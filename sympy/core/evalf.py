@@ -177,7 +177,7 @@ def check_target(expr, result, prec):
     if a < prec:
         raise PrecisionExhausted("Failed to distinguish the expression: \n\n%s\n\n"
             "from zero. Try simplifying the input, using chop=True, or providing "
-            "a higher maxprec for evalf" % (expr))
+            "a higher maxprec for evalf")# % (expr))
 
 def get_integer_part(expr, no, options, return_ints=False):
     """
