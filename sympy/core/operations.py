@@ -144,7 +144,7 @@ class AssocOp(Expr):
         """
         # apply repl_dict to pattern to eliminate fixed wild parts
         if evaluate:
-            return self.subs(repl_dict.items()).matches(expr, repl_dict)
+            return self.subs(repl_dict).matches(expr, repl_dict)
 
         # handle simple patterns
         d = self._matches_simple(expr, repl_dict)
@@ -177,14 +177,12 @@ class AssocOp(Expr):
         else:
             expr_list = [expr]
 
-        while expr_list:
-            last_op = expr_list.pop()
+        for last_op in reversed(expr_list):
             tmp = wild_part[:]
-            while tmp:
-                w = tmp.pop()
+            for w in reversed(tmp):
                 d1 = w.matches(last_op, repl_dict)
                 if d1 is not None:
-                    d2 = self.subs(d1.items()).matches(expr, d1)
+                    d2 = self.subs(d1).matches(expr, d1)
                     if d2 is not None:
                         return d2
 
