@@ -802,8 +802,8 @@ class Mul(AssocOp):
             return self.__class__(*[s._eval_subs(old, new) for s in self.args ])
 
         # break up self and old into terms
-        coeff_self,terms_self = self.as_coeff_terms()
-        coeff_old,terms_old = old.as_coeff_terms()
+        coeff_self, terms_self = self.as_coeff_terms()
+        coeff_old, terms_old = old.as_coeff_terms()
 
         # NEW - implementation of strict substitution
         # if the coefficients are not the same, do not substitute.
