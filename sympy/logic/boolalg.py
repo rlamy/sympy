@@ -1,9 +1,9 @@
 """Boolean algebra module for SymPy"""
-from sympy.core import Basic, Function, sympify, Symbol
+from sympy.core import Basic, FuncExpr, sympify, Symbol
 from sympy.utilities import flatten
 
 
-class BooleanFunction(Function):
+class BooleanFunction(FuncExpr):
     """Boolean function is a function that lives in a boolean space
     It is used as base class for And, Or, Not, etc.
     """

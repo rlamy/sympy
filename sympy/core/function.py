@@ -81,71 +81,51 @@ class FunctionClass(BasicMeta):
     def __repr__(cls):
         return cls.__name__
 
-class Function(Basic):
+class FunctionBase(Basic):
     """
-    Base class for applied functions.
-    Constructor of undefined classes.
-
+    Represents a mathematical function.
     """
+    def __call__(self, *args):
+        return FuncExpr(self, args)
 
-    __metaclass__ = FunctionClass
+
+class FuncExpr(Basic):
+    """
+    Expression resulting from the application of a function.
+
+    This should never be visible to the end-user from the public interface.
+    """
 
     is_Function = True
 
     nargs = None
 
-    @vectorize(1)
     @cacheit
-    def __new__(cls, *args, **options):
-        # NOTE: this __new__ is twofold:
-        #
-        # 1 -- it can create another *class*, which can then be instantiated by
-        #      itself e.g. Function('f') creates a new class f(Function)
-        #
-        # 2 -- on the other hand, we instantiate -- that is we create an
-        #      *instance* of a class created earlier in 1.
-        #
-        # So please keep, both (1) and (2) in mind.
-
-        # (1) create new function class
-        #     UC: Function('f')
-        if cls is Function:
-            #when user writes Function("f"), do an equivalent of:
-            #taking the whole class Function(...):
-            #and rename the Function to "f" and return f, thus:
-            #In [13]: isinstance(f, Function)
-            #Out[13]: False
-            #In [14]: isinstance(f, FunctionClass)
-            #Out[14]: True
-
-            if len(args) == 1 and isinstance(args[0], str):
-                #always create Function
-                return FunctionClass(Function, *args)
-                return FunctionClass(Function, *args, **options)
-            else:
-                print args
-                print type(args[0])
-                raise TypeError("You need to specify exactly one string")
-
-        # (2) create new instance of a class created in (1)
-        #     UC: Function('f')(x)
-        #     UC: sin(x)
-        args = map(sympify, args)
+    def __new__(cls, func, args, **options):
+        args = tuple(map(sympify, args))
         # these lines should be refactored
         for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
             if opt in options:
                 del options[opt]
         # up to here.
+        obj = Basic.__new__(cls, func, args, **options)
         if options.get('evaluate') is False:
-            return Basic.__new__(cls, *args, **options)
-        evaluated = cls.eval(*args)
-        if evaluated is not None: return evaluated
+            return obj
+        evaluated = obj.doit()
+        if evaluated is not None:
+            return evaluated
         # Just undefined functions have nargs == None
         if not cls.nargs and hasattr(cls, 'undefined_Function'):
-            r = Basic.__new__(cls, *args, **options)
-            r.nargs = len(args)
-            return r
-        return Basic.__new__(cls, *args, **options)
+            obj.nargs = len(args)
+        return obj
+
+    @property
+    def args(self):
+        return tuple(self._args[1])
+
+    @property
+    def func(self):
+        return self._args[0]
 
     @property
     def is_commutative(self):
@@ -158,6 +138,9 @@ class Function(Basic):
     @deprecated
     def canonize(cls, *args):
         return cls.eval(*args)
+
+    def doit(self):
+        return
 
     @classmethod
     def eval(cls, *args):
@@ -186,10 +169,6 @@ class Function(Basic):
 
         """
         return
-
-    @property
-    def func(self):
-        return self.__class__
 
     def _eval_subs(self, old, new):
         if self == old:
@@ -254,17 +233,18 @@ class Function(Basic):
             da = a.diff(s)
             if da is S.Zero:
                 continue
-            if isinstance(self.func, FunctionClass):
-                df = self.fdiff(i)
-                l.append(df * da)
+            df = self.fdiff(i)
+            l.append(df * da)
         return Add(*l)
 
     def _eval_is_commutative(self):
         r = True
         for a in self._args:
             c = a.is_commutative
-            if c is None: return None
-            if not c: r = False
+            if c is None:
+                return None
+            if not c:
+                r = False
         return r
 
     def _eval_eq_nonzero(self, other):
@@ -279,7 +259,8 @@ class Function(Basic):
 
     def count_ops(self, symbolic=True):
         #      f()             args
-        return 1 + Add(*[ t.count_ops(symbolic) for t in self.args ])
+        return self.func.count_ops(symbolic) + \
+                        Add(*[t.count_ops(symbolic) for t in self.args])
 
     def _eval_nseries(self, x, x0, n):
         assert len(self.args) == 1
@@ -474,41 +455,410 @@ class Function(Basic):
         x = sympify(x)
         return cls(x).diff(x, n).subs(x, 0) * x**n / C.Factorial(n)
 
-class WildFunction(Function, Atom):
-    """
-    WildFunction() matches any expression but another WildFunction()
-    XXX is this as intended, does it work ?
-    """
 
-    nargs = 1
+#class Function(Basic):
+#    """
+#    Base class for applied functions.
+#    Constructor of undefined classes.
 
-    def __new__(cls, name=None, **assumptions):
-        if name is None:
-            name = 'Wf%s' % (Symbol.dummycount + 1) # XXX refactor dummy counting
-            Symbol.dummycount += 1
-        obj = Function.__new__(cls, name, **assumptions)
-        obj.name = name
-        return obj
+#    """
 
-    def matches(pattern, expr, repl_dict={}, evaluate=False):
-        for p,v in repl_dict.items():
-            if p==pattern:
-                if v==expr: return repl_dict
-                return None
-        if pattern.nargs is not None:
-            if not hasattr(expr,'nargs') or pattern.nargs != expr.nargs:
-                return None
-        repl_dict = repl_dict.copy()
-        repl_dict[pattern] = expr
-        return repl_dict
+#    __metaclass__ = FunctionClass
 
-    @classmethod
-    def _eval_apply_evalf(cls, arg):
-        return
+#    is_Function = True
 
-    @property
-    def is_number(self):
-        return False
+#    nargs = None
+
+#    @vectorize(1)
+#    @cacheit
+#    def __new__(cls, *args, **options):
+#        # NOTE: this __new__ is twofold:
+#        #
+#        # 1 -- it can create another *class*, which can then be instantiated by
+#        #      itself e.g. Function('f') creates a new class f(Function)
+#        #
+#        # 2 -- on the other hand, we instantiate -- that is we create an
+#        #      *instance* of a class created earlier in 1.
+#        #
+#        # So please keep, both (1) and (2) in mind.
+
+#        # (1) create new function class
+#        #     UC: Function('f')
+#        if cls is Function:
+#            #when user writes Function("f"), do an equivalent of:
+#            #taking the whole class Function(...):
+#            #and rename the Function to "f" and return f, thus:
+#            #In [13]: isinstance(f, Function)
+#            #Out[13]: False
+#            #In [14]: isinstance(f, FunctionClass)
+#            #Out[14]: True
+
+#            if len(args) == 1 and isinstance(args[0], str):
+#                #always create Function
+#                return FunctionClass(Function, *args)
+#                return FunctionClass(Function, *args, **options)
+#            else:
+#                print args
+#                print type(args[0])
+#                raise TypeError("You need to specify exactly one string")
+
+#        # (2) create new instance of a class created in (1)
+#        #     UC: Function('f')(x)
+#        #     UC: sin(x)
+#        args = map(sympify, args)
+#        # these lines should be refactored
+#        for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
+#            if opt in options:
+#                del options[opt]
+#        # up to here.
+#        if options.get('evaluate') is False:
+#            return Basic.__new__(cls, *args, **options)
+#        evaluated = cls.eval(*args)
+#        if evaluated is not None: return evaluated
+#        # Just undefined functions have nargs == None
+#        if not cls.nargs and hasattr(cls, 'undefined_Function'):
+#            r = Basic.__new__(cls, *args, **options)
+#            r.nargs = len(args)
+#            return r
+#        return Basic.__new__(cls, *args, **options)
+
+#    @property
+#    def is_commutative(self):
+#        if all(getattr(t, 'is_commutative') for t in self.args):
+#            return True
+#        else:
+#            return False
+
+#    @classmethod
+#    @deprecated
+#    def canonize(cls, *args):
+#        return cls.eval(*args)
+
+#    @classmethod
+#    def eval(cls, *args):
+#        """
+#        Returns a canonical form of cls applied to arguments args.
+
+#        The eval() method is called when the class cls is about to be
+#        instantiated and it should return either some simplified instance
+#        (possible of some other class), or if the class cls should be
+#        unmodified, return None.
+
+#        Example of eval() for the function "sign"
+#        ---------------------------------------------
+
+#        @classmethod
+#        def eval(cls, arg):
+#            if arg is S.NaN:
+#                return S.NaN
+#            if arg is S.Zero: return S.Zero
+#            if arg.is_positive: return S.One
+#            if arg.is_negative: return S.NegativeOne
+#            if isinstance(arg, C.Mul):
+#                coeff, terms = arg.as_coeff_terms()
+#                if coeff is not S.One:
+#                    return cls(coeff) * cls(C.Mul(*terms))
+
+#        """
+#        return
+
+#    @property
+#    def func(self):
+#        return self.__class__
+
+#    def _eval_subs(self, old, new):
+#        if self == old:
+#            return new
+#        elif old.is_Function and new.is_Function:
+#            if old == self.func:
+#                if self.nargs is new.nargs or not new.nargs:
+#                    return new(*self.args[:])
+#                # Written down as an elif to avoid a super-long line
+#                elif isinstance(new.nargs,tuple) and self.nargs in new.nargs:
+#                    return new(*self.args[:])
+#        obj = self.func._eval_apply_subs(*(self.args[:] + (old,) + (new,)))
+#        if obj is not None:
+#            return obj
+#        return Basic._seq_subs(self, old, new)
+
+#    def _eval_evalf(self, prec):
+#        # Lookup mpmath function based on name
+#        fname = self.func.__name__
+#        try:
+#            if not hasattr(mpmath, fname):
+#                from sympy.utilities.lambdify import MPMATH_TRANSLATIONS
+#                fname = MPMATH_TRANSLATIONS[fname]
+#            func = getattr(mpmath, fname)
+#        except (AttributeError, KeyError):
+#            return
+
+#        # Convert all args to mpf or mpc
+#        try:
+#            args = [arg._to_mpmath(prec) for arg in self.args]
+#        except ValueError:
+#            return
+
+#        # Set mpmath precision and apply. Make sure precision is restored
+#        # afterwards
+#        orig = mpmath.mp.prec
+#        try:
+#            mpmath.mp.prec = prec
+#            v = func(*args)
+#        finally:
+#            mpmath.mp.prec = orig
+
+#        return Basic._from_mpmath(v, prec)
+
+#    def _eval_is_comparable(self):
+#        if self.is_Function:
+#            r = True
+#            for s in self.args:
+#                c = s.is_comparable
+#                if c is None: return
+#                if not c: r = False
+#            return r
+#        return
+
+#    def _eval_derivative(self, s):
+#        # f(x).diff(s) -> x.diff(s) * f.fdiff(1)(s)
+#        i = 0
+#        l = []
+#        r = S.Zero
+#        for a in self.args:
+#            i += 1
+#            da = a.diff(s)
+#            if da is S.Zero:
+#                continue
+#            if isinstance(self.func, FunctionClass):
+#                df = self.fdiff(i)
+#                l.append(df * da)
+#        return Add(*l)
+
+#    def _eval_is_commutative(self):
+#        r = True
+#        for a in self._args:
+#            c = a.is_commutative
+#            if c is None: return None
+#            if not c: r = False
+#        return r
+
+#    def _eval_eq_nonzero(self, other):
+#        if isinstance(other.func, self.func.__class__) and len(self)==len(other):
+#            for a1,a2 in zip(self,other):
+#                if not (a1==a2):
+#                    return False
+#            return True
+
+#    def as_base_exp(self):
+#        return self, S.One
+
+#    def count_ops(self, symbolic=True):
+#        #      f()             args
+#        return 1   + Add(*[t.count_ops(symbolic) for t in self.args])
+
+#    def _eval_nseries(self, x, x0, n):
+#        assert len(self.args) == 1
+#        arg = self.args[0]
+#        arg0 = arg.limit(x, 0)
+#        from sympy import oo
+#        if arg0 in [-oo, oo]:
+#            raise PoleError("Cannot expand around %s" % (arg))
+#        if arg0 is not S.Zero:
+#            e = self
+#            e1 = e.expand()
+#            if e == e1:
+#                #for example when e = sin(x+1) or e = sin(cos(x))
+#                #let's try the general algorithm
+#                term = e.subs(x, S.Zero)
+#                series = term
+#                fact = S.One
+#                for i in range(n-1):
+#                    i += 1
+#                    fact *= Rational(i)
+#                    e = e.diff(x)
+#                    term = e.subs(x, S.Zero)*(x**i)/fact
+#                    term = term.expand()
+#                    series += term
+#                return series + C.Order(x**n, x)
+#            return e1.nseries(x, x0, n)
+#        l = []
+#        g = None
+#        for i in xrange(n+2):
+#            g = self.taylor_term(i, arg, g)
+#            g = g.nseries(x, x0, n)
+#            l.append(g)
+#        return Add(*l) + C.Order(x**n, x)
+
+#    def _eval_is_polynomial(self, syms):
+#        for arg in self.args:
+#            if arg.has(*syms):
+#                return False
+#        return True
+
+#    def _eval_expand_basic(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_basic'):
+#                newterm = term._eval_expand_basic(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_power_exp(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_power_exp'):
+#                newterm = term._eval_expand_power_exp(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_power_base(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_power_base'):
+#                newterm = term._eval_expand_power_base(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_mul(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_mul'):
+#                newterm = term._eval_expand_mul(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_multinomial(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_multinomail'):
+#                newterm = term._eval_expand_multinomial(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_log(self, deep=True, **hints):
+#        if not deep:
+#            return self
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_log'):
+#                newterm = term._eval_expand_log(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_complex(self, deep=True, **hints):
+#        if deep:
+#            func = self.func(*[ a.expand(deep, **hints) for a in self.args ])
+#        else:
+#            func = self.func(*self.args)
+#        return C.re(func) + S.ImaginaryUnit * C.im(func)
+
+#    def _eval_expand_trig(self, deep=True, **hints):
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_trig'):
+#                newterm = term._eval_expand_trig(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_expand_func(self, deep=True, **hints):
+#        sargs, terms = self.args[:], []
+#        for term in sargs:
+#            if hasattr(term, '_eval_expand_func'):
+#                newterm = term._eval_expand_func(deep=deep, **hints)
+#            else:
+#                newterm = term
+#            terms.append(newterm)
+#        return self.new(*terms)
+
+#    def _eval_rewrite(self, pattern, rule, **hints):
+#        if hints.get('deep', False):
+#            args = [ a._eval_rewrite(pattern, rule, **hints) for a in self ]
+#        else:
+#            args = self.args[:]
+
+#        if pattern is None or isinstance(self.func, pattern):
+#            if hasattr(self, rule):
+#                rewritten = getattr(self, rule)(*args)
+
+#                if rewritten is not None:
+#                    return rewritten
+
+#        return self.func(*args, **self._assumptions)
+
+#    def fdiff(self, argindex=1):
+#        if self.nargs is not None:
+#            if isinstance(self.nargs, tuple):
+#                nargs = self.nargs[-1]
+#            else:
+#                nargs = self.nargs
+#            if not (1<=argindex<=nargs):
+#                raise TypeError("argument index %r is out of range [1,%s]" % (argindex,nargs))
+#        return Derivative(self,self.args[argindex-1],evaluate=False)
+
+#    @classmethod
+#    def _eval_apply_evalf(cls, arg):
+#        arg = arg.evalf(prec)
+
+#        #if cls.nargs == 1:
+#        # common case for functions with 1 argument
+#        #if arg.is_Number:
+#        if arg.is_number:
+#            func_evalf = getattr(arg, cls.__name__)
+#            return func_evalf()
+
+#    def _eval_as_leading_term(self, x):
+#        """General method for the leading term"""
+#        arg = self.args[0].as_leading_term(x)
+
+#        if C.Order(1,x).contains(arg):
+#            return arg
+#        else:
+#            return self.func(arg)
+
+#    @classmethod
+#    def taylor_term(cls, n, x, *previous_terms):
+#        """General method for the taylor term.
+
+#        This method is slow, because it differentiates n-times.  Subclasses can
+#        redefine it to make it faster by using the "previous_terms".
+#        """
+#        x = sympify(x)
+#        return cls(x).diff(x, n).subs(x, 0) * x**n / C.Factorial(n)
+
+
+#class DerivativeFunction(Function):
+#    """
+#    Represents the derivative of an arbitrary function
+#    """
+
+#    def __new__(cls, function, *orders, **assumptions):
+#        if function.nargs is not None and len(orders) != function.nargs:
+#            raise ValueError
+
 
 class Derivative(Basic):
     """
@@ -671,7 +1021,7 @@ class Derivative(Basic):
         else:
             return arg.removeO().diff(dx)
 
-class Lambda(Function):
+class Lambda(FunctionBase):
     """
     Lambda(x, expr) represents a lambda function similar to Python's
     'lambda x: expr'. A function of several variables is written as
@@ -714,11 +1064,11 @@ class Lambda(Function):
 
     # a minimum of 2 arguments (parameter, expression) are needed
     nargs = 2
-    def __new__(cls,*args):
+    def __new__(cls, *args):
         assert len(args) >= 2,"Must have at least one parameter and an expression"
         if len(args) == 2 and isinstance(args[0], (list, tuple)):
             args = tuple(args[0])+(args[1],)
-        obj = Function.__new__(cls,*args)
+        obj = FunctionBase.__new__(cls,*args)
         obj.nargs = len(args)-1
         return obj
 
@@ -796,6 +1146,50 @@ class Lambda(Function):
            # if self.args[1] == other.args[1].subs(other.args[0], self.args[0]):
            #     return True
         return False
+
+class FunctionSymbol(FunctionBase, Symbol):
+    def __new__(cls, name, nargs=1, **opts):
+        obj = Symbol.__new__(cls, name, **opts)
+        obj.nargs = nargs
+        return obj
+Function = FunctionSymbol
+
+class WildFunction(FunctionSymbol):
+    """
+    WildFunction() matches any expression but another WildFunction()
+    XXX is this as intended, does it work ?
+    """
+
+    nargs = 1
+
+    def __new__(cls, name=None, **assumptions):
+        if name is None:
+            name = 'Wf%s' % (Symbol.dummycount + 1) # XXX refactor dummy counting
+            Symbol.dummycount += 1
+        obj = FunctionSymbol.__new__(cls, name, **assumptions)
+        obj.name = name
+        return obj
+
+    def matches(pattern, expr, repl_dict={}, evaluate=False):
+        for p,v in repl_dict.items():
+            if p==pattern:
+                if v==expr: return repl_dict
+                return None
+        if pattern.nargs is not None:
+            if not hasattr(expr,'nargs') or pattern.nargs != expr.nargs:
+                return None
+        repl_dict = repl_dict.copy()
+        repl_dict[pattern] = expr
+        return repl_dict
+
+    @classmethod
+    def _eval_apply_evalf(cls, arg):
+        return
+
+    @property
+    def is_number(self):
+        return False
+
 
 @vectorize(0)
 def diff(f, *symbols, **kwargs):

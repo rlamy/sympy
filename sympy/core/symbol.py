@@ -64,7 +64,7 @@ class Symbol(Atom):
         return Dummy(self.name, **self.assumptions0)
 
     def __call__(self, *args):
-        return Function(self.name, nargs=len(args))(*args, **self.assumptions0)
+        return FunctionSymbol(self.name, nargs=len(args))(*args, **self.assumptions0)
 
     def _eval_expand_complex(self, deep=True, **hints):
             return C.re(self) + C.im(self)*S.ImaginaryUnit
@@ -283,4 +283,4 @@ def var(*names, **kwargs):
 
 from basic import Basic, Atom, S, C
 from sympify import sympify
-from function import Function
+from function import FunctionSymbol

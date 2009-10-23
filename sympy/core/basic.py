@@ -1167,10 +1167,10 @@ class Basic(AssumeMeths):
             return new
         #new functions are initialized differently, than old functions
         if isinstance(self.func, FunctionClass):
-            args = self.args
+            args = self.args.args
         else:
-            args = (self.func,)+self
-        return self.__class__(*[s.subs(old, new) for s in args])
+            args = (self.func,)+self.args
+        return self.func(*[s.subs(old, new) for s in self.args])
 
     def __contains__(self, what):
         if self == what or self.is_Function and self.func == what: return True
