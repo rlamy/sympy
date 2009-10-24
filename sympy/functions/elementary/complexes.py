@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import FuncExpr, Derivative
+from sympy.core.function import FuncExpr, Derivative, builtin
 from sympy.functions.elementary.miscellaneous import sqrt
 
 from sympy.utilities.decorator import deprecated
@@ -10,6 +10,7 @@ from sympy.utilities.iterables import make_list, iff
 ######################### REAL and IMAGINARY PARTS ############################
 ###############################################################################
 
+@builtin
 class re(FuncExpr):
     """Returns real part of expression. This function performs only
        elementary analysis and so it will fail to decompose properly
@@ -86,6 +87,7 @@ class re(FuncExpr):
 #        else:
         return self.args[0].as_real_imag()[0]
 
+@builtin
 class im(FuncExpr):
     """Returns imaginary part of expression. This function performs
        only elementary analysis and so it will fail to decompose
@@ -164,6 +166,7 @@ class im(FuncExpr):
 ############### SIGN, ABSOLUTE VALUE, ARGUMENT and CONJUGATION ################
 ###############################################################################
 
+@builtin
 class sign(FuncExpr):
     """Return the sign of an expression, that is:
         -1 if expr <  0
@@ -208,6 +211,7 @@ class sign(FuncExpr):
     def _eval_is_zero(self):
         return (self.args[0] is S.Zero)
 
+@builtin
 class abs(FuncExpr):
     """Return the absolute value of the argument. This is an extension of the built-in
     function abs to accept symbolic values
@@ -295,6 +299,7 @@ class abs(FuncExpr):
         import sage.all as sage
         return sage.abs_symbolic(self.args[0]._sage_())
 
+@builtin
 class arg(FuncExpr):
     """Returns the argument (in radians) of a complex number"""
 
@@ -318,6 +323,7 @@ class arg(FuncExpr):
     def _eval_conjugate(self):
         return self
 
+@builtin
 class conjugate(FuncExpr):
     """Changes the sign of the imaginary part of a complex number.
 

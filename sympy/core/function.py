@@ -85,8 +85,24 @@ class FunctionBase(Basic):
     """
     Represents a mathematical function.
     """
-    def __call__(self, *args):
-        return FuncExpr(self, args)
+    def __new__(cls, head, expr_cls):
+        head = sympify(head)
+        obj = Basic.__new__(cls, head, expr_cls)
+        obj._cls = expr_cls
+        return obj
+
+    def __call__(self, *args, **opts):
+        return self._cls(*args, **opts)
+
+class builtin(FunctionBase):
+    """
+    Class decorator for builtin functions (i.e. those declared as a class)
+    """
+    def __new__(cls, expr_cls):
+        head = Symbol(expr_cls.__name__)
+        obj = FunctionBase.__new__(cls, head, expr_cls)
+        expr_cls._func = obj
+        return obj
 
 
 class FuncExpr(Basic):
@@ -101,31 +117,31 @@ class FuncExpr(Basic):
     nargs = None
 
     @cacheit
-    def __new__(cls, func, args, **options):
+    def __new__(cls, *args, **options):
         args = tuple(map(sympify, args))
         # these lines should be refactored
         for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
             if opt in options:
                 del options[opt]
         # up to here.
-        obj = Basic.__new__(cls, func, args, **options)
         if options.get('evaluate') is False:
-            return obj
-        evaluated = obj.doit()
+            return Basic.__new__(cls, *args, **options)
+        evaluated = cls.eval(*args)
         if evaluated is not None:
             return evaluated
         # Just undefined functions have nargs == None
+        obj = Basic.__new__(cls, *args, **options)
         if not cls.nargs and hasattr(cls, 'undefined_Function'):
             obj.nargs = len(args)
         return obj
 
     @property
     def args(self):
-        return tuple(self._args[1])
+        return self._args
 
     @property
     def func(self):
-        return self._args[0]
+        return self._func
 
     @property
     def is_commutative(self):

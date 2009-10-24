@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Lambda, Function
+from sympy.core.function import Lambda, FuncExpr, builtin
 
 from sympy.core.evalf import get_integer_part, PrecisionExhausted
 from sympy.utilities.decorator import deprecated
@@ -9,7 +9,8 @@ from sympy.utilities.decorator import deprecated
 ######################### FLOOR and CEILING FUNCTIONS #########################
 ###############################################################################
 
-class RoundFunction(Function):
+@builtin
+class RoundFunction(FuncExpr):
 
     nargs = 1
 
@@ -77,7 +78,8 @@ class RoundFunction(Function):
     def _eval_is_integer(self):
         return self.args[0].is_real
 
-class floor(RoundFunction):
+@builtin
+class floor(FuncExpr):
     """
     Floor is a univariate function which returns the largest integer
     value not greater than its argument. However this implementaion
@@ -125,7 +127,8 @@ class floor(RoundFunction):
             return r
 
 
-class ceiling(RoundFunction):
+@builtin
+class ceiling(FuncExpr):
     """
     Ceiling is a univariate function which returns the smallest integer
     value not less than its argument. Ceiling function is generalized
