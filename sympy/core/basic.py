@@ -381,7 +381,7 @@ class Basic(AssumeMeths):
         x
 
         """
-        obj = type(self) (*args, **self.assumptions0)
+        obj = self.func(*args, **self.assumptions0)
         return obj
 
 

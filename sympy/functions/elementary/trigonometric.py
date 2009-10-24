@@ -130,18 +130,18 @@ class sin(FuncExpr):
             if m in [-S.Pi, -S.Pi/2, S.Pi/2, S.Pi]:
                 return sin(m)*cos(x)+cos(m)*sin(x)
 
-        if isinstance(arg, asin):
+        if arg.func == asin:
             return arg.args[0]
 
-        if isinstance(arg, atan):
+        if arg.func == atan:
             x = arg.args[0]
             return x / sqrt(1 + x**2)
 
-        if isinstance(arg, acos):
+        if arg.func == acos:
             x = arg.args[0]
             return sqrt(1 - x**2)
 
-        if isinstance(arg, acot):
+        if arg.func == acot:
             x = arg.args[0];
             return 1 / (sqrt(1 + 1 / x**2) * x)
 
@@ -345,18 +345,18 @@ class cos(FuncExpr):
             if m in [-S.Pi, -S.Pi/2, S.Pi/2, S.Pi]:
                 return cos(m)*cos(x)-sin(m)*sin(x)
 
-        if isinstance(arg, acos):
+        if arg.func == acos:
             return arg.args[0]
 
-        if isinstance(arg, atan):
+        if arg.func == atan:
             x = arg.args[0]
             return 1 / sqrt(1 + x**2)
 
-        if isinstance(arg, asin):
+        if arg.func == asin:
             x = arg.args[0]
             return sqrt(1 - x ** 2)
 
-        if isinstance(arg, acot):
+        if arg.func == acot:
             x = arg.args[0]
             return 1 / sqrt(1 + 1 / x**2)
 
@@ -533,18 +533,18 @@ class tan(FuncExpr):
                 except KeyError:
                     pass
 
-        if isinstance(arg, atan):
+        if arg.func == atan:
             return arg.args[0]
 
-        if isinstance(arg, asin):
+        if arg.func == asin:
             x = arg.args[0]
             return x / sqrt(1 - x**2)
 
-        if isinstance(arg, acos):
+        if arg.func == acos:
             x = arg.args[0]
             return sqrt(1 - x**2) / x
 
-        if isinstance(arg, acot):
+        if arg.func == acot:
             x = arg.args[0]
             return 1 / x
 
@@ -680,18 +680,18 @@ class cot(FuncExpr):
                 except KeyError:
                     pass
 
-        if isinstance(arg, acot):
+        if arg.func == acot:
             return arg.args[0]
 
-        if isinstance(arg, atan):
+        if arg.func == atan:
             x = arg.args[0]
             return 1 / x
 
-        if isinstance(arg, asin):
+        if arg.func == asin:
             x = arg.args[0]
             return sqrt(1 - x**2) / x
 
-        if isinstance(arg, acos):
+        if arg.func == acos:
             x = arg.args[0]
             return x / sqrt(1 - x**2)
 

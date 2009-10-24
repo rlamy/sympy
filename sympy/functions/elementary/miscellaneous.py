@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Lambda, FuncExpr
+from sympy.core.function import Lambda, FuncExpr, builtin
 from sympy.utilities.decorator import deprecated
 
 ###############################################################################
@@ -15,6 +15,7 @@ def sqrt(arg):
 ############################# MINIMUM and MAXIMUM #############################
 ###############################################################################
 
+@builtin
 class max_(FuncExpr):
 
     nargs = 2
@@ -42,7 +43,7 @@ class max_(FuncExpr):
                     if x.is_unbounded:
                         return
                     return x
-
+@builtin
 class min_(FuncExpr):
 
     nargs = 2

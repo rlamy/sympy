@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import FuncExpr
+from sympy.core.function import FuncExpr, builtin
 from sympy.ntheory import sieve
 from math import sqrt
 
@@ -9,7 +9,7 @@ from sympy.utilities.decorator import deprecated
 ###############################################################################
 ######################## FACTORIAL and MULTI-FACTORIAL ########################
 ###############################################################################
-
+@builtin
 class Factorial(FuncExpr):
     """Implementation of factorial function over nonnegative integers.
        For the sake of convenience and simplicity of procedures using
@@ -158,7 +158,7 @@ factorial   = Factorial
 ###############################################################################
 ######################## RISING and FALLING FACTORIALS ########################
 ###############################################################################
-
+@builtin
 class RisingFactorial(FuncExpr):
     """Rising factorial (also called Pochhammer symbol) is a double valued
        function arising in concrete mathematics, hypergeometric functions
@@ -227,6 +227,7 @@ class RisingFactorial(FuncExpr):
     def _eval_rewrite_as_gamma(self, x, k):
         return C.gamma(x + k) / C.gamma(x)
 
+@builtin
 class FallingFactorial(FuncExpr):
     """Falling factorial (related to rising factorial) is a double valued
        function arising in concrete mathematics, hypergeometric functions
@@ -303,6 +304,7 @@ ff = FallingFactorial
 ########################### BINOMIAL COEFFICIENTS #############################
 ###############################################################################
 
+@builtin
 class Binomial(FuncExpr):
     """Implementation of the binomial coefficient. It can be defined
        in two ways depending on its desired interpretation:

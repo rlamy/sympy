@@ -85,6 +85,8 @@ class FunctionBase(Basic):
     """
     Represents a mathematical function.
     """
+    is_Function = True
+
     def __new__(cls, head, expr_cls):
         head = sympify(head)
         obj = Basic.__new__(cls, head, expr_cls)
@@ -102,6 +104,8 @@ class builtin(FunctionBase):
         head = Symbol(expr_cls.__name__)
         obj = FunctionBase.__new__(cls, head, expr_cls)
         expr_cls._func = obj
+        obj.__name__ = expr_cls.__name__
+        obj.nargs = expr_cls.nargs
         return obj
 
 
@@ -124,11 +128,10 @@ class FuncExpr(Basic):
             if opt in options:
                 del options[opt]
         # up to here.
-        if options.get('evaluate') is False:
-            return Basic.__new__(cls, *args, **options)
-        evaluated = cls.eval(*args)
-        if evaluated is not None:
-            return evaluated
+        if options.get('evaluate', True):
+            evaluated = cls.eval(*args)
+            if evaluated is not None:
+                return evaluated
         # Just undefined functions have nargs == None
         obj = Basic.__new__(cls, *args, **options)
         if not cls.nargs and hasattr(cls, 'undefined_Function'):
@@ -1084,8 +1087,8 @@ class Lambda(FunctionBase):
         assert len(args) >= 2,"Must have at least one parameter and an expression"
         if len(args) == 2 and isinstance(args[0], (list, tuple)):
             args = tuple(args[0])+(args[1],)
-        obj = FunctionBase.__new__(cls,*args)
-        obj.nargs = len(args)-1
+        obj = FunctionBase.__new__(cls, *args)
+        obj.nargs = len(args) - 1
         return obj
 
     @classmethod
@@ -1168,7 +1171,32 @@ class FunctionSymbol(FunctionBase, Symbol):
         obj = Symbol.__new__(cls, name, **opts)
         obj.nargs = nargs
         return obj
+
+    def __call__(self, *args):
+        return FunctionApplication(self, args)
+
 Function = FunctionSymbol
+
+class FunctionApplication(FuncExpr):
+    """
+    This represents the application of a generically defined function.
+
+    This class should be invisible for the end-user.
+    """
+    def __new__(cls, func, args):
+        if not isinstance(func, FunctionBase):
+            raise TypeError
+        obj = Basic.__new__(cls, func, args)
+        obj.nargs = len(args)
+        return obj
+
+    @property
+    def args(self):
+        return self._args[1]
+
+    @property
+    def func(self):
+        return self._args[0]
 
 class WildFunction(FunctionSymbol):
     """
