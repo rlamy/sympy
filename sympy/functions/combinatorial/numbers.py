@@ -7,7 +7,7 @@ Factorials, binomial coefficients and related functions are located in
 the separate 'factorials' module.
 """
 
-from sympy import Function, S, Symbol, Rational, oo, Integer, C
+from sympy import FuncExpr, builtin, S, Symbol, Rational, oo, Integer, C
 
 from sympy.mpmath import bernfrac
 
@@ -32,7 +32,8 @@ _sym = Symbol('x')
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-class fibonacci(Function):
+@builtin
+class fibonacci(FuncExpr):
     """
     Fibonacci numbers / Fibonacci polynomials
 
@@ -95,7 +96,8 @@ class fibonacci(Function):
                        "only for positive integer indices.")
                 return cls._fibpoly(n).subs(_sym, sym)
 
-class lucas(Function):
+@builtin
+class lucas(FuncExpr):
     """
     Lucas numbers
 
@@ -140,7 +142,8 @@ class lucas(Function):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-class bernoulli(Function):
+@builtin
+class bernoulli(FuncExpr):
     r"""
     Bernoulli numbers / Bernoulli polynomials
 
@@ -286,7 +289,8 @@ class bernoulli(Function):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-class bell(Function):
+@builtin
+class bell(FuncExpr):
     r"""
     Bell numbers / Bell polynomials
 
@@ -382,7 +386,8 @@ class bell(Function):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-class harmonic(Function):
+@builtin
+class harmonic(FuncExpr):
     r"""
     Harmonic numbers
 

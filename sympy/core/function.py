@@ -105,6 +105,9 @@ class builtin(FunctionBase):
         obj = FunctionBase.__new__(cls, head, expr_cls)
         expr_cls._func = obj
         obj.__name__ = expr_cls.__name__
+
+        # Replace FuncExpr with function object in the class registry
+        BasicMeta.classnamespace[obj.__name__] = obj
         obj.nargs = expr_cls.nargs
         return obj
 

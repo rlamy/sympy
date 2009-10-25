@@ -1,6 +1,6 @@
 
 from sympy.core import Basic, Add, S, C, sympify
-from sympy.core.function import Function
+from sympy.core.function import FuncExpr, builtin
 from zeta_functions import zeta
 from sympy.functions.elementary.exponential import log
 from sympy.functions.elementary.miscellaneous import sqrt
@@ -11,7 +11,8 @@ from sympy.utilities.decorator import deprecated
 ############################ COMPLETE GAMMA FUNCTION ##########################
 ###############################################################################
 
-class gamma(Function):
+@builtin
+class gamma(FuncExpr):
 
     nargs = 1
 
@@ -91,7 +92,8 @@ class gamma(Function):
 ################## LOWER and UPPER INCOMPLETE GAMMA FUNCTIONS #################
 ###############################################################################
 
-class lowergamma(Function):
+@builtin
+class lowergamma(FuncExpr):
     """Lower incomplete gamma function"""
 
     nargs = 2
@@ -113,7 +115,8 @@ class lowergamma(Function):
                     return b*cls(b, x) - x**b * C.exp(-x)
 
 
-class uppergamma(Function):
+@builtin
+class uppergamma(FuncExpr):
     """Upper incomplete gamma function"""
 
     nargs = 2
@@ -155,7 +158,8 @@ class uppergamma(Function):
 ########################### GAMMA RELATED FUNCTIONS ###########################
 ###############################################################################
 
-class polygamma(Function):
+@builtin
+class polygamma(FuncExpr):
 
     nargs = 2
 
@@ -228,6 +232,7 @@ class polygamma(Function):
     def _eval_rewrite_as_zeta(self, n, z):
         return (-1)**(n+1)*C.Factorial(n)*zeta(n+1, z-1)
 
-class loggamma(Function):
+@builtin
+class loggamma(FuncExpr):
 
     nargs = 1

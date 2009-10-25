@@ -1,12 +1,13 @@
 
-from sympy.core import Function, S, C, Basic, sympify, pi
+from sympy.core import FuncExpr, builtin, S, C, Basic, sympify, pi
 from sympy.utilities.decorator import deprecated
 
 ###############################################################################
 ###################### HURWITZ GENERALIZED ZETA FUNCTION ######################
 ###############################################################################
 
-class zeta(Function):
+@builtin
+class zeta(FuncExpr):
 
     nargs = (1, 2)
 
@@ -53,7 +54,8 @@ class zeta(Function):
                         return zeta - C.harmonic(a-1, z)
 
 
-class dirichlet_eta(Function):
+@builtin
+class dirichlet_eta(FuncExpr):
     """
     Dirichlet eta function
     """
