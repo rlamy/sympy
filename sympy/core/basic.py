@@ -829,15 +829,15 @@ class Basic(AssumeMeths):
                 if expr.is_Atom and len(typ) == 0: # if we haven't specified types
                     return [expr]
                 else:
-                    try:
-                        if isinstance(expr, typ): return [expr]
-                    except TypeError:
-                        #one or more types is in implicit form
-                        for t in typ:
-                            if type(type(t)) is type:
-                                if isinstance(expr, t): return [expr]
-                            else:
-                                if isinstance(expr, type(t)): return [expr]
+                    if any(expr.func is t for t in typ):
+                        return [expr]
+                    for t in typ:
+                        if type(type(t)) is type:
+                            if isinstance(expr, t):
+                                return [expr]
+                        else:
+                            if isinstance(expr, type(t)):
+                                return [expr]
             result = []
             #search for a suitable iterator
             if isinstance(expr, Basic):
@@ -1283,8 +1283,8 @@ class Basic(AssumeMeths):
             raise TypeError("has() requires at least 1 argument (got none)")
         p = sympify(patterns[0])
         if p.is_Atom and not isinstance(p, Wild):
-            return p in self.atoms(p.__class__)
-        if isinstance(p, BasicType):
+            return p in self.atoms(p.func)
+        if isinstance(p, BasicType) or p.is_Function:
             return bool(self.atoms(p))
         if p.matches(self) is not None:
             return True

@@ -93,6 +93,7 @@ class FunctionBase(Basic):
         obj._cls = expr_cls
         return obj
 
+    @vectorize(1)
     def __call__(self, *args, **opts):
         return self._cls(*args, **opts)
 
@@ -1086,12 +1087,21 @@ class Lambda(FunctionBase):
 
     # a minimum of 2 arguments (parameter, expression) are needed
     nargs = 2
+
     def __new__(cls, *args):
+        args = tuple(map(sympify, args))
         assert len(args) >= 2,"Must have at least one parameter and an expression"
         if len(args) == 2 and isinstance(args[0], (list, tuple)):
             args = tuple(args[0])+(args[1],)
-        obj = FunctionBase.__new__(cls, *args)
-        obj.nargs = len(args) - 1
+
+        nargs = len(args) - 1
+        expression = args[nargs]
+        #use dummy variables internally
+        funargs = [Symbol(arg.name, dummy=True) for arg in args[:nargs]]
+        expression = expression.subs(zip(args[:nargs], funargs))
+        funargs.append(expression)
+        obj = Basic.__new__(cls, *funargs)
+        obj.nargs = nargs
         return obj
 
     @classmethod
@@ -1100,7 +1110,7 @@ class Lambda(FunctionBase):
         return cls.eval(*args)
 
     @classmethod
-    def eval(cls,*args):
+    def eval(cls, *args):
         obj = Basic.__new__(cls, *args)
         #use dummy variables internally, just to be sure
         nargs = len(args)-1
@@ -1136,13 +1146,15 @@ class Lambda(FunctionBase):
         """
 
         nparams = self.nargs
-        assert nparams >= len(args),"Cannot call function with more parameters than function variables: %s (%d variables) called with %d arguments" % (str(self),nparams,len(args))
+        assert nparams >= len(args), "Cannot call function with more parameters"\
+            " than function variables: %s (%d variables) called with %d "\
+            "arguments" % (str(self),nparams,len(args))
 
 
         #replace arguments
         expression = self.args[self.nargs]
-        for arg,funarg in zip(args,self.args[:nparams]):
-            expression = expression.subs(funarg,arg)
+        for arg, funarg in zip(args, self.args[:nparams]):
+            expression = expression.subs(funarg, arg)
 
         #curry the rest
         if nparams != len(args):
@@ -1160,13 +1172,13 @@ class Lambda(FunctionBase):
                 return False
 
             selfexpr = self.args[self.nargs]
+            selfargs = self.args[:self.nargs]
             otherexpr = other.args[other.nargs]
-            for selfarg,otherarg in zip(self.args[:self.nargs],other.args[:other.nargs]):
-                otherexpr = otherexpr.subs(otherarg,selfarg)
+            otherargs = other.args[:other.nargs]
+            otherexpr = otherexpr.subs(dict(zip(otherargs, selfargs)))
             if selfexpr == otherexpr:
                 return True
-           # if self.args[1] == other.args[1].subs(other.args[0], self.args[0]):
-           #     return True
+
         return False
 
 class FunctionSymbol(FunctionBase, Symbol):
@@ -1189,7 +1201,7 @@ class FunctionApplication(FuncExpr):
     def __new__(cls, func, args):
         if not isinstance(func, FunctionBase):
             raise TypeError
-        obj = Basic.__new__(cls, func, args)
+        obj = Basic.__new__(cls, func, tuple(args))
         obj.nargs = len(args)
         return obj
 
