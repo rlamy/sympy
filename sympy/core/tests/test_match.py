@@ -137,6 +137,8 @@ def test_functions():
 
 @XFAIL
 def test_functions_X1():
+    x = Symbol('x')
+    f = cos(5*x)
     assert f.match(p*g(q*x)) == {p: 1, g: cos, q: 5}
 
 def test_interface():

@@ -282,7 +282,7 @@ class FuncExpr(Basic):
 
     def count_ops(self, symbolic=True):
         #      f()             args
-        return self.func.count_ops(symbolic) + \
+        return 1 + \
                         Add(*[t.count_ops(symbolic) for t in self.args])
 
     def _eval_nseries(self, x, x0, n):
@@ -1182,7 +1182,7 @@ class Lambda(FunctionBase):
         return False
 
 class FunctionSymbol(FunctionBase, Symbol):
-    def __new__(cls, name, nargs=1, **opts):
+    def __new__(cls, name, nargs=None, **opts):
         obj = Symbol.__new__(cls, name, **opts)
         obj.nargs = nargs
         return obj
@@ -1229,11 +1229,13 @@ class WildFunction(FunctionSymbol):
         obj.name = name
         return obj
 
-    def matches(pattern, expr, repl_dict={}, evaluate=False):
-        for p,v in repl_dict.items():
-            if p==pattern:
-                if v==expr: return repl_dict
-                return None
+    def matches(self, expr, repl_dict={}, evaluate=False):
+        for p, v in repl_dict.items():
+            if p == self:
+                if v == expr:
+                    return repl_dict
+                else:
+                    return None
         if pattern.nargs is not None:
             if not hasattr(expr,'nargs') or pattern.nargs != expr.nargs:
                 return None

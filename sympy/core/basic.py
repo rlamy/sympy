@@ -1091,7 +1091,7 @@ class Basic(AssumeMeths):
         return self._eval_subs(old, new)
 
     def _eval_subs(self, old, new):
-        if self==old:
+        if self == old:
             return new
         return self
 
