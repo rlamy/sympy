@@ -1210,7 +1210,8 @@ class FunctionApplication(FuncExpr):
     def __new__(cls, func, args):
         if not isinstance(func, FunctionBase):
             raise TypeError
-        obj = Basic.__new__(cls, func, tuple(args))
+        args = tuple(map(sympify, args))
+        obj = Basic.__new__(cls, func, args)
         obj.nargs = len(args)
         return obj
 
