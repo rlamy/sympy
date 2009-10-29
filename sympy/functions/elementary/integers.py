@@ -9,7 +9,6 @@ from sympy.utilities.decorator import deprecated
 ######################### FLOOR and CEILING FUNCTIONS #########################
 ###############################################################################
 
-@builtin
 class RoundFunction(FuncExpr):
 
     nargs = 1
@@ -79,7 +78,7 @@ class RoundFunction(FuncExpr):
         return self.args[0].is_real
 
 @builtin
-class floor(FuncExpr):
+class floor(RoundFunction):
     """
     Floor is a univariate function which returns the largest integer
     value not greater than its argument. However this implementaion
@@ -128,7 +127,7 @@ class floor(FuncExpr):
 
 
 @builtin
-class ceiling(FuncExpr):
+class ceiling(RoundFunction):
     """
     Ceiling is a univariate function which returns the smallest integer
     value not less than its argument. Ceiling function is generalized
