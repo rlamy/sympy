@@ -1,5 +1,5 @@
 """Boolean algebra module for SymPy"""
-from sympy.core import Basic, FuncExpr, sympify, Symbol
+from sympy.core import Basic, FuncExpr, sympify, Symbol, builtin
 from sympy.utilities import flatten
 
 
@@ -9,6 +9,7 @@ class BooleanFunction(FuncExpr):
     """
     pass
 
+@builtin
 class And(BooleanFunction):
     """Logical AND function.
     It evaluates its arguments in order, giving False immediately if any of them
@@ -33,6 +34,7 @@ class And(BooleanFunction):
         sargs = sorted(flatten(out_args, cls=cls))
         return Basic.__new__(cls, *sargs)
 
+@builtin
 class Or(BooleanFunction):
     """Logical OR function
      It evaluates its arguments in order, giving True immediately if any of them are
@@ -51,6 +53,7 @@ class Or(BooleanFunction):
         sargs = sorted(flatten(out_args, cls=cls))
         return Basic.__new__(cls, *sargs)
 
+@builtin
 class Xor(BooleanFunction):
     """Logical XOR (exclusive OR) function.
     returns True if an odd number of the arguments are True, and the rest are False.
@@ -66,6 +69,7 @@ class Xor(BooleanFunction):
             A = Or(A & Not(B), (Not(A) & B))
         return A
 
+@builtin
 class Not(BooleanFunction):
     """Logical Not function (negation)
 
@@ -75,15 +79,17 @@ class Not(BooleanFunction):
         if len(args) > 1:
             return map(cls, args)
         arg = args[0]
+        if type(arg) is bool:
+            return not arg
         # apply De Morgan Rules
-        if type(arg) is  And:
+        if arg.func == And:
             return Or(*[Not(a) for a in arg.args])
-        if type(arg) is Or:
+        if arg.func == Or:
             return And(*[Not(a) for a in arg.args])
-        if type(arg) is bool: return not arg
-        if type(arg) is Not:
+        if arg.func == Not:
             return arg.args[0]
 
+@builtin
 class Nand(BooleanFunction):
     """Logical NAND function.
     It evaluates its arguments in order, giving True immediately if any
@@ -99,6 +105,7 @@ class Nand(BooleanFunction):
             A = Or(A, Not(B))
         return A
 
+@builtin
 class Nor(BooleanFunction):
     """Logical NOR function.
     It evaluates its arguments in order, giving False immediately if any
@@ -113,10 +120,11 @@ class Nor(BooleanFunction):
             B = args.pop()
             A = And(A, Not(B))
         return A
-
+@builtin
 class Implies(BooleanFunction):
     pass
 
+@builtin
 class Equivalent(BooleanFunction):
     """Equivalence relation.
     Equivalent(A, B) is True if and only if A and B are both True or both False
@@ -154,7 +162,7 @@ def conjuncts(expr):
     [Or(A, B)]
     """
     if expr:
-        if type(expr) is And:
+        if expr.func == And:
             return list(expr.args)
         return [expr]
     return []
@@ -168,7 +176,7 @@ def disjuncts(expr):
     >>> disjuncts(A & B)
     [And(A, B)]
     """
-    if isinstance(expr, Or):
+    if expr.func == Or:
         return list(expr.args)
     else:
         return [expr]
@@ -178,16 +186,17 @@ def distribute_and_over_or(expr):
     Given a sentence s consisting of conjunctions and disjunctions
     of literals, return an equivalent sentence in CNF.
     """
-    if isinstance(expr, Or):
+    if expr.func == Or:
         for arg in expr.args:
-            if isinstance(arg, And):
+            if arg.func == And:
                 conj = arg
                 break
-        else: return type(expr)(*expr.args)
+        else:
+            return expr
         rest = Or(*[a for a in expr.args if a is not conj])
         return And(*map(distribute_and_over_or,
                    [Or(c, rest) for c in conj.args]))
-    elif isinstance(expr, And):
+    elif expr.func == And:
         return And(*map(distribute_and_over_or, expr.args))
     else:
         return expr
@@ -216,9 +225,9 @@ def eliminate_implications(expr):
     if expr.is_Atom: return expr     ## (Atoms are unchanged.)
     args = map(eliminate_implications, expr.args)
     a, b = args[0], args[-1]
-    if isinstance(expr, Implies):
+    if expr.func == Implies:
         return (~a) | b
-    elif isinstance(expr, Equivalent):
+    elif expr.func == Equivalent:
         return (a | Not(b)) & (b | Not(a))
     else:
         return type(expr)(*args)
@@ -245,12 +254,14 @@ def to_int_repr(clauses, symbols):
         [[1, 2], [2]]
     """
     def append_symbol(arg, symbols):
-        if type(arg) is Not: return -(symbols.index(arg.args[0])+1)
-        else: return symbols.index(arg)+1
+        if arg.func == Not:
+            return -(symbols.index(arg.args[0])+1)
+        else:
+            return symbols.index(arg)+1
 
     output = []
     for c in clauses:
-        if type(c) is Or:
+        if c.func == Or:
             t = []
             for arg in c.args:
                 t.append(append_symbol(arg, symbols))

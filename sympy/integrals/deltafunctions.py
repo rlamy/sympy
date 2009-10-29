@@ -79,7 +79,7 @@ def deltaintegrate(f, x):
     if not f.has(DiracDelta):
         return None
     # g(x) = DiracDelta(h(x))
-    if isinstance(f,DiracDelta):
+    if f.func == DiracDelta:
         h = f.simplify(x)
         if h == f:#can't simplify the expression
             #FIXME: the second term tells wether is DeltaDirac or Derivative
