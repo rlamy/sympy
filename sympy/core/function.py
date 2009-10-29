@@ -162,9 +162,6 @@ class FuncExpr(Basic):
     def canonize(cls, *args):
         return cls.eval(*args)
 
-    def doit(self):
-        return
-
     @classmethod
     def eval(cls, *args):
         """

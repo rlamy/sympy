@@ -5,6 +5,10 @@ from sympy.core.cache import cacheit
 
 from sympy.utilities.decorator import deprecated
 
+from sympy.ntheory import multiplicity
+from sympy.core.basic import Mul
+
+
 @builtin
 class exp(FuncExpr):
 
