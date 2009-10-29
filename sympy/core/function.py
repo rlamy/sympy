@@ -1187,6 +1187,7 @@ class FunctionSymbol(FunctionBase, Symbol):
         obj.nargs = nargs
         return obj
 
+    @vectorize(1)
     def __call__(self, *args):
         return FunctionApplication(self, args)
 
@@ -1225,7 +1226,7 @@ class WildFunction(FunctionSymbol):
         if name is None:
             name = 'Wf%s' % (Symbol.dummycount + 1) # XXX refactor dummy counting
             Symbol.dummycount += 1
-        obj = FunctionSymbol.__new__(cls, name, **assumptions)
+        obj = FunctionSymbol.__new__(cls, name, nargs=cls.nargs, **assumptions)
         obj.name = name
         return obj
 
@@ -1236,11 +1237,11 @@ class WildFunction(FunctionSymbol):
                     return repl_dict
                 else:
                     return None
-        if pattern.nargs is not None:
-            if not hasattr(expr,'nargs') or pattern.nargs != expr.nargs:
+        if self.nargs is not None:
+            if not hasattr(expr,'nargs') or self.nargs != expr.nargs:
                 return None
         repl_dict = repl_dict.copy()
-        repl_dict[pattern] = expr
+        repl_dict[self] = expr
         return repl_dict
 
     @classmethod
