@@ -256,7 +256,7 @@ class Integral(Basic):
             return f.integrate(x)
 
         # Piecewise antiderivatives need to call special integrate.
-        if isinstance(f,Piecewise):
+        if f.func == Piecewise:
             return f._eval_integral(x)
 
         # let's cut it short if `f` does not depend on `x`

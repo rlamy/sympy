@@ -93,7 +93,6 @@ class FunctionBase(Basic):
         obj._cls = expr_cls
         return obj
 
-    @vectorize(1)
     def __call__(self, *args, **opts):
         return self._cls(*args, **opts)
 
@@ -124,6 +123,7 @@ class FuncExpr(Basic):
 
     nargs = None
 
+    @vectorize(1)
     @cacheit
     def __new__(cls, *args, **options):
         args = tuple(map(sympify, args))

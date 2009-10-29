@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S
-from sympy.core.function import Function, diff
+from sympy.core.function import FuncExpr, builtin, diff
 from sympy.core.numbers import Number
 from sympy.core.relational import Relational
 from sympy.core.sympify import sympify
@@ -27,8 +27,8 @@ class ExprCondPair(Basic):
         yield self.expr
         yield self.cond
 
-
-class Piecewise(Function):
+@builtin
+class Piecewise(FuncExpr):
     """
     Represents a piecewise function.
 
