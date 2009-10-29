@@ -8,14 +8,15 @@ combinatorial polynomials.
 
 from sympy.core.basic import Basic, S, C
 from sympy.core import Rational, Symbol
-from sympy.core.function import Function
+from sympy.core.function import FuncExpr, builtin
 from sympy.utilities.memoization import recurrence_memo, assoc_recurrence_memo
 from sympy.utilities.decorator import deprecated
 
 
 _x = C.Symbol('x', dummy=True)
 
-class PolynomialSequence(Function):
+
+class PolynomialSequence(FuncExpr):
     """Polynomial sequence with 1 index
 
        n >= 0
@@ -35,8 +36,13 @@ class PolynomialSequence(Function):
         if n.is_negative:
             raise ValueError("%s index must be nonnegative integer (got %r)" % (cls, n))
 
+class builtin_PS(builtin):
+    def __new__(cls, expr_cls):
+        obj = builtin.__new__(cls, expr_cls)
+        obj.calc = expr_cls.calc
+        return obj
 
-class PolynomialSequence2(Function):
+class PolynomialSequence2(FuncExpr):
     """Polynomial sequence with 2 indexes
 
        n >= 0
@@ -61,12 +67,17 @@ class PolynomialSequence2(Function):
         if abs(m) > n:
             raise ValueError("%s : abs('2nd index') must be <= '1st index' (got %r, %r)" % (cls, n, m))
 
-
+class builtin_PS2(builtin):
+    def __new__(cls, expr_cls):
+        obj = builtin.__new__(cls, expr_cls)
+        obj._calc2 = expr_cls._calc2
+        return obj
 
 #----------------------------------------------------------------------------
 # Chebyshev polynomials of first and second kind
 #
 
+@builtin_PS
 class chebyshevt(PolynomialSequence):
     """
     chebyshevt(n, x) gives the nth Chebyshev polynomial (of the first
@@ -98,7 +109,7 @@ class chebyshevt(PolynomialSequence):
     def calc(n, prev):
         return (2*_x*prev[n-1] - prev[n-2]).expand()
 
-
+@builtin_PS
 class chebyshevu(PolynomialSequence):
     """
     chebyshevu(n, x) gives the nth Chebyshev polynomial of the second
@@ -122,8 +133,8 @@ class chebyshevu(PolynomialSequence):
     def calc(n, prev):
         return (2*_x*prev[n-1] - prev[n-2]).expand()
 
-
-class chebyshevt_root(Function):
+@builtin
+class chebyshevt_root(FuncExpr):
     """
     chebyshev_root(n, k) returns the kth root (indexed from zero) of
     the nth Chebyshev polynomial of the first kind; that is, if
@@ -150,7 +161,8 @@ class chebyshevt_root(Function):
             raise ValueError("must have 0 <= k < n")
         return C.cos(S.Pi*(2*k+1)/(2*n))
 
-class chebyshevu_root(Function):
+@builtin
+class chebyshevu_root(FuncExpr):
     """
     chebyshevu_root(n, k) returns the kth root (indexed from zero) of the
     nth Chebyshev polynomial of the second kind; that is, if 0 <= k < n,
@@ -182,6 +194,7 @@ class chebyshevu_root(Function):
 # Legendre polynomials  and  Associated Legendre polynomials
 #
 
+@builtin_PS
 class legendre(PolynomialSequence):
     """
     legendre(n, x) gives the nth Legendre polynomial of x, P_n(x)
@@ -209,12 +222,12 @@ class legendre(PolynomialSequence):
     def calc(n, prev):
         return (((2*n-1)*_x*prev[n-1] - (n-1)*prev[n-2])/n).expand()
 
-
+@builtin_PS2
 class assoc_legendre(PolynomialSequence2):
     """
     assoc_legendre(n,m, x) gives P_nm(x) = mth association to Legendre polynomial P_n(x)
 
-    Associated Legende polynomial are orthogonal on [-1, 1] with:
+    Associated Legendre polynomial are orthogonal on [-1, 1] with:
 
     - weight = 1            for the same m, and different n.
     - weight = 1/(1-x**2)   for the same n, and different m.
@@ -275,7 +288,7 @@ class assoc_legendre(PolynomialSequence2):
 #----------------------------------------------------------------------------
 # Hermite polynomials
 #
-
+@builtin_PS
 class hermite(PolynomialSequence):
     """
     hermite(n, x) gives the nth Hermite polynomial in x, H_n(x)
