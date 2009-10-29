@@ -1629,19 +1629,10 @@ class Basic(AssumeMeths):
             return self
         else:
             pattern, rule = args[:-1], args[-1]
-
-            if not isinstance(rule, str):
-
-                if rule == C.tan:
-                    rule = "tan"
-                elif rule == C.exp:
-                    rule = "exp"
-                elif isinstance(rule, FunctionClass):   # new-style functions
-                    #print rule
-                    rule = rule.__name__  # XXX proper attribute for name?
-                    #print rule
-                else:
-                    rule = str(rule)
+            try:
+                rule = rule.name
+            except AttributeError:
+                rule = str(rule)
 
             rule = '_eval_rewrite_as_' + rule
 
