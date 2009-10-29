@@ -826,13 +826,15 @@ class Basic(AssumeMeths):
         def _atoms(expr, typ):
             """Helper function for recursively denesting atoms"""
             if isinstance(expr, Basic):
-                if expr.is_Atom and len(typ) == 0: # if we haven't specified types
-                    return [expr]
-                else:
-                    if any(expr.func is t for t in typ):
+                if not typ:
+                    if expr.is_Atom:
                         return [expr]
+                else:
                     for t in typ:
-                        if type(type(t)) is type:
+                        if isinstance(t, Basic):
+                            if expr == t or expr.func == t:
+                                return [expr]
+                        elif type(type(t)) is type:
                             if isinstance(expr, t):
                                 return [expr]
                         else:
@@ -1281,10 +1283,18 @@ class Basic(AssumeMeths):
             return False
         elif not patterns:
             raise TypeError("has() requires at least 1 argument (got none)")
+
         p = sympify(patterns[0])
+        if isinstance(p, Basic) and self == p:
+            return True
+        func = self.func
+        if isinstance(func, Basic) and func.has(p):
+            return True
+        if p.is_Function:
+            return bool(self.atoms(p))
         if p.is_Atom and not isinstance(p, Wild):
             return p in self.atoms(p.func)
-        if isinstance(p, BasicType) or p.is_Function:
+        if isinstance(p, BasicType):
             return bool(self.atoms(p))
         if p.matches(self) is not None:
             return True
@@ -1513,7 +1523,8 @@ class Basic(AssumeMeths):
         >>> (sin(x)*x+sin(x)**2).count_ops()
         ADD + MUL + POW + 2 * SIN
         """
-        return Integer(len(self)-1) + sum([t.count_ops(symbolic=symbolic) for t in self])
+        return Integer(len(self.args)-1) + \
+            sum([t.count_ops(symbolic=symbolic) for t in self.args])
 
     def doit(self, **hints):
         """Evaluate objects that are not evaluated by default like limits,
