@@ -1,5 +1,5 @@
 from sympy import sin, cos, abs, exp, pi, oo, symbols, ceiling
-from sympy import Function, Piecewise, Rational, Integer
+from sympy import Function, builtin, Piecewise, Rational, Integer
 
 from sympy.printing import ccode
 from sympy.utilities.pytest import XFAIL
@@ -8,7 +8,8 @@ x, y = symbols('xy')
 g = Function('g')
 
 def test_printmethod():
-    class fabs(abs):
+    @builtin
+    class fabs(abs._cls):
         def _ccode_(self, printer):
             return "fabs(%s)" % printer._print(self.args[0])
     assert ccode(fabs(x)) == "fabs(x)"

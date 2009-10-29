@@ -1,6 +1,6 @@
 from sympy import symbols, Rational, Symbol, Integral, log, diff, sin, exp, \
-        Function, factorial, floor, ceiling, abs, re, im, conjugate, gamma, \
-        Order, Piecewise, Matrix, asin, Interval, EmptySet, Union, S
+        builtin, factorial, floor, ceiling, abs, re, im, conjugate, gamma, \
+        Order, Piecewise, Matrix, asin, Interval, EmptySet, Union, S, Function
 from sympy.abc import mu, tau
 from sympy.printing.latex import latex
 from sympy.utilities.pytest import XFAIL
@@ -10,11 +10,13 @@ x,y = symbols('xy')
 k,n = symbols('kn', integer=True)
 
 def test_printmethod():
-    class R(abs):
+    @builtin
+    class R(abs._cls):
         def _latex_(self, printer):
             return "foo(%s)" % printer._print(self.args[0])
     assert latex(R(x)) == "$foo(x)$"
-    class R(abs):
+    @builtin
+    class R(abs._cls):
         def _latex_(self, printer):
             return "foo"
     assert latex(R(x)) == "$foo$"

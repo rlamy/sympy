@@ -35,7 +35,7 @@ from basic import BasicMeta
 from cache import cacheit
 from itertools import repeat
 from numbers import Rational, Integer
-from symbol import Symbol
+from symbol import Symbol, Dummy
 from multidimensional import vectorize
 from sympy.utilities.decorator import deprecated
 from sympy.utilities import all
@@ -91,6 +91,7 @@ class FunctionBase(Basic):
         head = sympify(head)
         obj = Basic.__new__(cls, head, expr_cls)
         obj._cls = expr_cls
+        obj.name = expr_cls.__name__
         return obj
 
     def __call__(self, *args, **opts):
@@ -104,12 +105,12 @@ class builtin(FunctionBase):
         head = Symbol(expr_cls.__name__)
         obj = FunctionBase.__new__(cls, head, expr_cls)
         expr_cls._func = obj
-        transferred_attributes = ['__name__', 'nargs', 'taylor_term']
+        transferred_attributes = ['nargs', 'taylor_term']
         for attr in transferred_attributes:
             setattr(obj, attr, getattr(expr_cls, attr))
 
         # Replace FuncExpr with function object in the class registry
-        BasicMeta.classnamespace[obj.__name__] = obj
+        BasicMeta.classnamespace[obj.name] = obj
 
         return obj
 
@@ -209,7 +210,7 @@ class FuncExpr(Basic):
 
     def _eval_evalf(self, prec):
         # Lookup mpmath function based on name
-        fname = self.func.__name__
+        fname = self.func.name
         try:
             if not hasattr(mpmath, fname):
                 from sympy.utilities.lambdify import MPMATH_TRANSLATIONS
@@ -1182,6 +1183,8 @@ class Lambda(FunctionBase):
 
 class FunctionSymbol(FunctionBase, Symbol):
     def __new__(cls, name, nargs=None, **opts):
+        if opts.get('dummy', False):
+            return DummyFunction(name, nargs, **opts)
         obj = Symbol.__new__(cls, name, **opts)
         obj.nargs = nargs
         return obj
@@ -1191,6 +1194,12 @@ class FunctionSymbol(FunctionBase, Symbol):
         return FunctionApplication(self, args)
 
 Function = FunctionSymbol
+
+class DummyFunction(FunctionSymbol, Dummy):
+    def __new__(cls, name, nargs=None, **opts):
+        obj = Dummy.__new__(cls, name, **opts)
+        obj.nargs = nargs
+        return obj
 
 class FunctionApplication(FuncExpr):
     """

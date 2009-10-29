@@ -358,8 +358,8 @@ class LatexPrinter(Printer):
         else:
             return r"%s %s" % (tex, self._print(expr.expr))
 
-    def _print_Function(self, expr, exp=None):
-        func = expr.func.__name__
+    def _print_FuncExpr(self, expr, exp=None):
+        func = expr.func.name
 
         if hasattr(self, '_print_' + func):
             return getattr(self, '_print_' + func)(expr, exp)

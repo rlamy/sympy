@@ -112,8 +112,8 @@ class StrPrinter(Printer):
     def _print_Factorial(self, expr):
         return "%s!" % self.parenthesize(expr.args[0], PRECEDENCE["Pow"])
 
-    def _print_Function(self, expr):
-        return expr.func.__name__ + "(%s)"%self.stringify(expr.args, ", ")
+    def _print_FuncExpr(self, expr):
+        return expr.func.name + "(%s)"%self.stringify(expr.args, ", ")
 
     def _print_GeometryEntity(self, expr):
         # GeometryEntity is special -- it's base is tuple

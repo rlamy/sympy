@@ -299,7 +299,7 @@ class MathMLPrinter(Printer):
         x.appendChild(self._print(e.expr))
         return x
 
-    def _print_Function(self, e):
+    def _print_FuncExpr(self, e):
         x = self.dom.createElement("apply")
         x.appendChild(self.dom.createElement(self.mathml_tag(e)))
         for arg in e.args:
