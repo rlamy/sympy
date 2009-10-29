@@ -104,11 +104,13 @@ class builtin(FunctionBase):
         head = Symbol(expr_cls.__name__)
         obj = FunctionBase.__new__(cls, head, expr_cls)
         expr_cls._func = obj
-        obj.__name__ = expr_cls.__name__
+        transferred_attributes = ['__name__', 'nargs', 'taylor_term']
+        for attr in transferred_attributes:
+            setattr(obj, attr, getattr(expr_cls, attr))
 
         # Replace FuncExpr with function object in the class registry
         BasicMeta.classnamespace[obj.__name__] = obj
-        obj.nargs = expr_cls.nargs
+
         return obj
 
 
