@@ -33,8 +33,8 @@ class ExprCondPair(Basic):
         yield self.expr
         yield self.cond
 
-@builtin
-class Piecewise(FuncExpr):
+#@builtin
+class _Piecewise(FuncExpr):
     """
     Represents a piecewise function.
 
@@ -230,6 +230,7 @@ class Piecewise(FuncExpr):
             if cond: return S.One
             return S.Zero
         return None
+Piecewise = builtin(_Piecewise)
 
 def piecewise_fold(expr):
     """

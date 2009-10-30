@@ -67,8 +67,8 @@ class builtin_PS2(builtin):
 # Chebyshev polynomials of first and second kind
 #
 
-@builtin_PS
-class chebyshevt(PolynomialSequence):
+#@builtin_PS
+class _chebyshevt(PolynomialSequence):
     """
     chebyshevt(n, x) gives the nth Chebyshev polynomial (of the first
     kind) of x, T_n(x)
@@ -98,9 +98,10 @@ class chebyshevt(PolynomialSequence):
     @recurrence_memo([S.One, _x])
     def calc(n, prev):
         return (2*_x*prev[n-1] - prev[n-2]).expand()
+chebyshevt = builtin_PS(_chebyshevt)
 
-@builtin_PS
-class chebyshevu(PolynomialSequence):
+#@builtin_PS
+class _chebyshevu(PolynomialSequence):
     """
     chebyshevu(n, x) gives the nth Chebyshev polynomial of the second
     kind of x, U_n(x)
@@ -123,9 +124,10 @@ class chebyshevu(PolynomialSequence):
     @recurrence_memo([S.One, 2*_x])
     def calc(n, prev):
         return (2*_x*prev[n-1] - prev[n-2]).expand()
+chebyshevu = builtin_PS(_chebyshevu)
 
-@builtin
-class chebyshevt_root(FuncExpr):
+#@builtin
+class _chebyshevt_root(FuncExpr):
     """
     chebyshev_root(n, k) returns the kth root (indexed from zero) of
     the nth Chebyshev polynomial of the first kind; that is, if
@@ -147,9 +149,10 @@ class chebyshevt_root(FuncExpr):
         if not 0 <= k < n:
             raise ValueError("must have 0 <= k < n")
         return C.cos(S.Pi*(2*k+1)/(2*n))
+chebyshevt_root = builtin(_chebyshevt_root)
 
-@builtin
-class chebyshevu_root(FuncExpr):
+#@builtin
+class _chebyshevu_root(FuncExpr):
     """
     chebyshevu_root(n, k) returns the kth root (indexed from zero) of the
     nth Chebyshev polynomial of the second kind; that is, if 0 <= k < n,
@@ -171,14 +174,14 @@ class chebyshevu_root(FuncExpr):
         if not 0 <= k < n:
             raise ValueError("must have 0 <= k < n")
         return C.cos(S.Pi*(k+1)/(n+1))
-
+chebyshevu_root = builtin(_chebyshevu_root)
 
 #----------------------------------------------------------------------------
 # Legendre polynomials  and  Associated Legendre polynomials
 #
 
-@builtin_PS
-class legendre(PolynomialSequence):
+#@builtin_PS
+class _legendre(PolynomialSequence):
     """
     legendre(n, x) gives the nth Legendre polynomial of x, P_n(x)
 
@@ -204,9 +207,10 @@ class legendre(PolynomialSequence):
     @recurrence_memo([S.One, _x])
     def calc(n, prev):
         return (((2*n-1)*_x*prev[n-1] - (n-1)*prev[n-2])/n).expand()
+legendre = builtin_PS(_legendre)
 
-@builtin_PS2
-class assoc_legendre(PolynomialSequence2):
+#@builtin_PS2
+class _assoc_legendre(PolynomialSequence2):
     """
     assoc_legendre(n,m, x) gives P_nm(x), where n and m are the degree
     and order or an expression which is related to the nth order
@@ -269,14 +273,14 @@ class assoc_legendre(PolynomialSequence2):
             factorial = C.Factorial
             m = -m
             return (-1)**m *factorial(n-m)/factorial(n+m) * assoc_legendre._calc2(n, m)
-
+assoc_legendre = builtin_PS2(_assoc_legendre)
 
 
 #----------------------------------------------------------------------------
 # Hermite polynomials
 #
-@builtin_PS
-class hermite(PolynomialSequence):
+#@builtin_PS
+class _hermite(PolynomialSequence):
     """
     hermite(n, x) gives the nth Hermite polynomial in x, H_n(x)
 
@@ -301,3 +305,4 @@ class hermite(PolynomialSequence):
     @recurrence_memo([S.One, 2*_x])
     def calc(n, prev):
         return (2*_x*prev[n-1]-2*(n-1)*prev[n-2]).expand()
+hermite = builtin_PS(_hermite)

@@ -9,8 +9,8 @@ from sympy.utilities.decorator import deprecated
 ###############################################################################
 ######################## FACTORIAL and MULTI-FACTORIAL ########################
 ###############################################################################
-@builtin
-class Factorial(FuncExpr):
+#@builtin
+class _Factorial(FuncExpr):
     """Implementation of factorial function over nonnegative integers.
        For the sake of convenience and simplicity of procedures using
        this function it is defined for negative integers and returns
@@ -143,6 +143,7 @@ class Factorial(FuncExpr):
 
     def _eval_is_integer(self):
         return self.args[0].is_integer
+Factorial = builtin(_Factorial)
 
 class MultiFactorial(FuncExpr):
     pass
@@ -153,8 +154,8 @@ factorial   = Factorial
 ###############################################################################
 ######################## RISING and FALLING FACTORIALS ########################
 ###############################################################################
-@builtin
-class RisingFactorial(FuncExpr):
+#@builtin
+class _RisingFactorial(FuncExpr):
     """Rising factorial (also called Pochhammer symbol) is a double valued
        function arising in concrete mathematics, hypergeometric functions
        and series expanansions. It is defined by
@@ -216,9 +217,11 @@ class RisingFactorial(FuncExpr):
 
     def _eval_rewrite_as_gamma(self, x, k):
         return C.gamma(x + k) / C.gamma(x)
+RisingFactorial = builtin(_RisingFactorial)
 
-@builtin
-class FallingFactorial(FuncExpr):
+
+#@builtin
+class _FallingFactorial(FuncExpr):
     """Falling factorial (related to rising factorial) is a double valued
        function arising in concrete mathematics, hypergeometric functions
        and series expanansions. It is defined by
@@ -281,6 +284,7 @@ class FallingFactorial(FuncExpr):
 
     def _eval_rewrite_as_gamma(self, x, k):
         return (-1)**k * C.gamma(-x + k) / C.gamma(-x)
+FallingFactorial = builtin(_FallingFactorial)
 
 rf = RisingFactorial
 ff = FallingFactorial
@@ -289,8 +293,8 @@ ff = FallingFactorial
 ########################### BINOMIAL COEFFICIENTS #############################
 ###############################################################################
 
-@builtin
-class Binomial(FuncExpr):
+#@builtin
+class _Binomial(FuncExpr):
     """Implementation of the binomial coefficient. It can be defined
        in two ways depending on its desired interpretation:
 
@@ -402,6 +406,6 @@ class Binomial(FuncExpr):
 
     def _eval_is_integer(self):
         return self.args[0].is_integer and self.args[1].is_integer
-
+Binomial = builtin(_Binomial)
 
 binomial = Binomial

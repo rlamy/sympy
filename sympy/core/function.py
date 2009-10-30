@@ -91,7 +91,7 @@ class FunctionBase(Basic):
         head = sympify(head)
         obj = Basic.__new__(cls, head, expr_cls)
         obj._cls = expr_cls
-        obj.name = expr_cls.__name__
+        obj.name = expr_cls.__name__.lstrip('_')
         return obj
 
     def __call__(self, *args, **opts):
@@ -102,7 +102,7 @@ class builtin(FunctionBase):
     Class decorator for builtin functions (i.e. those declared as a class)
     """
     def __new__(cls, expr_cls):
-        head = Symbol(expr_cls.__name__)
+        head = Symbol(expr_cls.__name__.lstrip('_'))
         obj = FunctionBase.__new__(cls, head, expr_cls)
         expr_cls._func = obj
         transferred_attributes = ['nargs', 'taylor_term']
@@ -114,6 +114,11 @@ class builtin(FunctionBase):
         BasicMeta.classnamespace[obj.name] = obj
 
         return obj
+
+    def __getnewargs__(self):
+        """ Pickling support.
+        """
+        return (self._cls,)
 
 
 class FuncExpr(Basic):

@@ -6,8 +6,8 @@ from sympy.utilities.decorator import deprecated
 ###################### HURWITZ GENERALIZED ZETA FUNCTION ######################
 ###############################################################################
 
-@builtin
-class zeta(FuncExpr):
+#@builtin
+class _zeta(FuncExpr):
 
     nargs = (1, 2)
 
@@ -47,10 +47,10 @@ class zeta(FuncExpr):
                         return zeta + C.harmonic(abs(a), z)
                     else:
                         return zeta - C.harmonic(a-1, z)
+zeta = builtin(_zeta)
 
-
-@builtin
-class dirichlet_eta(FuncExpr):
+#@builtin
+class _dirichlet_eta(FuncExpr):
     """
     Dirichlet eta function
     """
@@ -62,3 +62,4 @@ class dirichlet_eta(FuncExpr):
             return C.log(2)
         else:
             return (1-2**(1-s)) * zeta(s)
+dirichlet_eta = builtin(_dirichlet_eta)

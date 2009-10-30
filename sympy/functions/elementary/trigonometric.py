@@ -10,8 +10,8 @@ from sympy.utilities.decorator import deprecated
 ########################## TRIGONOMETRIC FUNCTIONS ############################
 ###############################################################################
 
-@builtin
-class sin(FuncExpr):
+#@builtin
+class _sin(FuncExpr):
     """
     Usage
     =====
@@ -218,9 +218,10 @@ class sin(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.sin(self.args[0]._sage_())
+sin = builtin(_sin)
 
-@builtin
-class cos(FuncExpr):
+#@builtin
+class _cos(FuncExpr):
     """
     Usage
     =====
@@ -426,9 +427,10 @@ class cos(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.cos(self.args[0]._sage_())
+cos = builtin(_cos)
 
-@builtin
-class tan(FuncExpr):
+#@builtin
+class _tan(FuncExpr):
     """
     Usage
     =====
@@ -592,9 +594,10 @@ class tan(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.tan(self.args[0]._sage_())
+tan = builtin(_tan)
 
-@builtin
-class cot(FuncExpr):
+#@builtin
+class _cot(FuncExpr):
     """
     Usage
     =====
@@ -722,13 +725,14 @@ class cot(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.cot(self.args[0]._sage_())
+cot = builtin(_cot)
 
 ###############################################################################
 ########################### TRIGONOMETRIC INVERSES ############################
 ###############################################################################
 
-@builtin
-class asin(FuncExpr):
+#@builtin
+class _asin(FuncExpr):
     """
     Usage
     =====
@@ -815,9 +819,10 @@ class asin(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.asin(self.args[0]._sage_())
+asin = builtin(_asin)
 
-@builtin
-class acos(FuncExpr):
+#@builtin
+class _acos(FuncExpr):
     """
     Usage
     =====
@@ -899,9 +904,10 @@ class acos(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.acos(self.args[0]._sage_())
+acos = builtin(_acos)
 
-@builtin
-class atan(FuncExpr):
+#@builtin
+class _atan(FuncExpr):
     """
     Usage
     =====
@@ -976,9 +982,10 @@ class atan(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.atan(self.args[0]._sage_())
+atan = builtin(_atan)
 
-@builtin
-class acot(FuncExpr):
+#@builtin
+class _acot(FuncExpr):
     """
     Usage
     =====
@@ -1054,9 +1061,10 @@ class acot(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.acot(self.args[0]._sage_())
+acot = builtin(_acot)
 
-@builtin
-class atan2(FuncExpr):
+#@builtin
+class _atan2(FuncExpr):
     """
     atan2(y,x) -> Returns the atan(y/x) taking two arguments y and x.
     Signs of both y and x are considered to determine the appropriate
@@ -1090,4 +1098,4 @@ class atan2(FuncExpr):
 
     def _eval_is_real(self):
         return self.args[0].is_real and self.args[1].is_real
-
+atan2 = builtin(_atan2)
