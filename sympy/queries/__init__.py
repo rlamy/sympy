@@ -92,7 +92,7 @@ def ask(expr, key, assumptions=True):
         if conj:
             out = []
             for sym in conjuncts(to_cnf(conj)):
-                lit, pos = literal_symbol(sym), type(sym) is not Not
+                lit, pos = literal_symbol(sym), sym.func != Not
                 if pos:
                     out.extend([known_facts_keys.index(str(l))+1 for l in disjuncts(lit)])
                 else:

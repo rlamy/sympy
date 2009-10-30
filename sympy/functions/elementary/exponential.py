@@ -9,8 +9,8 @@ from sympy.ntheory import multiplicity
 from sympy.core.basic import Mul
 
 
-@builtin
-class exp(FuncExpr):
+#@builtin
+class _exp(FuncExpr):
 
     nargs = 1
     def __new__(cls, arg, **opts):
@@ -264,9 +264,10 @@ class exp(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.exp(self.args[0]._sage_())
+exp = builtin(_exp)
 
-@builtin
-class log(FuncExpr):
+#@builtin
+class _log(FuncExpr):
 
     nargs = (1,2)
 
@@ -522,6 +523,7 @@ class log(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.log(self.args[0]._sage_())
+log = builtin(_log)
 
 # MrvLog is used by limit.py
 class MrvLog(log._cls):
@@ -535,8 +537,8 @@ class MrvLog(log._cls):
         return self
 
 
-@builtin
-class LambertW(FuncExpr):
+#@builtin
+class _LambertW(FuncExpr):
     """Lambert W function, defined as the inverse function of
     x*exp(x). This function represents the principal branch
     of this inverse function, which like the natural logarithm
@@ -566,3 +568,4 @@ class LambertW(FuncExpr):
             return LambertW(x)/(x*(1+LambertW(x)))
         else:
             raise ArgumentIndexError(self, argindex)
+LambertW = builtin(_LambertW)

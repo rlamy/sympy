@@ -7,8 +7,8 @@ from sympy.utilities.decorator import deprecated
 ###################### Kronecker Delta, Levi-Civita etc. ######################
 ###############################################################################
 
-@builtin
-class Dij(FuncExpr):
+#@builtin
+class _Dij(FuncExpr):
     """
     Represents the Kronecker Delta Function
 
@@ -30,9 +30,11 @@ class Dij(FuncExpr):
             return S.One
         elif i.is_number and j.is_number:
             return S.Zero
+Dij = builtin(_Dij)
 
-@builtin
-class Eijk(FuncExpr):
+
+#@builtin
+class _Eijk(FuncExpr):
     """
     Represents the Levi-Civita symbol (antisymmetric symbol)
     """
@@ -52,3 +54,4 @@ class Eijk(FuncExpr):
             return S.NegativeOne
         elif i==j or j==k or k==i:
             return S.Zero
+Eijk = builtin(_Eijk)

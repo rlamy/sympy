@@ -11,8 +11,8 @@ from sympy.utilities.decorator import deprecated
 ########################### HYPERBOLIC FUNCTIONS ##############################
 ###############################################################################
 
-@builtin
-class sinh(FuncExpr):
+#@builtin
+class _sinh(FuncExpr):
     """
     Usage
     =====
@@ -138,9 +138,10 @@ class sinh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.sinh(self.args[0]._sage_())
+sinh = builtin(_sinh)
 
-@builtin
-class cosh(FuncExpr):
+#@builtin
+class _cosh(FuncExpr):
     """
     Usage
     =====
@@ -264,9 +265,11 @@ class cosh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.cosh(self.args[0]._sage_())
+cosh = builtin(_cosh)
 
-@builtin
-class tanh(FuncExpr):
+
+#@builtin
+class _tanh(FuncExpr):
     """
     Usage
     =====
@@ -394,9 +397,11 @@ class tanh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.tanh(self.args[0]._sage_())
+tanh = builtin(_tanh)
 
-@builtin
-class coth(FuncExpr):
+
+#@builtin
+class _coth(FuncExpr):
     """
     Usage
     =====
@@ -504,14 +509,14 @@ class coth(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.coth(self.args[0]._sage_())
-
+coth = builtin(_coth)
 
 ###############################################################################
 ############################# HYPERBOLIC INVERSES #############################
 ###############################################################################
 
-@builtin
-class asinh(FuncExpr):
+#@builtin
+class _asinh(FuncExpr):
     """
     Usage
     =====
@@ -594,9 +599,11 @@ class asinh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.asinh(self.args[0]._sage_())
+asinh = builtin(_asinh)
 
-@builtin
-class acosh(FuncExpr):
+
+#@builtin
+class _acosh(FuncExpr):
     """
     Usage
     =====
@@ -683,9 +690,10 @@ class acosh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.acosh(self.args[0]._sage_())
+acosh = builtin(_acosh)
 
-@builtin
-class atanh(FuncExpr):
+#@builtin
+class _atanh(FuncExpr):
     """
     Usage
     =====
@@ -754,9 +762,10 @@ class atanh(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.atanh(self.args[0]._sage_())
+atanh = builtin(_atanh)
 
-@builtin
-class acoth(FuncExpr):
+#@builtin
+class _acoth(FuncExpr):
     """
     Usage
     =====
@@ -831,3 +840,4 @@ class acoth(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.acoth(self.args[0]._sage_())
+acoth = builtin(_acoth)

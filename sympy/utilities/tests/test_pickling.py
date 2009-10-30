@@ -17,7 +17,7 @@ from sympy.core.add import Add
 from sympy.core.mul import Mul
 from sympy.core.power import Pow
 from sympy.core.function import Derivative, Function, FunctionClass, Lambda,\
-        WildFunction
+        WildFunction, FunctionBase
 from sympy.core.sets import Interval
 from sympy.core.multidimensional import vectorize
 from sympy.core.cache import Memoizer
@@ -31,8 +31,8 @@ def check(a, check_attr = True):
     """
     for protocol in [0, 1, 2, copy.copy, copy.deepcopy]:
         if callable(protocol):
-            if isinstance(a, BasicType):
-                # Classes can't be copied, but that's okay.
+            if isinstance(a, BasicType) or isinstance(a, FunctionBase):
+                # Classes and functions can't be copied, but that's okay.
                 return
             b = protocol(a)
         else:
@@ -40,18 +40,19 @@ def check(a, check_attr = True):
 
         d1 = dir(a)
         d2 = dir(b)
-        assert d1==d2
-
         if not check_attr:
+            assert d1 == d2 or a == b
             continue
+        assert (d1 == d2)
+
         def c(a,b,d):
             for i in d:
                 if not hasattr(a,i):
                     continue
                 attr = getattr(a,i)
                 if not hasattr(attr, "__call__"):
-                    assert hasattr(b,i), i
-                    assert getattr(b,i)==attr
+                    assert hasattr(b, i), i
+                    assert getattr(b, i)==attr
         c(a,b,d1)
         c(b,a,d2)
 
@@ -141,7 +142,7 @@ def test_core_cache():
 
 
 #================== functions ===================
-from sympy.functions import (Piecewise, lowergamma, acosh,
+from sympy import (Piecewise, lowergamma, acosh,
         chebyshevu, chebyshevt, ln, chebyshevt_root, Binomial, legendre,
         Heaviside, Dij, factorial, bernoulli, coth, tanh, assoc_legendre, sign,
         arg, asin, DiracDelta, re, rf, abs, uppergamma, binomial, sinh, Ylm,
@@ -168,15 +169,15 @@ def test_functions():
     for a in zero_var:
         check(a)
     for cls in one_var:
-        check(cls)
+        check(cls, False)
         c = cls(x)
         check(c)
     for cls in two_var:
-        check(cls)
+        check(cls, False)
         c = cls(x, y)
         check(c)
     for cls in others:
-        check(cls)
+        check(cls, False)
 
 #================== geometry ====================
 from sympy.geometry.entity import GeometryEntity

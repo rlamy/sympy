@@ -11,8 +11,8 @@ from sympy.utilities.decorator import deprecated
 ###############################################################################
 ################################ DELTA FUNCTION ###############################
 ###############################################################################
-@builtin
-class DiracDelta(FuncExpr):
+#@builtin
+class _DiracDelta(FuncExpr):
     """DiracDelta function, and the derivatives.
     DiracDelta function has the following properties:
     1) diff(Heaviside(x),x) = DiracDelta(x)
@@ -141,12 +141,14 @@ class DiracDelta(FuncExpr):
         if p:
             return p.degree == 1
         return False
+DiracDelta = builtin(_DiracDelta)
+
 ###############################################################################
 ############################## HEAVISIDE FUNCTION #############################
 ###############################################################################
 
-@builtin
-class Heaviside(FuncExpr):
+#@builtin
+class _Heaviside(FuncExpr):
     """Heaviside Piecewise function.
     Heaviside function has the following properties:
     1) diff(Heaviside(x),x) = DiracDelta(x)
@@ -203,3 +205,5 @@ class Heaviside(FuncExpr):
             return S.Half
         elif arg.is_positive:
             return S.One
+Heaviside = builtin(_Heaviside)
+

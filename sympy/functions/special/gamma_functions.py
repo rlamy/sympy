@@ -11,8 +11,8 @@ from sympy.utilities.decorator import deprecated
 ############################ COMPLETE GAMMA FUNCTION ##########################
 ###############################################################################
 
-@builtin
-class gamma(FuncExpr):
+#@builtin
+class _gamma(FuncExpr):
 
     nargs = 1
 
@@ -86,14 +86,15 @@ class gamma(FuncExpr):
 
     def _eval_is_real(self):
         return self.args[0].is_real
+gamma = builtin(_gamma)
 
 
 ###############################################################################
 ################## LOWER and UPPER INCOMPLETE GAMMA FUNCTIONS #################
 ###############################################################################
 
-@builtin
-class lowergamma(FuncExpr):
+#@builtin
+class _lowergamma(FuncExpr):
     """Lower incomplete gamma function"""
 
     nargs = 2
@@ -113,10 +114,10 @@ class lowergamma(FuncExpr):
 
                 if b.is_positive:
                     return b*cls(b, x) - x**b * C.exp(-x)
+lowergamma = builtin(_lowergamma)
 
-
-@builtin
-class uppergamma(FuncExpr):
+#@builtin
+class _uppergamma(FuncExpr):
     """Upper incomplete gamma function"""
 
     nargs = 2
@@ -151,15 +152,15 @@ class uppergamma(FuncExpr):
 
                 if b.is_positive:
                     return b*cls(b, z) + z**b * C.exp(-z)
-
+uppergamma = builtin(_uppergamma)
 
 
 ###############################################################################
 ########################### GAMMA RELATED FUNCTIONS ###########################
 ###############################################################################
 
-@builtin
-class polygamma(FuncExpr):
+#@builtin
+class _polygamma(FuncExpr):
 
     nargs = 2
 
@@ -231,8 +232,11 @@ class polygamma(FuncExpr):
 
     def _eval_rewrite_as_zeta(self, n, z):
         return (-1)**(n+1)*C.Factorial(n)*zeta(n+1, z-1)
+polygamma = builtin(_polygamma)
 
-@builtin
-class loggamma(FuncExpr):
+#@builtin
+class _loggamma(FuncExpr):
 
     nargs = 1
+loggamma = builtin(_loggamma)
+

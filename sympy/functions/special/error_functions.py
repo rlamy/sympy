@@ -9,8 +9,8 @@ from sympy.utilities.decorator import deprecated
 ################################ ERROR FUNCTION ###############################
 ###############################################################################
 
-@builtin
-class erf(FuncExpr):
+#@builtin
+class _erf(FuncExpr):
 
     nargs = 1
 
@@ -84,3 +84,4 @@ class erf(FuncExpr):
             from sympy.mpmath import erf
             e = erf(float(arg))
             return Real(str(e))
+erf = builtin(_erf)

@@ -77,8 +77,8 @@ class RoundFunction(FuncExpr):
     def _eval_is_integer(self):
         return self.args[0].is_real
 
-@builtin
-class floor(RoundFunction):
+#@builtin
+class _floor(RoundFunction):
     """
     Floor is a univariate function which returns the largest integer
     value not greater than its argument. However this implementaion
@@ -124,10 +124,11 @@ class floor(RoundFunction):
                 return r-1
         else:
             return r
+floor = builtin(_floor)
 
 
-@builtin
-class ceiling(RoundFunction):
+#@builtin
+class _ceiling(RoundFunction):
     """
     Ceiling is a univariate function which returns the smallest integer
     value not less than its argument. Ceiling function is generalized
@@ -173,4 +174,5 @@ class ceiling(RoundFunction):
                 return r
         else:
             return r
+ceiling = builtin(_ceiling)
 

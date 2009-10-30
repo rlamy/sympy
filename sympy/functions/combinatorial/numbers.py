@@ -32,8 +32,8 @@ _sym = Symbol('x')
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-@builtin
-class fibonacci(FuncExpr):
+#@builtin
+class _fibonacci(FuncExpr):
     """
     Fibonacci numbers / Fibonacci polynomials
 
@@ -95,9 +95,11 @@ class fibonacci(FuncExpr):
                     raise ValueError("Fibonacci polynomials are defined "
                        "only for positive integer indices.")
                 return cls._fibpoly(n).subs(_sym, sym)
+fibonacci = builtin(_fibonacci)
 
-@builtin
-class lucas(FuncExpr):
+
+#@builtin
+class _lucas(FuncExpr):
     """
     Lucas numbers
 
@@ -134,6 +136,8 @@ class lucas(FuncExpr):
     def eval(cls, n):
         if n.is_Integer:
             return fibonacci(n+1) + fibonacci(n-1)
+lucas = builtin(_lucas)
+
 
 
 #----------------------------------------------------------------------------#
@@ -142,8 +146,8 @@ class lucas(FuncExpr):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-@builtin
-class bernoulli(FuncExpr):
+#@builtin
+class _bernoulli(FuncExpr):
     r"""
     Bernoulli numbers / Bernoulli polynomials
 
@@ -281,6 +285,7 @@ class bernoulli(FuncExpr):
             else:
                 raise ValueError("Bernoulli numbers are defined only"
                                  " for nonnegative integer indices.")
+bernoulli = builtin(_bernoulli)
 
 
 #----------------------------------------------------------------------------#
@@ -289,8 +294,8 @@ class bernoulli(FuncExpr):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-@builtin
-class bell(FuncExpr):
+#@builtin
+class _bell(FuncExpr):
     r"""
     Bell numbers / Bell polynomials
 
@@ -379,6 +384,8 @@ class bell(FuncExpr):
                 return Integer(cls._bell(int(n)))
             else:
                 return cls._bell_poly(int(n)).subs(_sym, sym)
+bell = builtin(_bell)
+
 
 #----------------------------------------------------------------------------#
 #                                                                            #
@@ -386,8 +393,8 @@ class bell(FuncExpr):
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-@builtin
-class harmonic(FuncExpr):
+#@builtin
+class _harmonic(FuncExpr):
     r"""
     Harmonic numbers
 
@@ -453,3 +460,5 @@ class harmonic(FuncExpr):
                     return prev[-1] + S.One / n**m
                 cls._functions[m] = f
             return cls._functions[m](int(n))
+harmonic = builtin(_harmonic)
+

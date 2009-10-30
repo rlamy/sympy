@@ -10,8 +10,8 @@ from sympy.utilities.iterables import make_list, iff
 ######################### REAL and IMAGINARY PARTS ############################
 ###############################################################################
 
-@builtin
-class re(FuncExpr):
+#@builtin
+class _re(FuncExpr):
     """Returns real part of expression. This function performs only
        elementary analysis and so it will fail to decompose properly
        more complicated expressions. If completely simplified result
@@ -86,9 +86,11 @@ class re(FuncExpr):
 #            return self.args[0].expand(deep, **hints).as_real_imag()[0]
 #        else:
         return self.args[0].as_real_imag()[0]
+re = builtin(_re)
 
-@builtin
-class im(FuncExpr):
+
+#@builtin
+class _im(FuncExpr):
     """Returns imaginary part of expression. This function performs
        only elementary analysis and so it will fail to decompose
        properly more complicated expressions. If completely simplified
@@ -161,13 +163,15 @@ class im(FuncExpr):
 #        if deep:
 #            return self.args[0].expand(deep, **hints).as_real_imag()[1]
         return self.args[0].as_real_imag()[1]
+im = builtin(_im)
+
 
 ###############################################################################
 ############### SIGN, ABSOLUTE VALUE, ARGUMENT and CONJUGATION ################
 ###############################################################################
 
-@builtin
-class sign(FuncExpr):
+#@builtin
+class _sign(FuncExpr):
     """Return the sign of an expression, that is:
         -1 if expr <  0
          0 if expr == 0
@@ -210,9 +214,10 @@ class sign(FuncExpr):
 
     def _eval_is_zero(self):
         return (self.args[0] is S.Zero)
+sign = builtin(_sign)
 
-@builtin
-class abs(FuncExpr):
+#@builtin
+class _abs(FuncExpr):
     """Return the absolute value of the argument. This is an extension of the built-in
     function abs to accept symbolic values
 
@@ -298,9 +303,11 @@ class abs(FuncExpr):
     def _sage_(self):
         import sage.all as sage
         return sage.abs_symbolic(self.args[0]._sage_())
+abs = builtin(_abs)
 
-@builtin
-class arg(FuncExpr):
+
+#@builtin
+class _arg(FuncExpr):
     """Returns the argument (in radians) of a complex number"""
 
     nargs = 1
@@ -322,9 +329,10 @@ class arg(FuncExpr):
 
     def _eval_conjugate(self):
         return self
+arg = builtin(_arg)
 
-@builtin
-class conjugate(FuncExpr):
+#@builtin
+class _conjugate(FuncExpr):
     """Changes the sign of the imaginary part of a complex number.
 
         >>> from sympy import *
@@ -354,6 +362,7 @@ class conjugate(FuncExpr):
         if not self.has(x):
             return S.Zero
         return conjugate(Derivative(self.args[0], x, **{'evaluate': True}))
+conjugate = builtin(_conjugate)
 
 # /cyclic/
 from sympy.core import basic as _

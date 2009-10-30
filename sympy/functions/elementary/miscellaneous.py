@@ -15,8 +15,8 @@ def sqrt(arg):
 ############################# MINIMUM and MAXIMUM #############################
 ###############################################################################
 
-@builtin
-class max_(FuncExpr):
+#@builtin
+class _max_(FuncExpr):
 
     nargs = 2
 
@@ -43,8 +43,10 @@ class max_(FuncExpr):
                     if x.is_unbounded:
                         return
                     return x
-@builtin
-class min_(FuncExpr):
+max_ = builtin(_max_)
+
+#@builtin
+class _min_(FuncExpr):
 
     nargs = 2
 
@@ -57,3 +59,4 @@ class min_(FuncExpr):
     def eval(cls, x, y):
         if x.is_Number and y.is_Number:
             return min(x, y)
+min_ = builtin(_min_)
