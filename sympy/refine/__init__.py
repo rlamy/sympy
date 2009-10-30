@@ -24,8 +24,11 @@ def refine(expr, assumptions=True):
     if not expr.is_Atom:
         args = [refine(arg, assumptions) for arg in expr.args]
         # TODO: this will probably not work with Integral or Polynomial
-        expr = type(expr)(*args)
-    name = expr.__class__.__name__
+        expr = expr.func(*args)
+    if expr.is_Function:
+        name = expr.func.name
+    else:
+        name = expr.__class__.__name__
     handler = handlers_dict.get(name, None)
     if handler is None: return expr
     new_expr = handler(expr, assumptions)
