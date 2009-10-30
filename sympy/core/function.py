@@ -110,6 +110,7 @@ class builtin(FunctionBase):
             setattr(obj, attr, getattr(expr_cls, attr))
 
         # Replace FuncExpr with function object in the class registry
+        del BasicMeta.classnamespace[expr_cls.__name__]
         BasicMeta.classnamespace[obj.name] = obj
 
         return obj
