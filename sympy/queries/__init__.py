@@ -68,13 +68,17 @@ def ask(expr, key, assumptions=True):
     for handler in handlers_dict[key]:
         resolutors.append( get_class(handler) )
     res, _res = None, None
-    mro = inspect.getmro(type(expr))
+    super_names = [cls.__name__ for cls in inspect.getmro(type(expr))]
+    if expr.is_Function:
+        super_names[0] = expr.func.name
     for handler in resolutors:
-        for subclass in mro:
-            if hasattr(handler, subclass.__name__):
-                res = getattr(handler, subclass.__name__)(expr, assumptions)
-                if _res is None: _res = res
-                elif _res != res: raise ValueError, 'incompatible resolutors'
+        for name in super_names:
+            if hasattr(handler, name):
+                res = getattr(handler, name)(expr, assumptions)
+                if _res is None:
+                    _res = res
+                elif _res != res:
+                    raise ValueError, 'incompatible resolutors'
                 break
     if res is not None:
         return res
