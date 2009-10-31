@@ -55,7 +55,7 @@ class _re(FuncExpr):
             return S.NaN
         elif arg.is_real:
             return arg
-        elif arg.is_Function and arg.func == conjugate:
+        elif arg.func == conjugate:
             return re(arg.args[0])
         else:
 
@@ -134,7 +134,7 @@ class _im(FuncExpr):
             return S.NaN
         elif arg.is_real:
             return S.Zero
-        elif arg.is_Function and arg.func == conjugate:
+        elif arg.func == conjugate:
             return -im(arg.args[0])
         else:
             included, reverted, excluded = [], [], []

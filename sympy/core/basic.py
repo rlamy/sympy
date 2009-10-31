@@ -823,22 +823,18 @@ class Basic(AssumeMeths):
         """
 
 
-        def _atoms(expr, typ):
+        def _atoms(expr, types):
             """Helper function for recursively denesting atoms"""
             if isinstance(expr, Basic):
-                if not typ:
+                if not types:
                     if expr.is_Atom:
                         return [expr]
                 else:
-                    for t in typ:
-                        if isinstance(t, Basic):
-                            if expr == t or expr.func == t:
+                    for typ in types:
+                        if isinstance(typ, Basic):
+                            if expr == typ or expr.func == typ:
                                 return [expr]
-                        elif type(type(t)) is type:
-                            if isinstance(expr, t):
-                                return [expr]
-                        else:
-                            if isinstance(expr, type(t)):
+                        elif isinstance(expr, typ):
                                 return [expr]
             result = []
             #search for a suitable iterator
@@ -850,10 +846,17 @@ class Basic(AssumeMeths):
                 iter = []
 
             for obj in iter:
-                result.extend(_atoms(obj, typ))
+                result.extend(_atoms(obj, types))
             return result
 
-        return set(_atoms(self, typ=types))
+        def get_head(expr):
+            if isinstance(expr, Basic) and not expr.is_Function:
+                return expr.func
+            else:
+                return expr
+
+        types = [get_head(typ) for typ in types]
+        return set(_atoms(self, types))
 
     def is_hypergeometric(self, k):
         from sympy.simplify import hypersimp
@@ -1175,7 +1178,8 @@ class Basic(AssumeMeths):
         return self.func(*[s.subs(old, new) for s in self.args])
 
     def __contains__(self, what):
-        if self == what or self.is_Function and self.func == what: return True
+        if self == what or self.func is what:
+            return True
         for x in self._args:
             if what in x:
                 return True

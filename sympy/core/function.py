@@ -128,7 +128,7 @@ class FuncExpr(Basic):
     This should never be visible to the end-user from the public interface.
     """
 
-    is_Function = True
+    is_FuncExpr = True
 
     nargs = None
 
@@ -243,14 +243,11 @@ class FuncExpr(Basic):
         return Basic._from_mpmath(v, prec)
 
     def _eval_is_comparable(self):
-        if self.is_Function:
-            r = True
-            for s in self.args:
-                c = s.is_comparable
-                if c is None: return
-                if not c: r = False
-            return r
-        return
+        for arg in self.args:
+            comp = arg.is_comparable
+            if not comp:
+                return comp
+        return True
 
     def _eval_derivative(self, s):
         # f(x).diff(s) -> x.diff(s) * f.fdiff(1)(s)

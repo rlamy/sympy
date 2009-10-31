@@ -38,7 +38,7 @@ def components(f, x):
     if f.has(x):
         if f.is_Symbol:
             result.add(f)
-        elif f.is_Function or f.is_Derivative:
+        elif f.func.is_Function or f.is_Derivative:
             for g in f.args:
                 result |= components(g, x)
 
@@ -179,12 +179,11 @@ def heurisch(f, x, **kwargs):
             b = Wild('b', exclude=[x])
 
             for g in set(terms):
-                if g.is_Function:
-                    if g.func is exp:
-                        M = g.args[0].match(a*x**2)
+                if g.func == exp:
+                    M = g.args[0].match(a*x**2)
 
-                        if M is not None:
-                            terms.add(erf(sqrt(-M[a])*x))
+                    if M is not None:
+                        terms.add(erf(sqrt(-M[a])*x))
                 elif g.is_Pow:
                     if g.exp.is_Rational and g.exp.q == 2:
                         M = g.base.match(a*x**2 + b)
@@ -260,14 +259,13 @@ def heurisch(f, x, **kwargs):
     special = {}
 
     for term in terms:
-        if term.is_Function:
-            if term.func is tan:
-                special[1 + substitute(term)**2] = False
-            elif term.func is tanh:
-                special[1 + substitute(term)] = False
-                special[1 - substitute(term)] = False
-            elif term.func is C.LambertW:
-                special[substitute(term)] = True
+        if term.func is tan:
+            special[1 + substitute(term)**2] = False
+        elif term.func is tanh:
+            special[1 + substitute(term)] = False
+            special[1 - substitute(term)] = False
+        elif term.func is C.LambertW:
+            special[substitute(term)] = True
 
     F = substitute(f)
 
