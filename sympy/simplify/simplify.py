@@ -172,9 +172,9 @@ def separate(expr, deep=False):
         else:
             return C.Pow(separate(expr.base, deep), expo)
     elif expr.is_Add or expr.is_Mul:
-        return type(expr)(*[separate(t, deep) for t in expr.args])
-    elif expr.is_Function and deep:
-        return expr.func(*[separate(t) for t in expr.args])
+        return type(expr)(*[ separate(t, deep) for t in expr.args ])
+    elif expr.func.is_Function and deep:
+        return expr.func(*[ separate(t) for t in expr.args])
     else:
         return expr
 
@@ -333,7 +333,7 @@ def together(expr, deep=False):
             return Add(*numerator)/(product*Mul(*denominator))
         elif expr.is_Mul or expr.is_Pow:
             return type(expr)(*[_together(t) for t in expr.args])
-        elif expr.is_Function and deep:
+        elif expr.func.is_Function and deep:
             return expr.func(*[_together(t) for t in expr.args])
         else:
             return expr
@@ -733,7 +733,6 @@ def separatevars(expr, dict=False, symbols=[]):
     True
 
     """
-
     if dict:
         if not symbols:
             try:
@@ -965,7 +964,7 @@ def trigsimp_nonrecursive(expr, deep=False):
     from sympy.core.basic import S
     sin, cos, tan, cot = C.sin, C.cos, C.tan, C.cot
 
-    if expr.is_Function:
+    if expr.func.is_Function:
         if deep:
             return expr.func(trigsimp_nonrecursive(expr.args[0], deep))
     elif expr.is_Mul:
@@ -1122,7 +1121,7 @@ def powsimp(expr, deep=False, combine='all'):
             expr.exp, deep, combine), deep, combine)/y
         else:
             return powsimp(y*expr, deep, combine)/y # Trick it into being a Mul
-    elif expr.is_Function:
+    elif expr.func.is_Function:
         if expr.func == exp and deep:
             # Exp should really be like Pow
             return powsimp(y*exp(powsimp(expr.args[0], deep, combine)), deep, combine)/y
@@ -1532,7 +1531,7 @@ def _logcombine(expr, assume_pos_real=False):
              _logcombine(x, assume_pos_real)*_logcombine(y, assume_pos_real),\
              expr.args[1:], 1)
 
-    if expr.is_Function:
+    if expr.func.is_Function:
         return apply(expr.func,map(lambda t: _logcombine(t, assume_pos_real)\
         , expr.args))
 

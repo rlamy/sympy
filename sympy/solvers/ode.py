@@ -816,7 +816,7 @@ def odesimp(eq, func, order, hint):
     if hint[:21] == "1st_homogeneous_coeff":
         # Solutions from this hint can almost always be logcombined
         eq = logcombine(eq, assume_pos_real=True)
-        if eq.lhs.is_Function and eq.lhs.func == log and eq.rhs == 0:
+        if eq.lhs.func == log and eq.rhs == 0:
             eq = Eq(eq.lhs.args[0]/C1,C1)
 
     if eq.lhs == func and not eq.rhs.has(func):
@@ -841,7 +841,7 @@ def odesimp(eq, func, order, hint):
                 neweq = []
                 for i in eq:
                     newi = logcombine(i, assume_pos_real=True)
-                    if newi.lhs.is_Function and newi.lhs.func == log and newi.rhs == 0:
+                    if newi.lhs.func == log and newi.rhs == 0:
                         newi = Eq(newi.lhs.args[0]*C1,C1)
                     neweq.append(newi)
                 eq = neweq
@@ -921,7 +921,7 @@ def checkodesol(ode, func, sol, order='auto', solve_for_func=True):
         (False, 2)
 
     """
-    if not func.is_Function or len(func.args) != 1:
+    if not func.func.is_Function or len(func.args) != 1:
         raise ValueError("func must be a function of one variable, not " + str(func))
     x = func.args[0]
     s = True
@@ -1228,7 +1228,7 @@ def constantsimp(expr, independentsymbol, endnumber, startnumber=1,
                 symbolname), constantsimp(expr.rhs, x, endnumber,
                 startnumber, symbolname))
 
-    if type(expr) not in (Mul, Add, Pow) and not expr.is_Function:
+    if type(expr) not in (Mul, Add, Pow) and not expr.func.is_Function:
         # We don't know how to handle other classes
         # This also serves as the base case for the recursion
         return expr
@@ -1266,7 +1266,7 @@ def constantsimp(expr, independentsymbol, endnumber, startnumber=1,
                 newargs = [newconst] + newargs
         if expr.is_Pow and len(newargs) == 1:
             newargs.append(S.One)
-        if expr.is_Function:
+        if expr.func.is_Function:
             if (len(newargs) == 0 or hasconst and len(newargs) == 1):
                 return newconst
             else:
@@ -1330,7 +1330,7 @@ def ode_renumber(expr, symbolname, startnumber, endnumber):
             return Eq(_ode_renumber(expr.lhs, symbolname, startnumber, endnumber),
             _ode_renumber(expr.rhs, symbolname, startnumber, endnumber))
 
-        if type(expr) not in (Mul, Add, Pow) and not expr.is_Function and\
+        if type(expr) not in (Mul, Add, Pow) and not expr.func.is_Function and\
         not any(expr.has(t) for t in constantsymbols):
             # Base case, as above.  We better hope there aren't constants inside
             # of some other class, because they won't be renumbered.
@@ -1341,7 +1341,7 @@ def ode_renumber(expr, symbolname, startnumber, endnumber):
             newstartnumber += 1
             return newconst
         else:
-            if expr.is_Function or expr.is_Pow:
+            if expr.func.is_Function or expr.is_Pow:
                 return expr.new(*map(lambda x: _ode_renumber(x, symbolname, \
                 startnumber, endnumber), expr.args))
             else:
@@ -1753,9 +1753,9 @@ def _homogeneous_order(eq, *symbols):
 
     # Replace all functions with dummy variables
 
-    if any(getattr(i, 'is_Function') for i in symbols):
+    if any(getattr(i.func, 'is_Function') for i in symbols):
         for i in symbols:
-            if i.is_Function:
+            if i.func.is_Function:
                 if not all(map((lambda i: i in symbols), i.args)):
                     return None
                 elif i not in symbols:
@@ -1818,7 +1818,7 @@ def _homogeneous_order(eq, *symbols):
                         s += o
                 n.add(sympify(s))
 
-    if eq.is_Function:
+    if eq.func.is_Function:
         if eq.func == log:
             # The only possibility to pull a t out of a function is a power in
             # a logarithm.  This is very likely due to calling of logcombine().
@@ -2387,7 +2387,7 @@ def _undetermined_coefficients_match(expr, x):
                         else:
                             foundtrig = True
             return all([_test_term(i, x) for i in expr.args])
-        elif expr.is_Function:
+        elif expr.func.is_Function:
             if expr.func in (sin, cos, exp):
                 if expr.args[0].match(a*x + b):
                     return True

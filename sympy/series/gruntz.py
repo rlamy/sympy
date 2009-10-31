@@ -220,7 +220,7 @@ def mrv(e, x):
             return mrv_max(set([e]), mrv(e.args[0], x), x)
         else:
             return mrv(e.args[0], x)
-    elif e.is_Function:
+    elif e.func.is_Function:
         if len(e.args) == 1:
             return mrv(e.args[0], x)
         #only functions of 1 argument currently implemented
@@ -318,12 +318,12 @@ def sign(e, x):
     elif e.is_Mul:
         a,b = e.as_two_terms()
         return sign(a, x) * sign(b, x)
-    elif e.func is exp:
+    elif e.func == exp:
         return 1
     elif e.is_Pow:
         if sign(e.base, x) == 1:
             return 1
-    elif e.func is log:
+    elif e.func == log:
         return sign(e.args[0] -1, x)
     elif e.is_Add:
         return sign(limitinf(e, x), x)

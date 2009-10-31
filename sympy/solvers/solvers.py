@@ -104,7 +104,7 @@ def guess_solve_strategy(expr, symbol):
     elif expr.is_Piecewise:
         return GS_PIECEWISE
 
-    elif expr.is_Function and expr.has(symbol):
+    elif expr.func.is_Function and expr.has(symbol):
         return GS_TRANSCENDENTAL
 
     elif not expr.has(symbol):
@@ -186,7 +186,7 @@ def solve(f, *symbols, **flags):
     for i, s in enumerate(symbols):
         if s.is_Symbol:
             s_new = s
-        elif s.is_Function:
+        elif s.func.is_Function:
             symbol_swapped = True
             s_new = Symbol('F%d' % i, dummy=True)
         elif s.is_Derivative:
@@ -671,7 +671,7 @@ def tsolve(eq, sym):
 
     #                    -1
     # f(x) = g  ->  x = f  (g)
-    if lhs.is_Function and lhs.nargs==1 and hasattr(lhs, 'inverse'):
+    if lhs.func.is_Function and lhs.nargs==1 and hasattr(lhs, 'inverse'):
         rhs = lhs.inverse() (rhs)
         lhs = lhs.args[0]
 
@@ -688,7 +688,7 @@ def tsolve(eq, sym):
 
         # find first term which is Function
         for f1 in lhs.args:
-            if f1.is_Function:
+            if f1.func.is_Function:
                 break
         else:
             raise NotImplementedError("Unable to solve the equation" + \
@@ -698,8 +698,8 @@ def tsolve(eq, sym):
         lhs_ = lhs.subs(f1, t)
 
         # if no Functions left, we can proceed with usual solve
-        if not (lhs_.is_Function or
-                any(term.is_Function for term in lhs_.args)):
+        if not (lhs_.func.is_Function or
+                any(term.func.is_Function for term in lhs_.args)):
             cv_sols = solve(lhs_ - rhs, t)
             for sol in cv_sols:
                 if sol.has(sym):

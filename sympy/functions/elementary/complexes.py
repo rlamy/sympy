@@ -46,7 +46,7 @@ class _re(FuncExpr):
             return S.NaN
         elif arg.is_real:
             return arg
-        elif arg.is_Function and arg.func == conjugate:
+        elif arg.func == conjugate:
             return re(arg.args[0])
         else:
 
@@ -120,7 +120,7 @@ class _im(FuncExpr):
             return S.NaN
         elif arg.is_real:
             return S.Zero
-        elif arg.is_Function and arg.func == conjugate:
+        elif arg.func == conjugate:
             return -im(arg.args[0])
         else:
             included, reverted, excluded = [], [], []
@@ -178,8 +178,8 @@ class _sign(FuncExpr):
         if arg is S.Zero: return S.Zero
         if arg.is_positive: return S.One
         if arg.is_negative: return S.NegativeOne
-        if arg.is_Function:
-            if arg.func is sign: return arg
+        if arg.func == sign:
+            return arg
         if arg.is_Mul:
             c, args = arg.as_coeff_terms()
             unk = []
