@@ -659,7 +659,7 @@ def rsolve(f, y, init=None):
         kspec = None
 
         for h in G:
-            if h.is_Function:
+            if h.func.is_Function:
                 if h.func == y.func:
                     result = h.args[0].match(n + k)
 
@@ -746,7 +746,7 @@ def rsolve(f, y, init=None):
                     try:
                         i = int(k)
                     except TypeError:
-                        if k.is_Function and k.func == y.func:
+                        if k.func.is_Function and k.func == y.func:
                             i = int(k.args[0])
                         else:
                             raise ValueError("Integer or term expected, got '%s'" % k)

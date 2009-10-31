@@ -24,7 +24,7 @@ def refine(expr, assumptions=True):
         args = [refine(arg, assumptions) for arg in expr.args]
         # TODO: this will probably not work with Integral or Polynomial
         expr = expr.func(*args)
-    if expr.is_Function:
+    if expr.func.is_Function:
         name = expr.func.name
     else:
         name = expr.__class__.__name__

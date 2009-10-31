@@ -192,8 +192,8 @@ class _sign(FuncExpr):
         if arg is S.Zero: return S.Zero
         if arg.is_positive: return S.One
         if arg.is_negative: return S.NegativeOne
-        if arg.is_Function:
-            if arg.func is sign: return arg
+        if arg.func == sign:
+            return arg
         if arg.is_Mul:
             c, args = arg.as_coeff_terms()
             unk = []

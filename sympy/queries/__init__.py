@@ -69,7 +69,7 @@ def ask(expr, key, assumptions=True):
         resolutors.append( get_class(handler) )
     res, _res = None, None
     super_names = [cls.__name__ for cls in inspect.getmro(type(expr))]
-    if expr.is_Function:
+    if expr.func.is_Function:
         super_names[0] = expr.func.name
     for handler in resolutors:
         for name in super_names:

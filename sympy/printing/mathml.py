@@ -51,7 +51,7 @@ class MathMLPrinter(Printer):
             'atan2': 'arctan',
             'log': 'ln'
         }
-        if isinstance(e, FuncExpr):
+        if isinstance(e, Basic) and e.func.is_Function:
             n = e.func.name
             if n in translate:
                 return translate[n]

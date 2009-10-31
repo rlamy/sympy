@@ -89,14 +89,14 @@ class LatexPrinter(Printer):
             elif expr.is_Pow and not self._pow_is_clean(expr):
                 return True
             # Add and Function always need brackets
-            elif expr.is_Add or expr.is_Function:
+            elif expr.is_Add or expr.func.is_Function:
                 return True
             else:
                 return False
 
     def _mul_is_clean(self, expr):
         for arg in expr.args:
-            if arg.is_Function:
+            if arg.func.is_Function:
                 return False
         return True
 
@@ -278,7 +278,7 @@ class LatexPrinter(Printer):
             base, p, q = self._print(expr.base), expr.exp.p, expr.exp.q
             return r"%s^{%s/%s}" % (base, p, q)
         else:
-            if expr.base.is_Function:
+            if expr.base.func.is_Function:
                 return self._print(expr.base, self._print(expr.exp))
             else:
                 if expr.exp == S.NegativeOne:

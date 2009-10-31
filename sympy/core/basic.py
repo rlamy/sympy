@@ -1281,10 +1281,7 @@ class Basic(AssumeMeths):
         """
         from sympy.utilities.iterables import flatten
         if len(patterns)>1:
-            for p in patterns:
-                if self.has(p):
-                    return True
-            return False
+            return any(self.has(p) for p in patterns)
         elif not patterns:
             raise TypeError("has() requires at least 1 argument (got none)")
 
