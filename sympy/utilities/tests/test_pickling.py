@@ -16,7 +16,7 @@ from sympy.core.relational import Equality, Inequality, Relational,\
 from sympy.core.add import Add
 from sympy.core.mul import Mul
 from sympy.core.power import Pow
-from sympy.core.function import Derivative, Function, FunctionClass, Lambda,\
+from sympy.core.function import Derivative, Function, Lambda,\
         WildFunction, FunctionBase
 from sympy.core.sets import Interval
 from sympy.core.multidimensional import vectorize
@@ -109,7 +109,7 @@ def test_core_power():
 
 def test_core_function():
     x = Symbol("x")
-    for f in (Derivative, Derivative(x), Function, FunctionClass, Lambda,\
+    for f in (Derivative, Derivative(x), Function, Lambda,\
               WildFunction):
         check(f)
 

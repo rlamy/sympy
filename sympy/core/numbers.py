@@ -394,9 +394,8 @@ class Real(Number):
         if isinstance(other, NumberSymbol):
             if other.is_irrational: return True
             return other.__ne__(self)
-        if isinstance(other, FunctionClass): #cos as opposed to cos(x)
-            return True
-        if other.is_comparable: other = other.evalf()
+        if other.is_comparable:
+            other = other.evalf()
         if isinstance(other, Number):
             return bool(not mlib.mpf_eq(self._mpf_, other._as_mpf_val(self._prec)))
         return True     # Real != non-Number
@@ -680,9 +679,8 @@ class Rational(Number):
         if isinstance(other, NumberSymbol):
             if other.is_irrational: return True
             return other.__ne__(self)
-        if isinstance(other, FunctionClass): #cos as opposed to cos(x)
-            return True
-        if other.is_comparable and not isinstance(other, Rational): other = other.evalf()
+        if other.is_comparable and not isinstance(other, Rational):
+            other = other.evalf()
         if isinstance(other, Number):
             if isinstance(other, Real):
                 return bool(not mlib.mpf_eq(self._as_mpf_val(other._prec), other._mpf_))
@@ -1640,6 +1638,6 @@ Basic.singleton['Catalan'] = Catalan
 from basic import Basic, Atom, S, C, SingletonMeta
 from cache import Memoizer
 from sympify import _sympify, SympifyError
-from function import FunctionBase, FunctionClass
+from function import FunctionBase
 from power import Pow, integer_nthroot
 from mul import Mul

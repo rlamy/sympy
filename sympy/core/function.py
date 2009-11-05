@@ -45,42 +45,6 @@ from sympy import mpmath
 class PoleError(Exception):
     pass
 
-class FunctionClass(BasicMeta):
-    """
-    Base class for function classes. FunctionClass is a subclass of type.
-
-    Use Function('<function name>' [ , signature ]) to create
-    undefined function classes.
-    """
-
-    _new = type.__new__
-
-    def __new__(cls, arg1, arg2, arg3=None, **options):
-        assert not options,`options`
-        if isinstance(arg1, type):
-            # the following code gets executed when one types
-            # FunctionClass(Function, "f")
-            # i.e. cls = FunctionClass, arg1 = Function, arg2 = "f"
-            # and we simply do an equivalent of:
-            # class f(Function):
-            #     ...
-            # return f
-            ftype, name, signature = arg1, arg2, arg3
-            #XXX this probably needs some fixing:
-            assert ftype.__name__.endswith('Function'),`ftype`
-            attrdict = ftype.__dict__.copy()
-            attrdict['undefined_Function'] = True
-            if signature is not None:
-                attrdict['signature'] = signature
-            bases = (ftype,)
-            return type.__new__(cls, name, bases, attrdict)
-        else:
-            name, bases, attrdict = arg1, arg2, arg3
-            return type.__new__(cls, name, bases, attrdict)
-
-    def __repr__(cls):
-        return cls.__name__
-
 class FunctionBase(Basic):
     """
     Represents a mathematical function.
@@ -96,7 +60,6 @@ class FunctionBase(Basic):
 
     def __call__(self, *args, **opts):
         return self._cls(*args, **opts)
-
 
 
 class builtin(FunctionBase):

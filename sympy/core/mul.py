@@ -745,9 +745,6 @@ class Mul(AssocOp):
         # simplest
         if self == old:
             return new
-        # pass it off to its own class
-        if isinstance(old, FunctionClass):
-            return self.__class__(*[s._eval_subs(old, new) for s in self.args ])
 
         # break up self and old into terms
         coeff_self,terms_self = self.as_coeff_terms()
@@ -887,6 +884,5 @@ class Mul(AssocOp):
 
 from power import Pow
 from numbers import Real
-from function import FunctionClass
 from sympify import sympify
 from add import Add

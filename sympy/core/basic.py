@@ -1171,11 +1171,7 @@ class Basic(AssumeMeths):
     def _seq_subs(self, old, new):
         if self==old:
             return new
-        #new functions are initialized differently, than old functions
-        if isinstance(self.func, FunctionClass):
-            args = self.args.args
-        else:
-            args = (self.func,)+self.args
+
         return self.func(*[s.subs(old, new) for s in self.args])
 
     def __contains__(self, what):
@@ -2547,5 +2543,5 @@ from mul import Mul
 from power import Pow
 from add import Add
 from relational import Inequality, StrictInequality
-from function import FunctionClass, Derivative
+from function import Derivative
 from numbers import Rational, Integer
