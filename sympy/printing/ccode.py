@@ -54,13 +54,13 @@ class CCodePrinter(StrPrinter):
         code = "if %s" + last_line
         return code % "else if ".join(ecpairs)
 
-    def _print_Function(self, expr):
-        if expr.func.__name__ == "ceiling":
+    def _print_FuncExpr(self, expr):
+        if expr.func.name == "ceiling":
             return "ceil(%s)" % self.stringify(expr.args, ", ")
-        elif expr.func.__name__ == "abs" and not expr.args[0].is_integer:
+        elif expr.func.name == "abs" and not expr.args[0].is_integer:
             return "fabs(%s)" % self.stringify(expr.args, ", ")
         else:
-            return StrPrinter._print_Function(self, expr)
+            return StrPrinter._print_FuncExpr(self, expr)
 
 
 def ccode(expr):

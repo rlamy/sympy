@@ -38,13 +38,10 @@ class ReprPrinter(Printer):
         args = map(self._print, args)
         return "Add(%s)"%", ".join(args)
 
-    def _print_Function(self, expr):
-        r = '%s(%r)' % (expr.func.__base__.__name__, expr.func.__name__)
+    def _print_FuncExpr(self, expr):
+        r = '%s(%r)' % (expr.func.func.__name__, expr.func.name)
         r+= '(%s)' % ', '.join([self._print(a) for a in expr.args])
         return r
-
-    def _print_FunctionClass(self, expr):
-        return 'Function(%r)'%(expr.__name__)
 
     def _print_GeometryEntity(self, expr):
         # GeometryEntity is special -- it's base is tuple

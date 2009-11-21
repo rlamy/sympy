@@ -2,7 +2,7 @@
 A MathML printer.
 """
 
-from sympy import Basic, sympify, C, S
+from sympy import Basic, sympify, C, S, FuncExpr
 from sympy.simplify import fraction
 from printer import Printer
 from conventions import split_super_sub
@@ -51,6 +51,12 @@ class MathMLPrinter(Printer):
             'atan2': 'arctan',
             'log': 'ln'
         }
+        if isinstance(e, FuncExpr):
+            n = e.func.name
+            if n in translate:
+                return translate[n]
+            else:
+                return n.lower()
 
         for cls in e.__class__.__mro__:
             n = cls.__name__
@@ -299,7 +305,7 @@ class MathMLPrinter(Printer):
         x.appendChild(self._print(e.expr))
         return x
 
-    def _print_Function(self, e):
+    def _print_FuncExpr(self, e):
         x = self.dom.createElement("apply")
         x.appendChild(self.dom.createElement(self.mathml_tag(e)))
         for arg in e.args:

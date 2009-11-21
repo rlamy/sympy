@@ -206,6 +206,15 @@ class Printer(object):
                                     (self.printmethod, expr.__class__.__name__))
                 return res
 
+            if hasattr(expr, 'func') and hasattr(expr.func, 'name') and isinstance(expr.func.name, str):
+                printmethod = '_print_' + expr.func.name
+                if hasattr(self, printmethod):
+                    res = getattr(self, printmethod)(expr, *args)
+                    if res is None:
+                        raise RuntimeError("Printing method '%s' did return None"%\
+                                        printmethod)
+                    return res
+
             # See if the class of expr is known, or if one of its super
             # classes is known, and use that print function
             for cls in type(expr).__mro__:

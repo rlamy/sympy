@@ -2,7 +2,7 @@ from sympy import abs, Catalan, cos, Derivative, E, EulerGamma, exp, factorial,\
                   Function, GoldenRatio, I, Integer, Integral, Interval, Lambda,\
                   Limit, log, Matrix, nan, O, oo, pi, Rational, Real, Rel, S,\
                   sin, SMatrix, sqrt, sum, Sum, Sum2, Symbol, symbols, Wild,\
-                  WildFunction, zeta, zoo
+                  WildFunction, zeta, zoo, builtin
 from sympy.core.basic import Basic
 from sympy.physics.units import second
 from sympy.polys.polynomial import Poly
@@ -21,11 +21,13 @@ x, y, z, w = symbols('xyzw')
 d = Symbol('d', dummy=True)
 
 def test_printmethod():
-    class R(abs):
+    @builtin
+    class R(abs._cls):
         def _sympystr_(self, printer):
             return "foo(%s)" % printer._print(self.args[0])
     assert spr(R(x)) == "foo(x)"
-    class R(abs):
+    @builtin
+    class R(abs._cls):
         def _sympystr_(self, printer):
             return "foo"
     assert spr(R(x)) == "foo"
