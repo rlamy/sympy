@@ -386,7 +386,7 @@ class LatexPrinter(Printer):
         else:
             return r"%s %s" % (tex, self._print(e))
 
-    def _print_FuncExpr(self, expr, exp=None):
+    def _print_Apply(self, expr, exp=None):
         func = expr.func.name
 
         if hasattr(self, '_print_' + func):

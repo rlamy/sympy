@@ -24,11 +24,11 @@ class PythonPrinter(ReprPrinter, StrPrinter):
             f = getattr(StrPrinter, f_name)
             setattr(PythonPrinter, f_name, f)
 
-    def _print_FuncExpr(self, expr):
+    def _print_Apply(self, expr):
         func = expr.func.name
         if not hasattr(sympy, func) and not func in self.functions:
             self.functions.append(func)
-        return StrPrinter._print_FuncExpr(self, expr)
+        return StrPrinter._print_Apply(self, expr)
 
     # procedure (!) for defining symbols which have be defined in print_python()
     def _print_Symbol(self, expr):

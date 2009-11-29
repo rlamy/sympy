@@ -92,43 +92,32 @@ class builtin(FunctionBase):
         return Integer(1)
 
 
-class FuncExpr(Basic):
+class Apply(Basic):
     """
     Expression resulting from the application of a function.
 
     This should never be visible to the end-user from the public interface.
     """
 
-    is_FuncExpr = True
+    is_Apply = True
 
     nargs = None
 
-    @vectorize(1)
-    @cacheit
-    def __new__(cls, *args, **options):
+    def __new__(cls, func, args):
+        if not isinstance(func, FunctionBase):
+            raise TypeError
         args = tuple(map(sympify, args))
-        # these lines should be refactored
-        for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
-            if opt in options:
-                del options[opt]
-        # up to here.
-        if options.get('evaluate', True):
-            evaluated = cls.eval(*args)
-            if evaluated is not None:
-                return evaluated
-        # Just undefined functions have nargs == None
-        obj = Basic.__new__(cls, *args, **options)
-        if not cls.nargs and hasattr(cls, 'undefined_Function'):
-            obj.nargs = len(args)
+        obj = Basic.__new__(cls, func, args)
+        obj.nargs = len(args)
         return obj
 
     @property
     def args(self):
-        return self._args
+        return self._args[1]
 
     @property
     def func(self):
-        return self._func
+        return self._args[0]
 
     @property
     def is_commutative(self):
@@ -807,27 +796,38 @@ class DummyFunction(FunctionSymbol, Dummy):
         obj.nargs = nargs
         return obj
 
-class Apply(FuncExpr):
+class FuncExpr(Apply):
     """
-    This represents the application of a generically defined function.
+    This represents the application of a user-defined function.
 
-    This class should be invisible for the end-user.
+    This class should be invisible for the end user.
     """
-    def __new__(cls, func, args):
-        if not isinstance(func, FunctionBase):
-            raise TypeError
+    @vectorize(1)
+    @cacheit
+    def __new__(cls, *args, **options):
         args = tuple(map(sympify, args))
-        obj = Basic.__new__(cls, func, args)
-        obj.nargs = len(args)
+        # these lines should be refactored
+        for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
+            if opt in options:
+                del options[opt]
+        # up to here.
+        if options.get('evaluate', True):
+            evaluated = cls.eval(*args)
+            if evaluated is not None:
+                return evaluated
+        # Just undefined functions have nargs == None
+        obj = Basic.__new__(cls, *args, **options)
+        if not cls.nargs and hasattr(cls, 'undefined_Function'):
+            obj.nargs = len(args)
         return obj
 
     @property
     def args(self):
-        return self._args[1]
+        return self._args
 
     @property
     def func(self):
-        return self._args[0]
+        return self._func
 
 
 @vectorize(0)

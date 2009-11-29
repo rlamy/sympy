@@ -379,7 +379,7 @@ class PrettyPrinter(Printer):
         base = prettyForm(pretty_atom('Exp1', 'e'))
         return base ** self._print(e.args[0])
 
-    def _print_FuncExpr(self, e):
+    def _print_Apply(self, e):
         # XXX works only for applied functions
         func = e.func
         args = e.args
