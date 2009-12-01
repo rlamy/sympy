@@ -89,6 +89,9 @@ class StrPrinter(Printer):
     def _print_Derivative(self, expr):
         return 'D(%s)'%", ".join(map(self._print, expr.args))
 
+    def _print_FDerivative(self, expr):
+        return 'FDerivative(%s)'%", ".join(map(self._print, expr.args))
+
     def _print_dict(self, expr):
         keys = expr.keys()
         keys.sort( Basic.compare_pretty )

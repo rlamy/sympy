@@ -385,7 +385,10 @@ class PrettyPrinter(Printer):
         args = e.args
         n = len(args)
 
-        func_name = func.name
+        try:
+            func_name = func.name
+        except AttributeError:
+            func_name = str(func)
 
         prettyFunc = self._print(C.Symbol(func_name));
         prettyArgs = prettyForm(*self._print_seq(args).parens())

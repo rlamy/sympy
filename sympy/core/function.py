@@ -404,7 +404,9 @@ class Apply(Basic):
                 nargs = self.nargs
             if not (1<=argindex<=nargs):
                 raise TypeError("argument index %r is out of range [1,%s]" % (argindex,nargs))
-        return Derivative(self,self.args[argindex-1],evaluate=False)
+            orders = [S.Zero] * nargs
+            orders[argindex-1] = S.One
+        return FDerivative(self.func, *orders)(*self.args)
 
     @classmethod
     def _eval_apply_evalf(cls, arg):
@@ -655,6 +657,37 @@ class Derivative(Basic):
             return arg.removeO().diff(dx) + arg.getO()/dx
         else:
             return arg.removeO().diff(dx)
+
+class FDerivative(FunctionBase):
+    """
+    Represents the derivative of a function.
+    """
+    def __new__(cls, func, *orders):
+        nargs = func.nargs
+        if nargs is not None:
+            n_orders = len(orders)
+            if n_orders != nargs:
+                try:
+                    if n_orders not in nargs:
+                        raise TypeError
+                except TypeError:
+                    raise TypeError
+        if func.func == FDerivative:
+            new_orders = [old + new for (old, new) in zip(func.orders, orders)]
+            return FDerivative(func.function, new_orders)
+        else:
+            obj = FunctionBase.__new__(cls, func, *orders)
+            obj.nargs = len(orders)
+            return obj
+
+    @property
+    def function(self):
+        return self.args[0]
+
+    @ property
+    def orders(self):
+        return tuple(self.args[1:])
+
 
 class Lambda(FunctionBase):
     """
