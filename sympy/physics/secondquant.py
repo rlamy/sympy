@@ -6,7 +6,7 @@ of Many-Particle Systems."
 """
 
 from sympy import (
-    Basic, Function, var, Mul, sympify, Integer, Add, sqrt,
+    Basic, FuncExpr, builtin, var, Mul, sympify, Integer, Add, sqrt,
     Number, Matrix, zeros, Pow, I, S,Symbol, latex, cache
 )
 
@@ -141,7 +141,7 @@ class Dagger(Basic):
         return self.args[0]
 
 
-class TensorSymbol(Function):
+class TensorSymbol(FuncExpr):
 
     is_commutative = True
 
@@ -189,7 +189,7 @@ def _tuple_wrapper(method):
     return wrap_tuples
 
 
-class AntiSymmetricTensor(TensorSymbol):
+class _AntiSymmetricTensor(TensorSymbol):
 
     nargs = 3
 
@@ -323,10 +323,10 @@ class AntiSymmetricTensor(TensorSymbol):
             return self.__class__(self.symbol,
                     self.args[1], self.args[2]._eval_subs(old,new))
         return self
+AntiSymmetricTensor = builtin(_AntiSymmetricTensor)
 
 
-
-class KroneckerDelta(Function):
+class _KroneckerDelta(FuncExpr):
     """
     Discrete delta function.
 
@@ -606,7 +606,7 @@ class KroneckerDelta(Function):
             return 'd>(%s,%s)'% (self.args[0],self.args[1])
         else:
             return 'd(%s,%s)'% (self.args[0],self.args[1])
-
+KroneckerDelta = builtin(_KroneckerDelta)
 
 
 class SqOperator(Basic):
@@ -1741,7 +1741,7 @@ class FixedBosonicBasis(BosonicBasis):
 #         return move(a, i, d) + move(b, i, d)
 #     raise NotImplementedError()
 
-class Commutator(Function):
+class _Commutator(FuncExpr):
     """
     The Commutator:  [A, B] = A*B - B*A
 
@@ -1870,10 +1870,10 @@ class Commutator(Function):
     def _latex_(self,printer):
         return "\\left[%s,%s\\right]"%tuple([
             printer._print(arg) for arg in self.args])
+Commutator = builtin(_Commutator)
 
 
-
-class NO(Function):
+class _NO(FuncExpr):
     """
     This function is used to represent normal ordering brackets.
 
@@ -1939,7 +1939,7 @@ class NO(Function):
             newseq = []
             foundit = False
             for fac in seq:
-                if isinstance(fac,NO):
+                if fac.func == NO:
                     newseq.extend(fac.args)
                     foundit = True
                 else:
@@ -1970,7 +1970,7 @@ class NO(Function):
             else:
                 return coeff*cls(Mul(*newseq))
 
-        if isinstance(arg,NO):
+        if arg.func == NO:
             return arg
 
         # if object was not Mul or Add, normal ordering does not apply
@@ -2075,7 +2075,7 @@ class NO(Function):
                     raise SubstitutionOfAmbigousOperatorFailed(self[i])
         if subslist:
             result = NO(self.subs(subslist))
-            if isinstance(result, Add):
+            if result.is_Add:
                 return Add(*[term.doit() for term in result.args])
         else:
             return self.args[0]
@@ -2192,7 +2192,7 @@ class NO(Function):
 
     def __str__(self):
         return ":%s:" % self.args[0]
-
+NO = builtin(_NO)
 
 # @cacheit
 def contraction(a,b):
@@ -2385,7 +2385,7 @@ def evaluate_deltas(e):
     if isinstance(e,accepted_functions):
         return e.new(*[evaluate_deltas(arg) for arg in e.args])
 
-    elif isinstance(e,Mul):
+    elif isinstance(e, Mul):
         # find all occurences of delta function and count each index present in
         # expression.
         deltas = []
@@ -2396,7 +2396,8 @@ def evaluate_deltas(e):
                     indices[s] += 1
                 else:
                     indices[s] = 0  # geek counting simplifies logic below
-            if isinstance(i, KroneckerDelta): deltas.append(i)
+            if i.func == KroneckerDelta:
+                deltas.append(i)
 
         for d in deltas:
             # If we do something, and there are more deltas, we should recurse
@@ -2422,7 +2423,7 @@ def _get_dummies(expr, _reverse, **require):
     Starting at right end to prioritize indices of non-commuting terms.
 
     FIXME: A more sophisticated predictable order would work better.
-    Current implementetation does not always work if factors commute. Since
+    Current implementation does not always work if factors commute. Since
     commuting factors are sorted also by dummy indices, it may happen that
     all terms have exactly the same index order, so that no term will
     obtain a substitution of dummies.
@@ -2772,7 +2773,7 @@ def wicks(e, **kw_args):
 
 
     # check if we are already normally ordered
-    if isinstance(e,NO):
+    if e.func == NO:
         if opts['keep_only_fully_contracted']:
             return S.Zero
         else:
