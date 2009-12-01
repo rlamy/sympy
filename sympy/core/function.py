@@ -120,6 +120,12 @@ class builtin(FunctionBase):
         """
         return (self._cls,)
 
+    def count_ops(self, symbolic=True):
+        """
+        Return the number of operations in expressions.
+        """
+        return Integer(1)
+
 
 class FuncExpr(Basic):
     """
@@ -830,17 +836,11 @@ class Lambda(FunctionBase):
 
         return False
 
-
 class DummyFunction(FunctionSymbol, Dummy):
     def __new__(cls, name, nargs=None, **opts):
         obj = Dummy.__new__(cls, name, **opts)
         obj.nargs = nargs
         return obj
-
-    @vectorize(1)
-    def __call__(self, *args):
-        return FunctionApplication(self, args)
-
 
 class FunctionApplication(FuncExpr):
     """
