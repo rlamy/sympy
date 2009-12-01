@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Lambda, Function
+from sympy.core.function import Lambda, FuncExpr, builtin
 from miscellaneous import sqrt
 from sympy.core.cache import cacheit
 
@@ -10,7 +10,8 @@ from sympy.utilities.decorator import deprecated
 ########################## TRIGONOMETRIC FUNCTIONS ############################
 ###############################################################################
 
-class sin(Function):
+@builtin
+class sin(FuncExpr):
     """
     Usage
     =====
@@ -218,7 +219,8 @@ class sin(Function):
         import sage.all as sage
         return sage.sin(self.args[0]._sage_())
 
-class cos(Function):
+@builtin
+class cos(FuncExpr):
     """
     Usage
     =====
@@ -425,7 +427,8 @@ class cos(Function):
         import sage.all as sage
         return sage.cos(self.args[0]._sage_())
 
-class tan(Function):
+@builtin
+class tan(FuncExpr):
     """
     Usage
     =====
@@ -590,7 +593,8 @@ class tan(Function):
         import sage.all as sage
         return sage.tan(self.args[0]._sage_())
 
-class cot(Function):
+@builtin
+class cot(FuncExpr):
     """
     Usage
     =====
@@ -723,7 +727,8 @@ class cot(Function):
 ########################### TRIGONOMETRIC INVERSES ############################
 ###############################################################################
 
-class asin(Function):
+@builtin
+class asin(FuncExpr):
     """
     Usage
     =====
@@ -811,7 +816,8 @@ class asin(Function):
         import sage.all as sage
         return sage.asin(self.args[0]._sage_())
 
-class acos(Function):
+@builtin
+class acos(FuncExpr):
     """
     Usage
     =====
@@ -894,7 +900,8 @@ class acos(Function):
         import sage.all as sage
         return sage.acos(self.args[0]._sage_())
 
-class atan(Function):
+@builtin
+class atan(FuncExpr):
     """
     Usage
     =====
@@ -970,7 +977,8 @@ class atan(Function):
         import sage.all as sage
         return sage.atan(self.args[0]._sage_())
 
-class acot(Function):
+@builtin
+class acot(FuncExpr):
     """
     Usage
     =====
@@ -1047,7 +1055,8 @@ class acot(Function):
         import sage.all as sage
         return sage.acot(self.args[0]._sage_())
 
-class atan2(Function):
+@builtin
+class atan2(FuncExpr):
     """
     atan2(y,x) -> Returns the atan(y/x) taking two arguments y and x.
     Signs of both y and x are considered to determine the appropriate

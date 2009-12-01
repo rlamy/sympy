@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Function
+from sympy.core.function import FuncExpr, builtin
 from sympy.functions.elementary.miscellaneous import sqrt
 from sympy.core.cache import cacheit
 import sympy.polys
@@ -11,7 +11,8 @@ from sympy.utilities.decorator import deprecated
 ###############################################################################
 ################################ DELTA FUNCTION ###############################
 ###############################################################################
-class DiracDelta(Function):
+@builtin
+class DiracDelta(FuncExpr):
     """DiracDelta function, and the derivatives.
     DiracDelta function has the following properties:
     1) diff(Heaviside(x),x) = DiracDelta(x)
@@ -139,7 +140,8 @@ class DiracDelta(Function):
 ############################## HEAVISIDE FUNCTION #############################
 ###############################################################################
 
-class Heaviside(Function):
+@builtin
+class Heaviside(FuncExpr):
     """Heaviside Piecewise function.
     Heaviside function has the following properties:
     1) diff(Heaviside(x),x) = DiracDelta(x)

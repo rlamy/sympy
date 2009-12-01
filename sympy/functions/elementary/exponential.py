@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify, Wild
-from sympy.core.function import Lambda, Function, Function, expand_log
+from sympy.core.function import Lambda, FunctionSymbol, FuncExpr, expand_log, builtin
 from sympy.core.cache import cacheit
 
 from sympy.utilities.decorator import deprecated
@@ -8,9 +8,13 @@ from sympy.utilities.decorator import deprecated
 from sympy.ntheory import multiplicity
 from sympy.core.basic import Mul
 
-class exp(Function):
+
+@builtin
+class exp(FuncExpr):
 
     nargs = 1
+    def __new__(cls, arg, **opts):
+        return FuncExpr.__new__(cls, arg, **opts)
 
     def fdiff(self, argindex=1):
         if argindex == 1:
@@ -158,7 +162,7 @@ class exp(Function):
                     r = C.Mul(*new_l)
                     return r
         old = o
-        return Function._eval_subs(self, old, new)
+        return FuncExpr._eval_subs(self, old, new)
 
     def _eval_is_real(self):
         return self.args[0].is_real
@@ -252,7 +256,8 @@ class exp(Function):
         import sage.all as sage
         return sage.exp(self.args[0]._sage_())
 
-class log(Function):
+@builtin
+class log(FuncExpr):
 
     nargs = (1,2)
 
@@ -501,7 +506,7 @@ class log(Function):
         return sage.log(self.args[0]._sage_())
 
 # MrvLog is used by limit.py
-class MrvLog(log):
+class MrvLog(log._cls):
 
     def _eval_subs(self, old, new):
         old = sympify(old)
@@ -512,7 +517,8 @@ class MrvLog(log):
         return self
 
 
-class LambertW(Function):
+@builtin
+class LambertW(FuncExpr):
     """Lambert W function, defined as the inverse function of
     x*exp(x). This function represents the principal branch
     of this inverse function, which like the natural logarithm

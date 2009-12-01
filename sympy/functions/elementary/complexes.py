@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Function, Derivative
+from sympy.core.function import FuncExpr, Derivative, builtin
 from sympy.functions.elementary.miscellaneous import sqrt
 
 from sympy.utilities.decorator import deprecated
@@ -10,7 +10,8 @@ from sympy.utilities.iterables import make_list, iff
 ######################### REAL and IMAGINARY PARTS ############################
 ###############################################################################
 
-class re(Function):
+@builtin
+class re(FuncExpr):
     """Returns real part of expression. This function performs only
        elementary analysis and so it will fail to decompose properly
        more complicated expressions. If completely simplified result
@@ -82,7 +83,8 @@ class re(Function):
             return S.Zero
         return re(Derivative(self.args[0], x, **{'evaluate': True}))
 
-class im(Function):
+@builtin
+class im(FuncExpr):
     """Returns imaginary part of expression. This function performs
        only elementary analysis and so it will fail to decompose
        properly more complicated expressions. If completely simplified
@@ -156,7 +158,8 @@ class im(Function):
 ############### SIGN, ABSOLUTE VALUE, ARGUMENT and CONJUGATION ################
 ###############################################################################
 
-class sign(Function):
+@builtin
+class sign(FuncExpr):
     """Return the sign of an expression, that is:
         -1 if expr <  0
          0 if expr == 0
@@ -195,7 +198,8 @@ class sign(Function):
     def _eval_is_zero(self):
         return (self.args[0] is S.Zero)
 
-class abs(Function):
+@builtin
+class abs(FuncExpr):
     """Return the absolute value of the argument. This is an extension of the built-in
     function abs to accept symbolic values
 
@@ -283,7 +287,8 @@ class abs(Function):
             **{'evaluate': True})) + im(self.args[0]) * im(Derivative(self.args[0],
                 x, **{'evaluate': True}))) / abs(self.args[0])
 
-class arg(Function):
+@builtin
+class arg(FuncExpr):
     """Returns the argument (in radians) of a complex number"""
 
     nargs = 1
@@ -308,7 +313,9 @@ class arg(Function):
         return (x * Derivative(y, t, **{'evaluate': True}) - y *
                 Derivative(x, t, **{'evaluate': True})) / (x**2 + y**2)
 
-class conjugate(Function):
+
+@builtin
+class conjugate(FuncExpr):
     """Changes the sign of the imaginary part of a complex number.
 
         >>> from sympy import *

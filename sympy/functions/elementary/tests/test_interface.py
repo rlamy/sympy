@@ -1,14 +1,15 @@
 # This test file tests the SymPy function interface, that people use to create
 # their own new functions. It should be as easy as possible.
 
-from sympy import Function, sympify, sin, cos, limit, tanh
+from sympy import FuncExpr, builtin, sympify, sin, cos, limit, tanh
 from sympy.abc import x
 from sympy.utilities.decorator import deprecated
 
 def test_function_series1():
     """Create our new "sin" function."""
 
-    class my_function(Function):
+    @builtin
+    class my_function(FuncExpr):
         nargs = 1
 
         def fdiff(self, argindex = 1):
@@ -27,7 +28,8 @@ def test_function_series1():
 def test_function_series2():
     """Create our new "cos" function."""
 
-    class my_function2(Function):
+    @builtin
+    class my_function2(FuncExpr):
         nargs = 1
 
         def fdiff(self, argindex = 1):
@@ -52,8 +54,8 @@ def test_function_series3():
         derivative is defined recursively in terms of the original function,
         since tanh(x).diff(x) == 1-tanh(x)**2
     """
-
-    class mytanh(Function):
+    @builtin
+    class mytanh(FuncExpr):
         nargs = 1
 
         def fdiff(self, argindex = 1):

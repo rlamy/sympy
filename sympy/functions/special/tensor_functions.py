@@ -1,5 +1,5 @@
 
-from sympy.core.function import Function
+from sympy.core.function import FuncExpr, builtin
 from sympy.core import sympify, S
 from sympy.utilities.decorator import deprecated
 
@@ -7,7 +7,8 @@ from sympy.utilities.decorator import deprecated
 ###################### Kronecker Delta, Levi-Civita etc. ######################
 ###############################################################################
 
-class Dij(Function):
+@builtin
+class Dij(FuncExpr):
     """
     Represents the Kronecker Delta Function
 
@@ -25,7 +26,8 @@ class Dij(Function):
         elif i.is_number and j.is_number:
             return S.Zero
 
-class Eijk(Function):
+@builtin
+class Eijk(FuncExpr):
     """
     Represents the Levi-Civita symbol (antisymmetric symbol)
     """

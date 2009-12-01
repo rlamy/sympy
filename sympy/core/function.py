@@ -35,7 +35,7 @@ from basic import BasicMeta
 from cache import cacheit
 from itertools import repeat
 from numbers import Rational, Integer
-from symbol import Symbol
+from symbol import Symbol, Dummy
 from multidimensional import vectorize
 from sympy.utilities.decorator import deprecated
 from sympy.utilities import all
@@ -81,14 +81,47 @@ class FunctionClass(BasicMeta):
     def __repr__(cls):
         return cls.__name__
 
-class Function(Basic):
+class FunctionBase(Basic):
     """
-    Base class for applied functions.
-    Constructor of undefined classes.
-
+    Represents a mathematical function.
     """
+    is_Function = True
 
-    __metaclass__ = FunctionClass
+    def __new__(cls, head, expr_cls):
+        head = sympify(head)
+        obj = Basic.__new__(cls, head, expr_cls)
+        obj._cls = expr_cls
+        obj.name = expr_cls.__name__
+        return obj
+
+    def __call__(self, *args, **opts):
+        return self._cls(*args, **opts)
+
+class builtin(FunctionBase):
+    """
+    Class decorator for builtin functions (i.e. those declared as a class)
+    """
+    def __new__(cls, expr_cls):
+        head = Symbol(expr_cls.__name__)
+        obj = FunctionBase.__new__(cls, head, expr_cls)
+        expr_cls._func = obj
+        transferred_attributes = ['nargs', 'taylor_term']
+        for attr in transferred_attributes:
+            setattr(obj, attr, getattr(expr_cls, attr))
+
+        # Replace FuncExpr with function object in the class registry
+        BasicMeta.classnamespace.pop(expr_cls.__name__, None)
+        BasicMeta.classnamespace[obj.name] = obj
+
+        return obj
+
+
+class FuncExpr(Basic):
+    """
+    Expression resulting from the application of a function.
+
+    This should never be visible to the end-user from the public interface.
+    """
 
     is_Function = True
 
@@ -97,55 +130,29 @@ class Function(Basic):
     @vectorize(1)
     @cacheit
     def __new__(cls, *args, **options):
-        # NOTE: this __new__ is twofold:
-        #
-        # 1 -- it can create another *class*, which can then be instantiated by
-        #      itself e.g. Function('f') creates a new class f(Function)
-        #
-        # 2 -- on the other hand, we instantiate -- that is we create an
-        #      *instance* of a class created earlier in 1.
-        #
-        # So please keep, both (1) and (2) in mind.
-
-        # (1) create new function class
-        #     UC: Function('f')
-        if cls is Function:
-            #when user writes Function("f"), do an equivalent of:
-            #taking the whole class Function(...):
-            #and rename the Function to "f" and return f, thus:
-            #In [13]: isinstance(f, Function)
-            #Out[13]: False
-            #In [14]: isinstance(f, FunctionClass)
-            #Out[14]: True
-
-            if len(args) == 1 and isinstance(args[0], str):
-                #always create Function
-                return FunctionClass(Function, *args)
-                return FunctionClass(Function, *args, **options)
-            else:
-                print args
-                print type(args[0])
-                raise TypeError("You need to specify exactly one string")
-
-        # (2) create new instance of a class created in (1)
-        #     UC: Function('f')(x)
-        #     UC: sin(x)
-        args = map(sympify, args)
+        args = tuple(map(sympify, args))
         # these lines should be refactored
         for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
             if opt in options:
                 del options[opt]
         # up to here.
-        if options.get('evaluate') is False:
-            return Basic.__new__(cls, *args, **options)
-        evaluated = cls.eval(*args)
-        if evaluated is not None: return evaluated
+        if options.get('evaluate', True):
+            evaluated = cls.eval(*args)
+            if evaluated is not None:
+                return evaluated
         # Just undefined functions have nargs == None
+        obj = Basic.__new__(cls, *args, **options)
         if not cls.nargs and hasattr(cls, 'undefined_Function'):
-            r = Basic.__new__(cls, *args, **options)
-            r.nargs = len(args)
-            return r
-        return Basic.__new__(cls, *args, **options)
+            obj.nargs = len(args)
+        return obj
+
+    @property
+    def args(self):
+        return self._args
+
+    @property
+    def func(self):
+        return self._func
 
     @property
     def is_commutative(self):
@@ -187,10 +194,6 @@ class Function(Basic):
         """
         return
 
-    @property
-    def func(self):
-        return self.__class__
-
     def _eval_subs(self, old, new):
         if self == old:
             return new
@@ -205,7 +208,7 @@ class Function(Basic):
 
     def _eval_evalf(self, prec):
         # Lookup mpmath function based on name
-        fname = self.func.__name__
+        fname = self.func.name
         try:
             if not hasattr(mpmath, fname):
                 from sympy.utilities.lambdify import MPMATH_TRANSLATIONS
@@ -251,17 +254,18 @@ class Function(Basic):
             da = a.diff(s)
             if da is S.Zero:
                 continue
-            if isinstance(self.func, FunctionClass):
-                df = self.fdiff(i)
-                l.append(df * da)
+            df = self.fdiff(i)
+            l.append(df * da)
         return Add(*l)
 
     def _eval_is_commutative(self):
         r = True
         for a in self._args:
             c = a.is_commutative
-            if c is None: return None
-            if not c: r = False
+            if c is None:
+                return None
+            if not c:
+                r = False
         return r
 
     def _eval_eq_nonzero(self, other):
@@ -276,7 +280,8 @@ class Function(Basic):
 
     def count_ops(self, symbolic=True):
         #      f()             args
-        return 1 + Add(*[ t.count_ops(symbolic) for t in self.args ])
+        return self.func.count_ops(symbolic) + \
+                        Add(*[t.count_ops(symbolic) for t in self.args])
 
     def _eval_nseries(self, x, x0, n):
         assert len(self.args) == 1
@@ -471,7 +476,23 @@ class Function(Basic):
         x = sympify(x)
         return cls(x).diff(x, n).subs(x, 0) * x**n / C.Factorial(n)
 
-class WildFunction(Function, Atom):
+
+class FunctionSymbol(FunctionBase, Symbol):
+    def __new__(cls, name, nargs=None, **opts):
+        if opts.get('dummy', False):
+            return DummyFunction(name, nargs, **opts)
+        obj = Symbol.__new__(cls, name, **opts)
+        obj.nargs = nargs
+        return obj
+
+    @vectorize(1)
+    def __call__(self, *args):
+        return FunctionApplication(self, args)
+
+Function = FunctionSymbol
+
+
+class WildFunction(FunctionSymbol):
     """
     WildFunction() matches any expression but another WildFunction()
     XXX is this as intended, does it work ?
@@ -483,20 +504,22 @@ class WildFunction(Function, Atom):
         if name is None:
             name = 'Wf%s' % (Symbol.dummycount + 1) # XXX refactor dummy counting
             Symbol.dummycount += 1
-        obj = Function.__new__(cls, name, **assumptions)
+        obj = FunctionSymbol.__new__(cls, name, nargs=cls.nargs, **assumptions)
         obj.name = name
         return obj
 
-    def matches(pattern, expr, repl_dict={}, evaluate=False):
-        for p,v in repl_dict.items():
-            if p==pattern:
-                if v==expr: return repl_dict
-                return None
-        if pattern.nargs is not None:
-            if not hasattr(expr,'nargs') or pattern.nargs != expr.nargs:
+    def matches(self, expr, repl_dict={}, evaluate=False):
+        for p, v in repl_dict.items():
+            if p == self:
+                if v == expr:
+                    return repl_dict
+                else:
+                    return None
+        if self.nargs is not None:
+            if not hasattr(expr,'nargs') or self.nargs != expr.nargs:
                 return None
         repl_dict = repl_dict.copy()
-        repl_dict[pattern] = expr
+        repl_dict[self] = expr
         return repl_dict
 
     @classmethod
@@ -506,6 +529,7 @@ class WildFunction(Function, Atom):
     @property
     def is_number(self):
         return False
+
 
 class Derivative(Basic):
     """
@@ -672,7 +696,7 @@ class Derivative(Basic):
         else:
             return arg.removeO().diff(dx)
 
-class Lambda(Function):
+class Lambda(FunctionBase):
     """
     Lambda(x, expr) represents a lambda function similar to Python's
     'lambda x: expr'. A function of several variables is written as
@@ -715,12 +739,21 @@ class Lambda(Function):
 
     # a minimum of 2 arguments (parameter, expression) are needed
     nargs = 2
-    def __new__(cls,*args):
+
+    def __new__(cls, *args):
+        args = tuple(map(sympify, args))
         assert len(args) >= 2,"Must have at least one parameter and an expression"
         if len(args) == 2 and isinstance(args[0], (list, tuple)):
             args = tuple(args[0])+(args[1],)
-        obj = Function.__new__(cls,*args)
-        obj.nargs = len(args)-1
+
+        nargs = len(args) - 1
+        expression = args[nargs]
+        #use dummy variables internally
+        funargs = [Symbol(arg.name, dummy=True) for arg in args[:nargs]]
+        expression = expression.subs(zip(args[:nargs], funargs))
+        funargs.append(expression)
+        obj = Basic.__new__(cls, *funargs)
+        obj.nargs = nargs
         return obj
 
     @classmethod
@@ -760,13 +793,15 @@ class Lambda(Function):
         """
 
         nparams = self.nargs
-        assert nparams >= len(args),"Cannot call function with more parameters than function variables: %s (%d variables) called with %d arguments" % (str(self),nparams,len(args))
+        assert nparams >= len(args), "Cannot call function with more parameters"\
+            " than function variables: %s (%d variables) called with %d "\
+            "arguments" % (str(self),nparams,len(args))
 
 
         #replace arguments
         expression = self.args[self.nargs]
-        for arg,funarg in zip(args,self.args[:nparams]):
-            expression = expression.subs(funarg,arg)
+        for arg, funarg in zip(args, self.args[:nparams]):
+            expression = expression.subs(funarg, arg)
 
         #curry the rest
         if nparams != len(args):
@@ -784,14 +819,49 @@ class Lambda(Function):
                 return False
 
             selfexpr = self.args[self.nargs]
+            selfargs = self.args[:self.nargs]
             otherexpr = other.args[other.nargs]
-            for selfarg,otherarg in zip(self.args[:self.nargs],other.args[:other.nargs]):
-                otherexpr = otherexpr.subs(otherarg,selfarg)
+            otherargs = other.args[:other.nargs]
+            otherexpr = otherexpr.subs(dict(zip(otherargs, selfargs)))
             if selfexpr == otherexpr:
                 return True
-           # if self.args[1] == other.args[1].subs(other.args[0], self.args[0]):
-           #     return True
+
         return False
+
+
+class DummyFunction(FunctionSymbol, Dummy):
+    def __new__(cls, name, nargs=None, **opts):
+        obj = Dummy.__new__(cls, name, **opts)
+        obj.nargs = nargs
+        return obj
+
+    @vectorize(1)
+    def __call__(self, *args):
+        return FunctionApplication(self, args)
+
+
+class FunctionApplication(FuncExpr):
+    """
+    This represents the application of a generically defined function.
+
+    This class should be invisible for the end-user.
+    """
+    def __new__(cls, func, args):
+        if not isinstance(func, FunctionBase):
+            raise TypeError
+        args = tuple(map(sympify, args))
+        obj = Basic.__new__(cls, func, args)
+        obj.nargs = len(args)
+        return obj
+
+    @property
+    def args(self):
+        return self._args[1]
+
+    @property
+    def func(self):
+        return self._args[0]
+
 
 @vectorize(0)
 def diff(f, *symbols, **kwargs):

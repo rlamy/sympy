@@ -12,8 +12,8 @@ from relational import Rel, Eq, Ne, Lt, Le, Gt, Ge, \
     Equality, Inequality, Unequality, StrictInequality
 from multidimensional import vectorize
 from function import Lambda, WildFunction, Derivative, diff, FunctionClass, \
-    Function, expand, PoleError, expand_mul, expand_log, expand_func,\
-    expand_trig, expand_complex
+    Function, FuncExpr, expand, PoleError, expand_mul, expand_log, expand_func,\
+    expand_trig, expand_complex, builtin, FunctionSymbol
 from sets import Set, Interval, Union, EmptySet
 from evalf import PrecisionExhausted, N
 

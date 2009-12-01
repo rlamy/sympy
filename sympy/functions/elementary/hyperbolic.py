@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Function, Lambda
+from sympy.core.function import FuncExpr, Lambda, builtin
 from sympy.core.cache import cacheit
 
 from sympy.functions.elementary.miscellaneous import sqrt
@@ -11,7 +11,8 @@ from sympy.utilities.decorator import deprecated
 ########################### HYPERBOLIC FUNCTIONS ##############################
 ###############################################################################
 
-class sinh(Function):
+@builtin
+class sinh(FuncExpr):
     """
     Usage
     =====
@@ -129,7 +130,8 @@ class sinh(Function):
         import sage.all as sage
         return sage.sinh(self.args[0]._sage_())
 
-class cosh(Function):
+@builtin
+class cosh(FuncExpr):
     """
     Usage
     =====
@@ -245,7 +247,8 @@ class cosh(Function):
         import sage.all as sage
         return sage.cosh(self.args[0]._sage_())
 
-class tanh(Function):
+@builtin
+class tanh(FuncExpr):
     """
     Usage
     =====
@@ -365,7 +368,8 @@ class tanh(Function):
         import sage.all as sage
         return sage.tanh(self.args[0]._sage_())
 
-class coth(Function):
+@builtin
+class coth(FuncExpr):
     """
     Usage
     =====
@@ -470,7 +474,8 @@ class coth(Function):
 ############################# HYPERBOLIC INVERSES #############################
 ###############################################################################
 
-class asinh(Function):
+@builtin
+class asinh(FuncExpr):
     """
     Usage
     =====
@@ -545,7 +550,8 @@ class asinh(Function):
         import sage.all as sage
         return sage.asinh(self.args[0]._sage_())
 
-class acosh(Function):
+@builtin
+class acosh(FuncExpr):
     """
     Usage
     =====
@@ -624,7 +630,8 @@ class acosh(Function):
         import sage.all as sage
         return sage.acosh(self.args[0]._sage_())
 
-class atanh(Function):
+@builtin
+class atanh(FuncExpr):
     """
     Usage
     =====
@@ -685,7 +692,8 @@ class atanh(Function):
         import sage.all as sage
         return sage.atanh(self.args[0]._sage_())
 
-class acoth(Function):
+@builtin
+class acoth(FuncExpr):
     """
     Usage
     =====

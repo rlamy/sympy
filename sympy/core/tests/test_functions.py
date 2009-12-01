@@ -1,6 +1,6 @@
 from sympy import Lambda, Symbol, Function, WildFunction, Derivative, sqrt, \
         log, exp, Rational, Real, sign, Basic, sin, cos, diff, I, re, im, \
-        oo, zoo, nan, E, expand, pi, raises, O, Sum
+        oo, zoo, nan, E, expand, pi, raises, O, FuncExpr, builtin, Sum
 from sympy.utilities.pytest import XFAIL
 from sympy.abc import x, y
 from sympy.core.function import PoleError
@@ -314,7 +314,8 @@ def test_function_evalf():
     assert eq(cos(100).evalf(15), Real("0.86231887228768"), 1e-13)
 
 def test_extensibility_eval():
-    class MyFunc(Function):
+    @builtin
+    class MyFunc(FuncExpr):
         @classmethod
         def eval(cls, *args):
             return (0,0,0)

@@ -1,10 +1,9 @@
 """Boolean algebra module for SymPy"""
-from sympy.core import Basic, Function, sympify, Symbol
+from sympy.core import Basic, FuncExpr, builtin, sympify, Symbol
 from sympy.utilities import flatten, make_list
 from sympy.core.operations import LatticeOp
 
-
-class BooleanFunction(Function):
+class BooleanFunction(FuncExpr):
     """Boolean function is a function that lives in a boolean space
     It is used as base class for And, Or, Not, etc.
     """
@@ -37,6 +36,7 @@ class Or(LatticeOp, BooleanFunction):
     zero = True
     identity = False
 
+@builtin
 class Xor(BooleanFunction):
     """Logical XOR (exclusive OR) function.
     returns True if an odd number of the arguments are True, and the rest are False.
@@ -52,6 +52,7 @@ class Xor(BooleanFunction):
             A = Or(A & Not(B), (Not(A) & B))
         return A
 
+@builtin
 class Not(BooleanFunction):
     """Logical Not function (negation)
 
@@ -71,6 +72,7 @@ class Not(BooleanFunction):
         if arg.func == Not:
             return arg.args[0]
 
+@builtin
 class Nand(BooleanFunction):
     """Logical NAND function.
     It evaluates its arguments in order, giving True immediately if any
@@ -87,6 +89,7 @@ class Nand(BooleanFunction):
             A = Or(A, Not(B))
         return A
 
+@builtin
 class Nor(BooleanFunction):
     """Logical NOR function.
     It evaluates its arguments in order, giving False immediately if any
@@ -102,10 +105,11 @@ class Nor(BooleanFunction):
             B = args.pop()
             A = And(A, Not(B))
         return A
-
+@builtin
 class Implies(BooleanFunction):
     pass
 
+@builtin
 class Equivalent(BooleanFunction):
     """Equivalence relation.
     Equivalent(A, B) is True if and only if A and B are both True or both False

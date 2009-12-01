@@ -1,6 +1,6 @@
 
 from sympy.core.basic import Basic, S, C, sympify
-from sympy.core.function import Function
+from sympy.core.function import FuncExpr, builtin
 from sympy.ntheory import sieve
 from math import sqrt
 
@@ -9,8 +9,8 @@ from sympy.utilities.decorator import deprecated
 ###############################################################################
 ######################## FACTORIAL and MULTI-FACTORIAL ########################
 ###############################################################################
-
-class Factorial(Function):
+@builtin
+class Factorial(FuncExpr):
     """Implementation of factorial function over nonnegative integers.
        For the sake of convenience and simplicity of procedures using
        this function it is defined for negative integers and returns
@@ -144,7 +144,7 @@ class Factorial(Function):
     def _eval_is_integer(self):
         return self.args[0].is_integer
 
-class MultiFactorial(Function):
+class MultiFactorial(FuncExpr):
     pass
 
 
@@ -153,8 +153,8 @@ factorial   = Factorial
 ###############################################################################
 ######################## RISING and FALLING FACTORIALS ########################
 ###############################################################################
-
-class RisingFactorial(Function):
+@builtin
+class RisingFactorial(FuncExpr):
     """Rising factorial (also called Pochhammer symbol) is a double valued
        function arising in concrete mathematics, hypergeometric functions
        and series expanansions. It is defined by
@@ -217,7 +217,8 @@ class RisingFactorial(Function):
     def _eval_rewrite_as_gamma(self, x, k):
         return C.gamma(x + k) / C.gamma(x)
 
-class FallingFactorial(Function):
+@builtin
+class FallingFactorial(FuncExpr):
     """Falling factorial (related to rising factorial) is a double valued
        function arising in concrete mathematics, hypergeometric functions
        and series expanansions. It is defined by
@@ -288,7 +289,8 @@ ff = FallingFactorial
 ########################### BINOMIAL COEFFICIENTS #############################
 ###############################################################################
 
-class Binomial(Function):
+@builtin
+class Binomial(FuncExpr):
     """Implementation of the binomial coefficient. It can be defined
        in two ways depending on its desired interpretation:
 

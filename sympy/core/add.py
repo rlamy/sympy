@@ -295,9 +295,10 @@ class Add(AssocOp):
         return S.One,(self,)
 
     def _eval_subs(self, old, new):
-        if self == old: return new
-        if isinstance(old, FunctionClass):
-            return self.__class__(*[s._eval_subs(old, new) for s in self.args ])
+        if self == old:
+            return new
+        if isinstance(old, FunctionBase):
+            return self.func(*[s._eval_subs(old, new) for s in self.args])
         coeff_self, factors_self = self.as_coeff_factors()
         coeff_old, factors_old = old.as_coeff_factors()
         if factors_self == factors_old: # (2+a).subs(3+a,y) -> 2-3+y
@@ -487,4 +488,4 @@ class Add(AssocOp):
         return s
 
 from mul import Mul
-from function import FunctionClass
+from function import FunctionBase
