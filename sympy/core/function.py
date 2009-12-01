@@ -51,15 +51,8 @@ class FunctionBase(Basic):
     """
     is_Function = True
 
-    def __new__(cls, head, expr_cls):
-        head = sympify(head)
-        obj = Basic.__new__(cls, head, expr_cls)
-        obj._cls = expr_cls
-        obj.name = expr_cls.__name__.lstrip('_')
-        return obj
-
     def __call__(self, *args, **opts):
-        return self._cls(*args, **opts)
+        return Apply(self, args, **opts)
 
 
 class builtin(FunctionBase):
@@ -69,6 +62,8 @@ class builtin(FunctionBase):
     def __new__(cls, expr_cls):
         head = Symbol(expr_cls.__name__.lstrip('_'))
         obj = FunctionBase.__new__(cls, head, expr_cls)
+        obj._cls = expr_cls
+        obj.name = expr_cls.__name__.lstrip('_')
         expr_cls._func = obj
         transferred_attributes = ['nargs', 'taylor_term']
         for attr in transferred_attributes:
@@ -90,6 +85,9 @@ class builtin(FunctionBase):
         Return the number of operations in expressions.
         """
         return Integer(1)
+
+    def __call__(self, *args, **opts):
+        return self._cls(*args, **opts)
 
 
 class Apply(Basic):
