@@ -555,7 +555,7 @@ class Derivative(Basic):
             evaluate = assumptions["evaluate"]
             del assumptions["evaluate"]
         else:
-            evaluate = False
+            evaluate = True
         if not evaluate and not isinstance(expr, Derivative):
             symbols = list(symbols)
             if len(symbols) == 0:
@@ -566,9 +566,6 @@ class Derivative(Basic):
             return obj
         unevaluated_symbols = []
         for s in symbols:
-            s = sympify(s)
-            if not isinstance(s, Symbol):
-                raise ValueError('Invalid literal: %s is not a valid variable' % s)
             if not expr.has(s):
                 return S.Zero
             obj = expr._eval_derivative(s)
@@ -675,7 +672,7 @@ class FDerivative(FunctionBase):
         orders = map(sympify, orders)
         if func.func == FDerivative:
             new_orders = [old + new for (old, new) in zip(func.orders, orders)]
-            return FDerivative(func.function, new_orders)
+            return FDerivative(func.function, *new_orders)
         else:
             obj = FunctionBase.__new__(cls, func, *orders)
             obj.nargs = len(orders)
