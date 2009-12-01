@@ -672,6 +672,7 @@ class FDerivative(FunctionBase):
                         raise TypeError
                 except TypeError:
                     raise TypeError
+        orders = map(sympify, orders)
         if func.func == FDerivative:
             new_orders = [old + new for (old, new) in zip(func.orders, orders)]
             return FDerivative(func.function, new_orders)
@@ -687,6 +688,11 @@ class FDerivative(FunctionBase):
     @ property
     def orders(self):
         return tuple(self.args[1:])
+
+    def _eval_subs(self, old, new):
+        if self == old:
+            return new
+        return self.func(*[arg._eval_subs(old, new) for arg in self.args])
 
 
 class Lambda(FunctionBase):
