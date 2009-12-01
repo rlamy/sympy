@@ -3,13 +3,16 @@ from sympy.core import Basic, FuncExpr, builtin, sympify, Symbol
 from sympy.utilities import flatten, make_list
 from sympy.core.operations import LatticeOp
 
-class BooleanFunction(FuncExpr):
+class Boolean(Basic):
+    pass
+
+class BooleanFunction(FuncExpr, Boolean):
     """Boolean function is a function that lives in a boolean space
     It is used as base class for And, Or, Not, etc.
     """
     pass
 
-class And(LatticeOp, BooleanFunction):
+class And(LatticeOp, Boolean):
     """
     Logical AND function.
 
@@ -26,7 +29,7 @@ class And(LatticeOp, BooleanFunction):
     zero = False
     identity = True
 
-class Or(LatticeOp, BooleanFunction):
+class Or(LatticeOp, Boolean):
     """
     Logical OR function
 
