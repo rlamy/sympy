@@ -97,6 +97,8 @@ class FunctionBase(Basic):
     def __call__(self, *args, **opts):
         return self._cls(*args, **opts)
 
+
+
 class builtin(FunctionBase):
     """
     Class decorator for builtin functions (i.e. those declared as a class)
@@ -495,7 +497,7 @@ class FunctionSymbol(FunctionBase, Symbol):
 
     @vectorize(1)
     def __call__(self, *args):
-        return FunctionApplication(self, args)
+        return Apply(self, args)
 
 Function = FunctionSymbol
 
@@ -842,7 +844,7 @@ class DummyFunction(FunctionSymbol, Dummy):
         obj.nargs = nargs
         return obj
 
-class FunctionApplication(FuncExpr):
+class Apply(FuncExpr):
     """
     This represents the application of a generically defined function.
 
