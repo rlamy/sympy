@@ -67,3 +67,12 @@ def test_doit():
 
 def test_S():
     assert repr(S) == 'S'
+
+def test_atomic_subs():
+    assert b21.atomic_subs(b2, b1) == Basic(b1, b1)
+    assert b21.atomic_subs(b2, b21) == Basic(b21, b1)
+    assert b3.atomic_subs(b2, b1) == b2
+    assert Basic(b1, b2).atomic_subs({b1: b2, b2: b1}) == Basic(b2, b1)
+    assert Atom(b1).atomic_subs(b1, b2) == Atom(b1)
+    raises(TypeError, 'b1.atomic_subs()')
+    raises(TypeError, 'b1.atomic_subs([b1,b2])')
