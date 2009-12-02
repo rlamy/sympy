@@ -1174,6 +1174,51 @@ class Basic(AssumeMeths):
             args = (self.func,)+self
         return self.__class__(*[s.subs(old, new) for s in args])
 
+    def atomic_subs(self, *args):
+        """
+        Replace occurrences of objects within an expression's tree.
+
+        Examples:
+
+        >>> from sympy import *
+        >>> x,y, z = symbols('xyz')
+        >>> (1+x*y).atomic_subs(x, pi)
+        1 + pi*y
+        >>> (1+x*y).atomic_subs({x:pi, y:2})
+        1 + 2*pi
+        >>> (1+x*y).atomic_subs([(x,pi), (y,2)])
+        1 + 2*pi
+
+        This function is primarily meant for substituting atoms. Trying to
+        substitute composite expressions is well-defined but sensitive to
+        implementation details.
+
+        >>> (x*y+z).atomic_subs(x*y, pi)
+        pi + z
+        >>> (x*y*z).atomic_subs(x*y, pi)
+        x*y*z
+        >>> (2*x).atomic_subs({2*x: y, x: z})
+        y
+        """
+        if len(args) == 1:
+            try:
+                repl_dict = dict(args[0])
+            except TypeError:
+                raise TypeError("Not a dict-like container")
+            return self._atomic_subs_dict(repl_dict)
+        elif len(args) == 2:
+            old, new = args
+            return self._atomic_subs_dict({old: new})
+        else:
+            raise TypeError("atomic_subs accepts either 1 or 2 arguments")
+
+    def _atomic_subs_dict(self, repl_dict):
+        if self in repl_dict:
+            return repl_dict[self]
+        else:
+            return self.func(*[arg._atomic_subs_dict(repl_dict) for arg in self.args])
+
+
     def __contains__(self, what):
         if self == what or self.is_Function and self.func == what: return True
         for x in self._args:
@@ -2391,6 +2436,9 @@ class Atom(Basic):
             return new
         else:
             return self
+
+    def _atomic_subs_dict(self, repl_dict):
+        return repl_dict.get(self, self)
 
     def as_numer_denom(self):
         return self, S.One

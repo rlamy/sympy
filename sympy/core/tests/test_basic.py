@@ -701,6 +701,7 @@ def test_contains():
     assert not h in p
 
 ################# Tests involving only Basic instances ########
+from sympy.core.basic import Atom
 b1 = Basic(); b2 = Basic(b1); b3 = Basic(b2)
 b21 = Basic(b2, b1)
 
@@ -724,3 +725,12 @@ def test_subs():
     assert b21.subs(b2, b1) == Basic(b1, b1)
     assert b21.subs(b2, b21) == Basic(b21, b1)
     assert b3.subs(b2, b1) == b2
+
+def test_atomic_subs():
+    assert b21.atomic_subs(b2, b1) == Basic(b1, b1)
+    assert b21.atomic_subs(b2, b21) == Basic(b21, b1)
+    assert b3.atomic_subs(b2, b1) == b2
+    assert Basic(b1, b2).atomic_subs({b1: b2, b2: b1}) == Basic(b2, b1)
+    assert Atom(b1).atomic_subs(b1, b2) == Atom(b1)
+    raises(TypeError, 'b1.atomic_subs()')
+    raises(TypeError, 'b1.atomic_subs([b1,b2])')
