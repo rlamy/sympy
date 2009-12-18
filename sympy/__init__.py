@@ -35,7 +35,7 @@ from utilities import *
 from integrals import *
 # This module is slow to import:
 #from physics import units
-from plotting import Plot, textplot
+from plotting import Plot, textplot, mp_plot, cplot
 from printing import pretty, pretty_print, pprint, pprint_use_unicode, \
     pprint_try_use_unicode, print_gtk, print_tree
 from printing import ccode, latex, preview

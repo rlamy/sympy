@@ -15,3 +15,5 @@ except Exception, e:
         raise e
 
 from textplot import textplot
+from matplot import plot as mp_plot
+from matplot import cplot
