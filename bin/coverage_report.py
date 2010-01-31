@@ -6,18 +6,22 @@ Usage:
 
 $ bin/coverage_report.py
 
-This will create a directory covhtml with the coverage reports.To restrict the analysis
-to a directory, you just need to pass its name as
-argument. For example:
+This will create a directory covhtml with the coverage reports. To restrict the
+analysis to a directory, you just need to pass its name as argument.
+For example:
 
 $ bin/coverage_report.py sympy/logic
 
-runs only the tests in sympy/logic/ and reports only on the modules in
-sympy/logic/.  You can also get a report on the parts of the whole sympy code
+runs only the tests in sympy/logic/ and reports only on the modules in the same
+folder. You can also get a report on the parts of the whole sympy code
 covered by the tests in sympy/logic/ by following up the previous command with
 
 $ bin/coverage_report.py -c
 
+It is also possible to set explicitly the modules reported on with '-s'.
+To know how much of the code in sympy/core/ is covered by a single file, run
+
+$ bin/coverage_report.py -s sympy/core sympy/core/tests/test_basic.py
 """
 import os, sys, re
 from optparse import OptionParser
@@ -46,7 +50,7 @@ def generate_covered_files(top_dir):
                 yield os.path.join(dirpath, filename)
 
 
-def make_report(source_dir, report_dir, use_cache=False):
+def make_report(test_dir, report_dir, use_cache=False, source_dir=None):
     #code adapted from /bin/test
     bin_dir = os.path.abspath(os.path.dirname(__file__))         # bin/
     sympy_top  = os.path.split(bin_dir)[0]      # ../
@@ -64,11 +68,13 @@ def make_report(source_dir, report_dir, use_cache=False):
         cov.erase()
         cov.start()
         import sympy
-        sympy.test(source_dir)
+        sympy.test(test_dir)
         #sympy.doctest()        #coverage doesn't play well with doctests
         cov.stop()
         cov.save()
 
+    if source_dir is None:
+        source_dir = test_dir
     covered_files = list(generate_covered_files(source_dir))
 
     if report_dir in os.listdir(os.curdir):
@@ -84,12 +90,14 @@ if __name__ == '__main__':
                         help='Use cached data.')
     parser.add_option('-d', '--report-dir', default='covhtml',
                         help='Directory to put the generated report in.')
+    parser.add_option('-s', '--source-dir', default=None,
+                        help='Directory of the source files to generate report on')
 
     options, args = parser.parse_args()
 
     if args:
-        source_dir = args[0]
+        test_dir = args[0]
     else:
-        source_dir = 'sympy/'
+        test_dir = 'sympy/'
 
-    make_report(source_dir, **options.__dict__)
+    make_report(test_dir, **options.__dict__)
