@@ -1073,3 +1073,17 @@ def test_Pow_as_coeff_terms_doesnt_expand():
 
 def test_issue974():
     assert -1/(-1-x)    == 1/(1+x)
+
+
+def test_as_args():
+    assert Add.as_args(x) == [x]
+    assert Mul.as_args(x) == [x]
+
+    assert Add.as_args(x*y*z) == [x*y*z]
+    assert sorted(Mul.as_args(x*y*z)) == [x, y, z]
+
+    assert sorted(Add.as_args(x+y+z)) == [x, y, z]
+    assert Mul.as_args(x+y+z) == [x+y+z]
+
+    assert Add.as_args((x+y)**z) == [(x+y)**z]
+    assert Mul.as_args((x+y)**z) == [(x+y)**z]
