@@ -285,6 +285,29 @@ class LatticeOp(AssocOp):
             else:
                 yield arg
 
+    @classmethod
+    def as_args(cls, expr):
+        """
+        Return a sequence of elements `args` such that cls(*args) == expr
+
+        >>> from sympy import Symbol, Mul, Add
+        >>> x, y = map(Symbol, 'xy')
+
+        >>> Mul.as_args(x*y)
+        (x, y)
+        >>> Add.as_args(x*y)
+        (x*y,)
+        >>> set(Add.as_args(x*y + y)) == set([y, x*y])
+        True
+
+        """
+        if isinstance(expr, cls):
+            return expr._argset
+        elif expr == cls.identity:
+            return frozenset()
+        else:
+            return frozenset([expr])
+
     @property
     def args(self):
         return tuple(self._argset)
