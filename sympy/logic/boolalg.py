@@ -173,9 +173,9 @@ def conjuncts(expr):
     >>> from sympy.logic.boolalg import conjuncts
     >>> from sympy.abc import A, B
     >>> conjuncts(A & B)
-    [A, B]
+    (A, B)
     >>> conjuncts(A | B)
-    [Or(A, B)]
+    (Or(A, B),)
 
     """
     return And.as_args(expr)
@@ -185,9 +185,9 @@ def disjuncts(expr):
     >>> from sympy.logic.boolalg import disjuncts
     >>> from sympy.abc import A, B
     >>> disjuncts(A | B)
-    [A, B]
+    (A, B)
     >>> disjuncts(A & B)
-    [And(A, B)]
+    (And(A, B),)
 
     """
     return Or.as_args(expr)

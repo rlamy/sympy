@@ -1076,14 +1076,14 @@ def test_issue974():
 
 
 def test_as_args():
-    assert Add.as_args(x) == [x]
-    assert Mul.as_args(x) == [x]
+    assert Add.as_args(x) == (x,)
+    assert Mul.as_args(x) == (x,)
 
-    assert Add.as_args(x*y*z) == [x*y*z]
-    assert sorted(Mul.as_args(x*y*z)) == [x, y, z]
+    assert Add.as_args(x*y*z) == (x*y*z,)
+    assert Mul.as_args(x*y*z) == (x*y*z).args
 
-    assert sorted(Add.as_args(x+y+z)) == [x, y, z]
-    assert Mul.as_args(x+y+z) == [x+y+z]
+    assert Add.as_args(x+y+z) == (x+y+z).args
+    assert Mul.as_args(x+y+z) == (x+y+z,)
 
-    assert Add.as_args((x+y)**z) == [(x+y)**z]
-    assert Mul.as_args((x+y)**z) == [(x+y)**z]
+    assert Add.as_args((x+y)**z) == ((x+y)**z,)
+    assert Mul.as_args((x+y)**z) == ((x+y)**z,)

@@ -205,19 +205,19 @@ class AssocOp(Expr):
         >>> x, y = map(Symbol, 'xy')
 
         >>> Mul.as_args(x*y)
-        [x, y]
+        (x, y)
         >>> Add.as_args(x*y)
-        [x*y]
+        (x*y,)
         >>> set(Add.as_args(x*y + y)) == set([y, x*y])
         True
 
         """
         if isinstance(expr, cls):
-            return list(expr.args)
+            return expr.args
         elif expr == cls.identity:
-            return []
+            return ()
         else:
-            return [expr]
+            return (expr,)
 
 class ShortCircuit(Exception):
     pass
