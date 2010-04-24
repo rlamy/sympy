@@ -144,6 +144,7 @@ class Predicate(Boolean):
     def __new__(cls, name, handlers=None):
         obj = Boolean.__new__(cls)
         obj.name = name
+        obj.handlers = handlers or []
         return obj
 
     def _hashable_content(self):
@@ -154,3 +155,9 @@ class Predicate(Boolean):
 
     def __call__(self, expr):
         return Assume(expr, self.name)
+
+    def add_handler(self, handler):
+        self.handlers.append(handler)
+
+    def remove_handler(self, handler):
+        self.handlers.remove(handler)
