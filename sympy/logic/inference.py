@@ -54,49 +54,16 @@ def pl_true(expr, model={}):
     True
 
     """
-
-    if isinstance(expr, bool):
+    from sympy import Q, ask, Basic
+    from sympy.logic.boolalg import eliminate_implications
+    if expr in (True, False):
         return expr
-
     expr = sympify(expr)
-    if expr.is_Atom:
-        return model.get(expr)
 
-    args = expr.args
-    if expr.func is Not:
-        p = pl_true(args[0], model)
-        if p is None: return None
-        else: return not p
-    elif expr.func is Or:
-        result = False
-        for arg in args:
-            p = pl_true(arg, model)
-            if p == True: return True
-            if p == None: result = None
-        return result
-    elif expr.func is And:
-        result = True
-        for arg in args:
-            p = pl_true(arg, model)
-            if p == False: return False
-            if p == None: result = None
-        return result
+    model = dict((key, val) for key, val in model.iteritems() if val is not None)
+    prop = eliminate_implications(expr).subs(model)
+    return ask(prop, Q.is_true)
 
-    elif expr.func is Implies:
-        p, q = args
-        return pl_true(Or(Not(p), q), model)
-
-    elif expr.func is Equivalent:
-        p, q = args
-        pt = pl_true(p, model)
-        if pt == None:
-            return None
-        qt = pl_true(q, model)
-        if qt == None:
-            return None
-        return pt == qt
-    else:
-        raise ValueError, "Illegal operator in logic expression" + str(expr)
 
 
 class KB(object):
