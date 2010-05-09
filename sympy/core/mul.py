@@ -315,7 +315,7 @@ class Mul(AssocOp):
                     # (a*b)**2 -> a**2 * b**2
                     return Mul(*[s**e for s in b.args])
 
-                if e.is_rational:
+                if e.is_Rational:
                     coeff, rest = b.as_coeff_terms()
                     unk=[]
                     nonneg=[]
