@@ -9,16 +9,16 @@ from sympy.utilities.pytest import XFAIL
 def test_assume():
     x = symbols('x')
     assump = Assume(x, 'integer')
-    assert assump.expr == x
-    assert assump.key == Q.integer
+    assert assump.arg == x
+    assert assump.func == Q.integer
 
 def test_Predicate_wraps_Assume():
     x = symbols('x')
     integer = Predicate('integer')
     assump = integer(x)
-    assert (assump.expr, assump.key) == (x, integer)
+    assert (assump.arg, assump.func) == (x, integer)
     assump = Assume(x, integer)
-    assert (assump.expr, assump.key) == (x, integer)
+    assert (assump.arg, assump.func) == (x, integer)
 
 def test_False():
     """Test Assume object with False keys"""

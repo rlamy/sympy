@@ -57,8 +57,8 @@ class StrPrinter(Printer):
             sign = ""
         return sign + ' '.join(l)
 
-    def _print_Assume(self, expr):
-        return 'Assume(%s, %r)' % (expr.expr, expr.key)
+    def _print_ApplyPredicate(self, expr):
+        return '%s(%s)' % (expr.func, expr.arg)
 
     def _print_Basic(self, expr):
         l = [self._print(o) for o in expr.args]

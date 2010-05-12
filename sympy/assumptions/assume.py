@@ -17,7 +17,7 @@ class AssumptionsContext(set):
         >>> from sympy.abc import x
         >>> global_assumptions.add(Assume(x, Q.real))
         >>> global_assumptions
-        AssumptionsContext([Assume(x, Q.real)])
+        AssumptionsContext([Q.real(x)])
         >>> global_assumptions.remove(Assume(x, Q.real))
         >>> global_assumptions
         AssumptionsContext()
@@ -28,43 +28,56 @@ class AssumptionsContext(set):
     def add(self, *assumptions):
         """Add an assumption."""
         for a in assumptions:
-            assert isinstance(a, Assume), 'can only store instances of Assume'
+            assert isinstance(a, ApplyPredicate), 'can only store instances of Assume'
             super(AssumptionsContext, self).add(a)
 
 global_assumptions = AssumptionsContext()
 
-class Assume(Boolean):
+def Assume(expr, predicate=None, value=True):
     """New-style assumptions.
 
     >>> from sympy import Assume, Q
     >>> from sympy.abc import x
     >>> Assume(x, Q.integer)
-    Assume(x, Q.integer)
+    Q.integer(x)
     >>> Assume(x, Q.integer, False)
-    Not(Assume(x, Q.integer))
+    Not(Q.integer(x))
     >>> Assume( x > 1 )
-    Assume(1 < x, Q.is_true)
+    Q.is_true(1 < x)
 
     """
-    def __new__(cls, expr, predicate=None, value=True):
-        from sympy import Q
-        if predicate is None:
-            predicate = Q.is_true
-        elif not isinstance(predicate, Predicate):
-            key = str(predicate)
-            try:
-                predicate = getattr(Q, key)
-            except AttributeError:
-                predicate = Predicate(key)
-        if value:
-            return Boolean.__new__(cls, expr, predicate)
-        else:
-            return Not(Boolean.__new__(cls, expr, predicate))
+    from sympy import Q
+    if predicate is None:
+        predicate = Q.is_true
+    elif not isinstance(predicate, Predicate):
+        key = str(predicate)
+        try:
+            predicate = getattr(Q, key)
+        except AttributeError:
+            predicate = Predicate(key)
+    if value:
+        return ApplyPredicate(predicate, expr)
+    else:
+        return Not(ApplyPredicate(predicate, expr))
+
+class ApplyPredicate(Boolean):
+    """New-style assumptions.
+
+    >>> from sympy import Assume, Q
+    >>> from sympy.abc import x
+    >>> Q.integer(x)
+    Q.integer(x)
+
+    """
+    __slots__ = []
+
+    def __new__(cls, predicate, arg):
+        return Boolean.__new__(cls, predicate, arg)
 
     is_Atom = True # do not attempt to decompose this
 
     @property
-    def expr(self):
+    def arg(self):
         """
         Return the expression used by this assumption.
 
@@ -72,14 +85,18 @@ class Assume(Boolean):
             >>> from sympy import Assume, Q
             >>> from sympy.abc import x
             >>> a = Assume(x+1, Q.integer)
-            >>> a.expr
+            >>> a.arg
             1 + x
 
         """
-        return self._args[0]
+        return self._args[1]
 
     @property
-    def key(self):
+    def args(self):
+        return self._args[1:]
+
+    @property
+    def func(self):
         """
         Return the key used by this assumption.
         It is a string, e.g. 'integer', 'rational', etc.
@@ -88,14 +105,14 @@ class Assume(Boolean):
             >>> from sympy import Assume, Q
             >>> from sympy.abc import x
             >>> a = Assume(x, Q.integer)
-            >>> a.key
+            >>> a.func
             'integer'
 
         """
-        return self._args[1]
+        return self._args[0]
 
     def __eq__(self, other):
-        if type(other) == Assume:
+        if type(other) == ApplyPredicate:
             return self._args == other._args
         return False
 
@@ -117,11 +134,11 @@ def eliminate_assume(expr, symbol=None):
         Not(Q.positive)
 
     """
-    if expr.func is Assume:
+    if expr.__class__ is ApplyPredicate:
         if symbol is not None:
-            if not expr.expr.has(symbol):
+            if not expr.arg.has(symbol):
                 return
-        return expr.key
+        return expr.func
     return expr.func(*[eliminate_assume(arg, symbol) for arg in expr.args])
 
 class Predicate(Boolean):
@@ -141,7 +158,7 @@ class Predicate(Boolean):
         return (self.name,)
 
     def __call__(self, expr):
-        return Assume(expr, self.name)
+        return ApplyPredicate(self, expr)
 
     def add_handler(self, handler):
         self.handlers.append(handler)
