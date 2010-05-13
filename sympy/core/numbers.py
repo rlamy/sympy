@@ -541,8 +541,10 @@ class Rational(Number):
         if n>1:
             p //= n
             q //= n
-        if q==1: return Integer(p)
-        if p==1 and q==2: return S.Half
+        if q==1:
+            return Integer(p)
+        if p==1 and q==2:
+            return S.Half
         obj = Expr.__new__(cls)
         obj.p = p
         obj.q = q
@@ -561,7 +563,8 @@ class Rational(Number):
     def _eval_is_zero(self):
         return self.p == 0
 
-    def __neg__(self): return Rational(-self.p, self.q)
+    def __neg__(self):
+        return Rational(-self.p, self.q)
 
     @_sympifyit('other', NotImplemented)
     def __mul__(self, other):
@@ -666,7 +669,8 @@ class Rational(Number):
             return other.__eq__(self)
         if isinstance(other, FunctionClass): #cos as opposed to cos(x)
             return False
-        if other.is_comparable and not isinstance(other, Rational): other = other.evalf()
+        if other.is_comparable and not isinstance(other, Rational):
+            other = other.evalf()
         if isinstance(other, Number):
             if isinstance(other, Real):
                 return bool(mlib.mpf_eq(self._as_mpf_val(other._prec), other._mpf_))
@@ -684,7 +688,8 @@ class Rational(Number):
             return other.__ne__(self)
         if isinstance(other, FunctionClass): #cos as opposed to cos(x)
             return True
-        if other.is_comparable and not isinstance(other, Rational): other = other.evalf()
+        if other.is_comparable and not isinstance(other, Rational):
+            other = other.evalf()
         if isinstance(other, Number):
             if isinstance(other, Real):
                 return bool(not mlib.mpf_eq(self._as_mpf_val(other._prec), other._mpf_))
@@ -699,7 +704,8 @@ class Rational(Number):
             return False    # sympy > other  --> not <
         if isinstance(other, NumberSymbol):
             return other.__ge__(self)
-        if other.is_comparable and not isinstance(other, Rational): other = other.evalf()
+        if other.is_comparable and not isinstance(other, Rational):
+            other = other.evalf()
         if isinstance(other, Number):
             if isinstance(other, Real):
                 return bool(mlib.mpf_lt(self._as_mpf_val(other._prec), other._mpf_))
@@ -713,7 +719,8 @@ class Rational(Number):
             return False    # sympy > other  -->  not <=
         if isinstance(other, NumberSymbol):
             return other.__gt__(self)
-        if other.is_comparable and not isinstance(other, Rational): other = other.evalf()
+        if other.is_comparable and not isinstance(other, Rational):
+            other = other.evalf()
         if isinstance(other, Number):
             if isinstance(other, Real):
                 return bool(mlib.mpf_le(self._as_mpf_val(other._prec), other._mpf_))
@@ -723,10 +730,13 @@ class Rational(Number):
     def factors(self):
         f = factor_trial_division(self.p).copy()
         for p,e in factor_trial_division(self.q).items():
-            try: f[p] += -e
-            except KeyError: f[p] = -e
+            try:
+                f[p] += -e
+            except KeyError:
+                f[p] = -e
 
-        if len(f)>1 and 1 in f: del f[1]
+        if len(f)>1 and 1 in f:
+            del f[1]
         return f
 
     def as_numer_denom(self):
@@ -821,10 +831,9 @@ class Integer(Rational):
             # We only work with well-behaved integer types. This converts, for
             # example, numpy.int32 instances.
             ival = int(i)
-            if ival == 0: obj = S.Zero
-            elif ival == 1: obj = S.One
-            elif ival == -1: obj = S.NegativeOne
-            else:
+            try:
+                obj = _intcache[ival]
+            except KeyError:
                 obj = Expr.__new__(cls)
                 obj.p = ival
 
@@ -896,11 +905,6 @@ class Integer(Rational):
             return Integer(b.p * a.p)
         return Rational.__mul__(a, b)
 
-    # XXX __pow__ ?
-
-    # XXX do we need to define __cmp__ ?
-#   def __cmp__(a, b):
-
     def __eq__(a, b):
         if type(b) is int:
             return (a.p == b)
@@ -961,12 +965,17 @@ class Integer(Rational):
           - (-4)**Rational(1,2) becomes 2*I
         We will
         """
-        if e is S.NaN: return S.NaN
-        if b is S.One: return S.One
-        if b is S.NegativeOne: return
+        if e is S.NaN:
+            return S.NaN
+        if b is S.One:
+            return S.One
+        if b is S.NegativeOne:
+            return
         if e is S.Infinity:
-            if b.p > S.One: return S.Infinity
-            if b.p == -1: return S.NaN
+            if b.p > S.One:
+                return S.Infinity
+            if b.p == -1:
+                return S.NaN
             # cases 0, 1 are done in their respective classes
             return S.Infinity + S.ImaginaryUnit * S.Infinity
         if not isinstance(e, Number):
@@ -975,7 +984,8 @@ class Integer(Rational):
             c,t = b.as_coeff_terms()
             if e.is_even and isinstance(c, Number) and c < 0:
                 return (-c * Mul(*t)) ** e
-        if not isinstance(e, Rational): return
+        if not isinstance(e, Rational):
+            return
         if e is S.Half and b < 0:
             # we extract I for this special case since everyone is doing so
             return S.ImaginaryUnit * Pow(-b, e)
@@ -994,7 +1004,8 @@ class Integer(Rational):
         if xexact:
             # if it's a perfect root we've finished
             result = Integer(x ** abs(e.p))
-            if b < 0: result *= (-1)**e
+            if b < 0:
+                result *= (-1)**e
             return result
         # The following is an algorithm where we collect perfect roots
         # from the factors of base
