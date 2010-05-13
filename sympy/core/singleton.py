@@ -22,39 +22,26 @@ class SingletonMeta(BasicMeta):
     def __init__(cls, *args, **kw):
         BasicMeta.__init__(cls, *args, **kw)
 
-        # we are going to inject singletonic __new__, here it is:
-        def cls_new(cls):
-            try:
-                obj = getattr(SingletonFactory, cls.__name__)
 
-            except AttributeError:
-                obj = Basic.__new__(cls, *(), **{})
-                setattr(SingletonFactory, cls.__name__, obj)
+class Singleton(Basic):
+    __metaclass__ = SingletonMeta
+    __slots__ = []
 
-            return obj
+    is_Singleton = True
 
-        cls_new.__name__ = '%s.__new__' % (cls.__name__)
+    def __new__(cls):
+        try:
+            obj = getattr(SingletonFactory, cls.__name__)
 
-        assert not cls.__dict__.has_key('__new__'), \
-                'Singleton classes are not allowed to redefine __new__'
+        except AttributeError:
+            obj = Basic.__new__(cls, *(), **{})
+            setattr(SingletonFactory, cls.__name__, obj)
 
-        # inject singletonic __new__
-        cls.__new__      = staticmethod(cls_new)
+        return obj
 
-        # Inject pickling support.
-        def cls_getnewargs(self):
-            return ()
-        cls_getnewargs.__name__ = '%s.__getnewargs__' % cls.__name__
-
-        assert not cls.__dict__.has_key('__getnewargs__'), \
-                'Singleton classes are not allowed to redefine __getnewargs__'
-        cls.__getnewargs__ = cls_getnewargs
-
-
-        # tag the class appropriately (so we could verify it later when doing
-        # S.<something>
-        cls.is_Singleton = True
-
+    def __getnewargs__(self):
+        """Pickling support."""
+        return ()
 
 class SingletonFactory:
     """

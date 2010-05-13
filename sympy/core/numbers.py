@@ -1,7 +1,7 @@
 from core import C
 from sympify import converter, sympify, _sympify, SympifyError
 from basic import Atom, Basic
-from singleton import S, SingletonMeta
+from singleton import S, Singleton
 from expr import Expr
 from decorators import _sympifyit
 from cache import Memoizer, cacheit, clear_cache
@@ -1118,8 +1118,7 @@ class Integer(Rational):
 converter[int] = converter[long] = Integer
 
 
-class Zero(Integer):
-    __metaclass__ = SingletonMeta
+class Zero(Singleton, Integer):
 
     p = 0
     q = 1
@@ -1163,9 +1162,7 @@ class Zero(Integer):
     def __nonzero__(self):
         return False
 
-class One(Integer):
-    __metaclass__ = SingletonMeta
-
+class One(Singleton, Integer):
     p = 1
     q = 1
 
@@ -1191,9 +1188,7 @@ class One(Integer):
     def factors():
         return {1: 1}
 
-class NegativeOne(Integer):
-    __metaclass__ = SingletonMeta
-
+class NegativeOne(Singleton, Integer):
     p = -1
     q = 1
 
@@ -1231,9 +1226,7 @@ class NegativeOne(Integer):
                     return b ** q * b ** (e - q)
         return
 
-class Half(Rational):
-    __metaclass__ = SingletonMeta
-
+class Half(Singleton, Rational):
     p = 1
     q = 2
 
@@ -1244,9 +1237,7 @@ class Half(Rational):
         return S.Half
 
 
-class Infinity(Rational):
-    __metaclass__ = SingletonMeta
-
+class Infinity(Singleton, Rational):
     p = 1
     q = 0
 
@@ -1317,9 +1308,7 @@ class Infinity(Rational):
     __rmod__ = __mod__
 
 
-class NegativeInfinity(Rational):
-    __metaclass__ = SingletonMeta
-
+class NegativeInfinity(Singleton, Rational):
     p = -1
     q = 0
 
@@ -1384,9 +1373,7 @@ class NegativeInfinity(Rational):
         return True
 
 
-class NaN(Rational):
-    __metaclass__ = SingletonMeta
-
+class NaN(Singleton, Rational):
     p = 0
     q = 0
 
@@ -1416,9 +1403,7 @@ class NaN(Rational):
         import sage.all as sage
         return sage.NaN
 
-class ComplexInfinity(Atom, Expr):
-    __metaclass__ = SingletonMeta
-
+class ComplexInfinity(Singleton, Atom, Expr):
     is_commutative = True
     is_comparable = None
     is_bounded = False
@@ -1447,9 +1432,7 @@ class ComplexInfinity(Atom, Expr):
                 else:
                     return S.Zero
 
-class NumberSymbol(Atom, Expr):
-    __metaclass__ = SingletonMeta
-
+class NumberSymbol(Singleton, Atom, Expr):
     is_commutative = True
     is_comparable = True
     is_bounded = True
@@ -1649,9 +1632,7 @@ class Catalan(NumberSymbol):
         import sage.all as sage
         return sage.catalan
 
-class ImaginaryUnit(Atom, Expr):
-    __metaclass__ = SingletonMeta
-
+class ImaginaryUnit(Singleton, Atom, Expr):
     is_commutative = True
     is_imaginary = True
     is_bounded = True

@@ -1,5 +1,5 @@
 from basic import Basic
-from singleton import SingletonMeta, S
+from singleton import Singleton, S
 from evalf import EvalfMixin
 from sympify import _sympify
 from sympy.mpmath import mpi
@@ -547,7 +547,7 @@ class Union(Set):
             measure += set.measure
         return measure
 
-class EmptySet(Set):
+class EmptySet(Singleton, Set):
     """
     Represents the empty set. The empty set is available as a singleton
     as S.EmptySet.
@@ -562,8 +562,6 @@ class EmptySet(Set):
         EmptySet()
 
     """
-
-    __metaclass__ = SingletonMeta
 
     def _intersect(self, other):
         return S.EmptySet
