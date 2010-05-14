@@ -1,8 +1,8 @@
 from core import C
 from sympify import converter, sympify, _sympify, SympifyError
-from basic import Atom, Basic
+from basic import Basic
 from singleton import S, Singleton
-from expr import Expr
+from expr import Expr, AtomicExpr
 from decorators import _sympifyit
 from cache import Memoizer, cacheit, clear_cache
 import sympy.mpmath as mpmath
@@ -140,7 +140,7 @@ def factor_trial_division(n):
     return factors
 
 
-class Number(Atom, Expr):
+class Number(AtomicExpr):
     """
     Represents any kind of number in sympy.
 
@@ -1414,7 +1414,7 @@ class NaN(Singleton, Rational):
         import sage.all as sage
         return sage.NaN
 
-class ComplexInfinity(Singleton, Atom, Expr):
+class ComplexInfinity(Singleton, AtomicExpr):
     is_commutative = True
     is_comparable = None
     is_bounded = False
@@ -1443,7 +1443,7 @@ class ComplexInfinity(Singleton, Atom, Expr):
                 else:
                     return S.Zero
 
-class NumberSymbol(Singleton, Atom, Expr):
+class NumberSymbol(Singleton, AtomicExpr):
     is_commutative = True
     is_comparable = True
     is_bounded = True
@@ -1643,7 +1643,7 @@ class Catalan(NumberSymbol):
         import sage.all as sage
         return sage.catalan
 
-class ImaginaryUnit(Singleton, Atom, Expr):
+class ImaginaryUnit(Singleton, AtomicExpr):
     is_commutative = True
     is_imaginary = True
     is_bounded = True
