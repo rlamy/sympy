@@ -27,8 +27,6 @@ class Singleton(Basic):
     __metaclass__ = SingletonMeta
     __slots__ = []
 
-    is_Singleton = True
-
     def __new__(cls):
         try:
             obj = getattr(SingletonFactory, cls.__name__)
@@ -54,7 +52,7 @@ class SingletonFactory:
             return lambda: "S"
 
         cls = getattr(C, clsname)
-        assert cls.is_Singleton
+        assert issubclass(cls, Singleton)
         obj = cls()
 
         # store found object in own __dict__, so the next lookups will be
