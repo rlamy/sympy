@@ -1,5 +1,4 @@
-from sympy.core.basic import S, sympify
-from sympy.core.function import Function
+from sympy.core import S, sympify, Function
 
 ###############################################################################
 ############################# SQUARE ROOT FUNCTION ############################

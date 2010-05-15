@@ -1118,4 +1118,3 @@ class Atom(Basic):
 
 
 
-from singleton import S
