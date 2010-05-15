@@ -35,6 +35,3 @@ from special.delta_functions import DiracDelta, Heaviside
 from special.bsplines import bspline_basis, bspline_basis_set
 
 ln = log
-
-for _n, _cls in Basic.singleton.items():
-    exec '%s = _cls()' % (_n)
