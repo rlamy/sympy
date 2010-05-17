@@ -51,7 +51,7 @@ class TautologicalHandler(AskHandler):
 
     @staticmethod
     def ApplyPredicate(expr, assumptions):
-        return (expr, assumptions)
+        return refine_logic(expr, assumptions)
 
     @staticmethod
     def BooleanFunction(expr, assumptions):

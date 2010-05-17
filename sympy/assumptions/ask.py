@@ -121,7 +121,7 @@ def refine_logic(prop, assumptions=True):
     """
     # direct resolution method, no logic
     if isinstance(prop, ApplyPredicate):
-        res = eval_predicate(prop.func, prop.arg, assumptions)
+        res = eval_predicate(prop.func, sympify(prop.arg), assumptions)
     else:
         res = eval_predicate(Q.is_true, prop, assumptions)
     if res in (True, False):
