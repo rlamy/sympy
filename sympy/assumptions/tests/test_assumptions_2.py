@@ -36,7 +36,7 @@ def test_equal():
 
 def test_pretty():
     x = symbols('x')
-    assert pretty(Assume(x, 'positive')) == "Q.positive(x)"
+    assert pretty(Assume(x, 'integer')) == "Q.integer(x)"
 
 def test_eliminate_assumptions():
     a, b = map(Predicate, symbols('ab'))

@@ -28,7 +28,6 @@ class AssumptionsContext(set):
     def add(self, *assumptions):
         """Add an assumption."""
         for a in assumptions:
-            assert isinstance(a, ApplyPredicate), 'can only store instances of Assume'
             super(AssumptionsContext, self).add(a)
 
 global_assumptions = AssumptionsContext()
@@ -49,16 +48,16 @@ def Assume(expr, predicate=None, value=True):
     from sympy import Q
     if predicate is None:
         predicate = Q.is_true
-    elif not isinstance(predicate, Predicate):
+    elif isinstance(predicate, basestring):
         key = str(predicate)
         try:
             predicate = getattr(Q, key)
         except AttributeError:
             predicate = Predicate(key)
     if value:
-        return ApplyPredicate(predicate, expr)
+        return predicate(expr)
     else:
-        return Not(ApplyPredicate(predicate, expr))
+        return Not(predicate(expr))
 
 class ApplyPredicate(Boolean):
     """New-style assumptions.
@@ -128,10 +127,10 @@ def eliminate_assume(expr, symbol=None):
         >>> from sympy.assumptions.assume import eliminate_assume
         >>> from sympy import Assume, Q
         >>> from sympy.abc import x
-        >>> eliminate_assume(Assume(x, Q.positive))
-        Q.positive
-        >>> eliminate_assume(Assume(x, Q.positive, False))
-        Not(Q.positive)
+        >>> eliminate_assume(Assume(x, Q.integer))
+        Q.integer
+        >>> eliminate_assume(Assume(x, Q.integer, False))
+        Not(Q.integer)
 
     """
     if symbol is not None:

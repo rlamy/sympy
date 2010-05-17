@@ -954,6 +954,10 @@ def test_functions_in_assumptions():
     x = symbols('x')
     assert ask(x, Q.negative, Q.real(x) >> Q.positive(x)) is False
     assert ask(x, Q.negative, Equivalent(Q.real(x), Q.positive(x))) is False
+    assert ask(x, Q.integer, Xor(Q.real(x), Q.integer(x))) is False
+
+@XFAIL
+def test_composite_predicate_and_assumption():
     assert ask(x, Q.negative, Xor(Q.real(x), Q.negative(x))) is False
 
 def test_is_true():
