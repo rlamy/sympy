@@ -28,8 +28,14 @@ class AssumptionsContext(set):
     def add(self, *assumptions):
         """Add an assumption."""
         for a in assumptions:
-            assert isinstance(a, ApplyPredicate), 'can only store instances of Assume'
             super(AssumptionsContext, self).add(a)
+
+    def clear_symbol(self, symbol):
+        """
+        Clear all informations associated with a symbol.
+        """
+        self.difference_update(set([x for x in self if symbol in
+                                            [prop.arg for prop in x.atoms()]]))
 
 global_assumptions = AssumptionsContext()
 

@@ -57,7 +57,23 @@ class Symbol(AtomicExpr, Boolean):
         return obj
 
     __xnew__       = staticmethod(__new_stage2__)            # never cached (e.g. dummy)
-    __xnew_cached_ = staticmethod(cacheit(__new_stage2__))   # symbols are always cached
+    __xnew_cached_ = staticmethod(__new_stage2__)   # symbols are always cached
+
+    def __init__(self, name, commutative=True, **assumptions):
+        from sympy.assumptions import Q, global_assumptions
+
+        for keyword in ['exclude', 'dummy']:
+            try:
+                del assumptions[keyword]
+            except KeyError:
+                pass
+
+        global_assumptions.clear_symbol(self)
+        for key, value in assumptions.iteritems():
+            assumption = getattr(Q, key)(self)
+            if not value:
+                assumption = ~assumption
+            global_assumptions.add(assumption)
 
     def __getnewargs__(self):
         return (self.name, self.is_commutative)
