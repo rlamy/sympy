@@ -55,16 +55,16 @@ def Assume(expr, predicate=None, value=True):
     from sympy import Q
     if predicate is None:
         predicate = Q.is_true
-    elif not isinstance(predicate, Predicate):
+    elif isinstance(predicate, basestring):
         key = str(predicate)
         try:
             predicate = getattr(Q, key)
         except AttributeError:
             predicate = Predicate(key)
     if value:
-        return ApplyPredicate(predicate, expr)
+        return predicate(expr)
     else:
-        return Not(ApplyPredicate(predicate, expr))
+        return Not(predicate(expr))
 
 class ApplyPredicate(Boolean):
     """New-style assumptions.

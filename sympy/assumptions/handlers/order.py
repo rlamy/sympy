@@ -26,7 +26,8 @@ class AskNegativeHandler(CommonHandler):
     def _number(expr, assumptions):
         if not expr.as_real_imag()[1]:
             return expr.evalf() < 0
-        else: return False
+        else:
+            return False
 
     @staticmethod
     def Basic(expr, assumptions):
@@ -65,7 +66,8 @@ class AskNegativeHandler(CommonHandler):
                 result = not result
             elif ask(arg, Q.positive, assumptions):
                 pass
-            else: return
+            else:
+                return
         return result
 
     @staticmethod

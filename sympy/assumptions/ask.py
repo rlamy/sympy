@@ -24,9 +24,7 @@ class Q:
     integer = Predicate('integer')
     irrational = Predicate('irrational')
     rational = Predicate('rational')
-    negative = Predicate('negative')
     nonzero = Predicate('nonzero')
-    positive = Predicate('positive')
     prime = Predicate('prime')
     real = Predicate('real')
     odd = Predicate('odd')
@@ -35,6 +33,8 @@ class Q:
     nonpositive = Predicate('nonpositive')
     is_true = Predicate('is_true')
 
+Q.negative = Q.nonpositive & Q.nonzero
+Q.positive = Q.nonnegative & Q.nonzero
 Q.zero = ~Q.nonzero
 Q.noninteger = Q.real & ~Q.integer
 Q.unbounded = ~Q.bounded
@@ -46,6 +46,8 @@ def eval_predicate(predicate, expr, assumptions=True):
 
     This uses only direct resolution methods, not logical inference.
     """
+    if not isinstance(predicate, Predicate):
+        return eval_predicate(Q.is_true, predicate(expr), assumptions)
     res, _res = None, None
     mro = inspect.getmro(type(expr))
     for handler in predicate.handlers:
@@ -100,7 +102,7 @@ def ask(expr, key=Q.is_true, assumptions=True):
 
     """
     expr = sympify(expr)
-    if type(key) is not Predicate:
+    if isinstance(key, basestring):
         key = getattr(Q, str(key))
     assumptions = And(assumptions, And(*global_assumptions))
 
@@ -187,9 +189,9 @@ _handlers_dict = {
     'integer'        : ['sympy.assumptions.handlers.sets.AskIntegerHandler'],
     'irrational'     : ['sympy.assumptions.handlers.sets.AskIrrationalHandler'],
     'rational'       : ['sympy.assumptions.handlers.sets.AskRationalHandler'],
-    'negative'       : ['sympy.assumptions.handlers.order.AskNegativeHandler'],
+    'nonpositive'       : ['sympy.assumptions.handlers.order.AskNegativeHandler'],
     'nonzero'        : ['sympy.assumptions.handlers.order.AskNonZeroHandler'],
-    'positive'       : ['sympy.assumptions.handlers.order.AskPositiveHandler'],
+    'nonnegative'       : ['sympy.assumptions.handlers.order.AskPositiveHandler'],
     'prime'          : ['sympy.assumptions.handlers.ntheory.AskPrimeHandler'],
     'real'           : ['sympy.assumptions.handlers.sets.AskRealHandler'],
     'odd'            : ['sympy.assumptions.handlers.ntheory.AskOddHandler'],
@@ -218,6 +220,8 @@ known_facts = And(
     Equivalent(Q.nonzero, Q.positive | Q.negative),
     Equivalent(Q.nonpositive, Q.real & ~Q.positive),
     Equivalent(Q.nonnegative, Q.real & ~Q.negative),
+    Implies(Q.zero, ~Q.positive),
+    Implies(Q.zero, ~Q.negative)
 )
 
 known_facts_compiled = to_int_repr(conjuncts(to_cnf(known_facts)), known_facts_keys)
