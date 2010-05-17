@@ -137,31 +137,19 @@ def refine_logic(prop, assumptions=True):
     expr = res.arg
 
     clauses = copy.deepcopy(known_facts_compiled)
-
-    assumptions = conjuncts(to_cnf(assumptions))
-    # add assumptions to the knowledge base
-    for assump in assumptions:
-        conj = eliminate_assume(assump, symbol=expr)
-        if conj:
-            for clause in conjuncts(to_cnf(conj)):
-                out = set()
-                for atom in disjuncts(clause):
-                    lit, pos = literal_symbol(atom), type(atom) is not Not
-                    if pos:
-                        out.add(known_facts_keys.index(lit)+1)
-                    else:
-                        out.add(-(known_facts_keys.index(lit)+1))
-                clauses.append(out)
+    clauses += known_facts_encode(assumptions, expr)
+    clauses_copy = copy.deepcopy(clauses)
 
     n = len(known_facts_keys)
     clauses.append(set([known_facts_keys.index(key)+1]))
     if not dpll_int_repr(clauses, set(range(1, n+1)), {}):
         return False
-    clauses[-1] = set([-(known_facts_keys.index(key)+1)])
-    if not dpll_int_repr(clauses, set(range(1, n+1)), {}):
+    del clauses
+
+    clauses_copy.append(set([-(known_facts_keys.index(key)+1)]))
+    if not dpll_int_repr(clauses_copy, set(range(1, n+1)), {}):
         # if the negation is satisfiable, it is entailed
         return True
-    del clauses
     return res
 
 
@@ -243,3 +231,26 @@ known_facts = And(
 )
 
 known_facts_compiled = to_int_repr(conjuncts(to_cnf(known_facts)), known_facts_keys)
+
+def known_facts_encode(proposition, expr):
+    """
+    Convert a logic proposition into an efficient int_repr compatible
+    with known_facts_compiled.
+    """
+    clauses = []
+    prop = conjuncts(to_cnf(proposition))
+    # add assumptions to the knowledge base
+    for assump in prop:
+        conj = eliminate_assume(assump, symbol=expr)
+        if conj:
+            for clause in conjuncts(to_cnf(conj)):
+                out = set()
+                for atom in disjuncts(clause):
+                    lit, pos = literal_symbol(atom), type(atom) is not Not
+                    if pos:
+                        out.add(known_facts_keys.index(lit)+1)
+                    else:
+                        out.add(-(known_facts_keys.index(lit)+1))
+                clauses.append(out)
+    return clauses
+
