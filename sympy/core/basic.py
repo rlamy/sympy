@@ -8,7 +8,8 @@ from sympify import _sympify, sympify, SympifyError
 _properties = ['bounded', 'commutative', 'complex', 'composite', 'even',
         'extended_real', 'imaginary', 'infinitesimal', 'infinity', 'integer',
         'irrational', 'rational', 'negative', 'nonzero', 'positive', 'prime',
-        'real', 'odd']
+        'real', 'odd', 'nonpositive', 'nonnegative', 'zero', 'noninteger',
+        'unbounded', 'finite']
 
 _template = """\
 @property
