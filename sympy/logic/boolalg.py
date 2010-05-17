@@ -198,6 +198,8 @@ def distribute_and_over_or(expr):
     Given a sentence s consisting of conjunctions and disjunctions
     of literals, return an equivalent sentence in CNF.
     """
+    if expr in (True, False):
+        return expr
     if expr.func is Or:
         for arg in expr.args:
             if arg.func is And:
@@ -235,6 +237,8 @@ def eliminate_implications(expr):
     operators.
     """
     expr = sympify(expr)
+    if expr in (True, False):
+        return expr
     if expr.is_Atom:
         return expr     ## (Atoms are unchanged.)
     args = map(eliminate_implications, expr.args)

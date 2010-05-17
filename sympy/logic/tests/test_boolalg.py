@@ -173,9 +173,12 @@ def test_De_Morgan():
 # test methods
 def test_eliminate_implications():
     A, B, C = map(Boolean, symbols('ABC'))
+    assert eliminate_implications(True) == True
+    assert eliminate_implications(False) == False
     assert eliminate_implications(Implies(A, B, evaluate=False)) == (~A) | B
     assert eliminate_implications(A >> (C >>Not(B))) \
         == Or(Or(Not(B), Not(C)), Not(A))
+
 
 def test_conjuncts():
     A, B, C = map(Boolean, symbols('ABC'))
