@@ -69,7 +69,7 @@ def eval_predicate(predicate, expr, assumptions=True):
     return res
 
 
-def ask(expr, key, assumptions=True):
+def ask(expr, key=Q.is_true, assumptions=True):
     """
     Method for inferring properties about objects.
 
