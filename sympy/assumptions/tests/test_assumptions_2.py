@@ -49,6 +49,11 @@ def test_eliminate_assumptions():
     assert eliminate_assume(Assume(x, a) | Assume(x, b)) == a | b
     assert eliminate_assume(Assume(x, a) | Assume(x, b, False)) == a | ~b
 
+def test_eliminate_composite_assumptions():
+    a, b = map(Predicate, symbols('ab'))
+    x, y = symbols('xy')
+    assert eliminate_assume(~a(y), x) == None
+
 def test_global():
     """Test for global assumptions"""
     x, y = symbols('x y')
