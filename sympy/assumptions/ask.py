@@ -130,23 +130,29 @@ def refine_logic(prop, assumptions=True):
         res = prop
 
     # use logic inference
-    if assumptions is True or not res.is_Atom:
+    if assumptions is True and not res.is_Atom:
         return res
 
-    key = res.func
-    expr = res.arg
+    exprs = set([pred.arg for pred in res.atoms(ApplyPredicate)])
+    if len(exprs) == 1:
+        expr = exprs.pop()
+    else: #proposition involves multiple expressions, can't handle that yet
+        return res
 
     clauses = copy.deepcopy(known_facts_compiled)
     clauses += known_facts_encode(assumptions, expr)
     clauses_copy = copy.deepcopy(clauses)
 
     n = len(known_facts_keys)
-    clauses.append(set([known_facts_keys.index(key)+1]))
+    try:
+        clauses += known_facts_encode(res, expr)
+    except ValueError:  #key not in known_facts
+        return res
     if not dpll_int_repr(clauses, set(range(1, n+1)), {}):
         return False
     del clauses
 
-    clauses_copy.append(set([-(known_facts_keys.index(key)+1)]))
+    clauses_copy += known_facts_encode(~res, expr)
     if not dpll_int_repr(clauses_copy, set(range(1, n+1)), {}):
         # if the negation is satisfiable, it is entailed
         return True
