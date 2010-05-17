@@ -2,7 +2,7 @@
 AskHandlers related to order relations: positive, negative, etc.
 """
 from sympy.utilities import all # python2.4 compatibility
-from sympy.assumptions import Q, ask
+from sympy.assumptions import Q, ask, refine_logic
 from sympy.assumptions.handlers import CommonHandler
 
 
@@ -84,9 +84,9 @@ class AskNegativeHandler(CommonHandler):
             if ask(expr.base, Q.positive, assumptions):
                 return False
             if ask(expr.exp, Q.even, assumptions):
-                return ask(expr.base, Q.zero, assumptions)
+                return refine_logic(Q.zero(expr.base), assumptions)
             if ask(expr.exp, Q.odd, assumptions):
-                return ask(expr.base, Q.nonpositive, assumptions)
+                return refine_logic(Q.nonpositive(expr.base), assumptions)
 
     @staticmethod
     def ImaginaryUnit(expr, assumptions):
@@ -124,7 +124,7 @@ class AskNonZeroHandler(CommonHandler):
 
     @staticmethod
     def Pow(expr, assumptions):
-        return ask(expr.base, Q.nonzero, assumptions)
+        return refine_logic(Q.nonzero(expr.base), assumptions)
 
     @staticmethod
     def NaN(expr, assumptions):
