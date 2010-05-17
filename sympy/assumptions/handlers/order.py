@@ -84,7 +84,7 @@ class AskNegativeHandler(CommonHandler):
             if ask(expr.base, Q.positive, assumptions):
                 return False
             if ask(expr.exp, Q.even, assumptions):
-                return
+                return ask(expr.base, Q.zero, assumptions)
             if ask(expr.exp, Q.odd, assumptions):
                 return ask(expr.base, Q.nonpositive, assumptions)
 
