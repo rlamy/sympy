@@ -2,7 +2,7 @@
 
 from core import BasicMeta, Registry
 from sympify import sympify
-from basic import Basic
+from basic import Atom
 
 class SingletonRegistry(Registry):
     """
@@ -26,7 +26,7 @@ class SingletonMeta(BasicMeta):
         setattr(cls.__registry__, cls.__name__, cls())
 
 
-class Singleton(Basic):
+class Singleton(Atom):
     __metaclass__ = SingletonMeta
     __slots__ = []
     __registry__ = S
@@ -35,7 +35,7 @@ class Singleton(Basic):
         try:
             obj = getattr(cls.__registry__, cls.__name__)
         except AttributeError:
-            obj = Basic.__new__(cls, *(), **{})
+            obj = Atom.__new__(cls, *(), **{})
         return obj
 
     def __getnewargs__(self):
