@@ -66,11 +66,11 @@ class Symbol(AtomicExpr, Boolean):
         return (self.is_commutative, self.name)
 
     def as_dummy(self):
-        return Dummy(self.name, self.is_commutative, **self.assumptions0)
+        return Dummy(self.name, self.is_commutative)
 
     def __call__(self, *args):
         from function import Function
-        return Function(self.name, nargs=len(args))(*args, **self.assumptions0)
+        return Function(self.name, nargs=len(args))(*args)
 
     def _eval_expand_complex(self, deep=True, **hints):
             return C.re(self) + C.im(self)*S.ImaginaryUnit
