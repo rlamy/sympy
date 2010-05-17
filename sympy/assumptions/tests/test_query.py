@@ -713,6 +713,9 @@ def test_negative():
     assert ask(x+y, Q.negative, Assume(x, Q.negative)) == None
     assert ask(x+y, Q.negative, Assume(x, Q.negative) &\
                      Assume(y, Q.negative)) == True
+    assert ask(-x + 123, Q.negative, Q.negative(x)) == False
+    assert ask(-x - 123, Q.positive, Q.positive(x)) == False
+
 
     assert ask(x**2, Q.negative) == None
     assert ask(x**2, Q.negative, Assume(x, Q.real)) == False

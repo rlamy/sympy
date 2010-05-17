@@ -41,12 +41,18 @@ class AskNegativeHandler(CommonHandler):
         """
         if expr.is_number:
             return AskNegativeHandler._number(expr, assumptions)
+        res = None
         for arg in expr.args:
-            if not ask(arg, Q.negative, assumptions):
-                break
+            neg = ask(arg, Q.negative, assumptions)
+            if neg is None:
+                return
+            if res is None:
+                res = neg
+            elif res != neg:
+                return
         else:
-            # if all argument's are negative
-            return True
+            # if all arguments have the same sign
+            return res
 
     @staticmethod
     def Mul(expr, assumptions):
@@ -148,22 +154,30 @@ class AskPositiveHandler(CommonHandler):
             return AskPositiveHandler._number(expr, assumptions)
         result = True
         for arg in expr.args:
-            if ask(arg, Q.positive, assumptions): continue
+            if ask(arg, Q.positive, assumptions):
+                continue
             elif ask(arg, Q.negative, assumptions):
                 result = result ^ True
-            else: return
+            else:
+                return
         return result
 
     @staticmethod
     def Add(expr, assumptions):
         if expr.is_number:
             return AskPositiveHandler._number(expr, assumptions)
+        res = None
         for arg in expr.args:
-            if ask(arg, Q.positive, assumptions) is not True:
-                break
+            pos = ask(arg, Q.positive, assumptions)
+            if pos is None:
+                return
+            if res is None:
+                res = pos
+            elif res != pos:
+                return
         else:
-            # if all argument's are positive
-            return True
+            # if all arguments have the same sign
+            return res
 
     @staticmethod
     def Pow(expr, assumptions):
