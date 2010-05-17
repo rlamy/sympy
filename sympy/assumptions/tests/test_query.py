@@ -761,6 +761,8 @@ def test_nonzero():
     assert ask(abs(x), Q.nonzero) == None
     assert ask(abs(x), Q.nonzero, Assume(x, Q.nonzero)) == True
 
+    assert ask(exp(x), Q.nonzero) == True
+
 def test_odd():
     x, y, z, t = symbols('x y z t')
     assert ask(x, Q.odd) == None

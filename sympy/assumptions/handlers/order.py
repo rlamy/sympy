@@ -133,6 +133,11 @@ class AskNonZeroHandler(CommonHandler):
     def abs(expr, assumptions):
         return ask(expr.args[0], Q.nonzero, assumptions)
 
+    @staticmethod
+    def exp(expr, assumptions):
+        if not ask(expr.args[0], Q.infinity, assumptions):
+            return True
+
 class AskPositiveHandler(CommonHandler):
     """
     Handler for key 'positive'
