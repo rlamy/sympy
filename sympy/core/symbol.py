@@ -62,11 +62,13 @@ class Symbol(AtomicExpr, Boolean):
     def __init__(self, name, commutative=True, **assumptions):
         from sympy.assumptions import Q, global_assumptions
 
-        for keyword in ['exclude', 'dummy']:
+        for keyword in ['exclude', 'dummy', 'properties']:
             try:
                 del assumptions[keyword]
             except KeyError:
                 pass
+        if not commutative:
+            assumptions['commutative'] = commutative
 
         global_assumptions.clear_symbol(self)
         for key, value in assumptions.iteritems():
