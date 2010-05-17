@@ -34,10 +34,9 @@ def test_equal():
     assert Assume(x, 'positive', True)  != Assume(x, 'positive', False)
     assert Assume(x, 'positive', False) == Assume(x, 'positive', False)
 
-@XFAIL #TODO: handle printing
 def test_pretty():
     x = symbols('x')
-    assert pretty(Assume(x, 'positive')) == "Assume(x, 'positive')"
+    assert pretty(Assume(x, 'positive')) == "Q.positive(x)"
 
 def test_eliminate_assumptions():
     a, b = map(Predicate, symbols('ab'))
