@@ -15,6 +15,9 @@ class AssocOp(Expr):
     (a op b) op c == a op (b op c) == a op b op c.
 
     Base class for Add and Mul.
+
+    This is an abstract base class, concrete derived classes must define
+    the attribute `identity`.
     """
 
     # for performance reason, we don't let is_commutative go to assumptions,
@@ -26,14 +29,17 @@ class AssocOp(Expr):
         if assumptions.get('evaluate') is False:
             return Expr.__new__(cls, *map(_sympify, args), **assumptions)
         if len(args)==0:
-            return cls.identity()
+            return cls.identity
         if len(args)==1:
             return _sympify(args[0])
         c_part, nc_part, order_symbols = cls.flatten(map(_sympify, args))
         if len(c_part) + len(nc_part) <= 1:
-            if c_part: obj = c_part[0]
-            elif nc_part: obj = nc_part[0]
-            else: obj = cls.identity()
+            if c_part:
+                obj = c_part[0]
+            elif nc_part:
+                obj = nc_part[0]
+            else:
+                obj = cls.identity
         else:
             obj = Expr.__new__(cls, *(c_part + nc_part), **assumptions)
             obj.is_commutative = not nc_part
@@ -64,17 +70,6 @@ class AssocOp(Expr):
 
         return obj
 
-    @classmethod
-    def identity(cls):
-        from mul import Mul
-        from add import Add
-        if cls is Mul: return S.One
-        if cls is Add: return S.Zero
-        if cls is C.Composition:
-            from symbol import Symbol
-            s = Symbol('x',dummy=True)
-            return Lambda(s,s)
-        raise NotImplementedError("identity not defined for class %r" % (cls.__name__))
 
     @classmethod
     def flatten(cls, seq):
@@ -202,6 +197,29 @@ class AssocOp(Expr):
 
     _eval_evalf = Expr._seq_eval_evalf
 
+    @classmethod
+    def as_args(cls, expr):
+        """
+        Return a sequence of elements `args` such that cls(*args) == expr
+
+        >>> from sympy import Symbol, Mul, Add
+        >>> x, y = map(Symbol, 'xy')
+
+        >>> Mul.as_args(x*y)
+        (x, y)
+        >>> Add.as_args(x*y)
+        (x*y,)
+        >>> set(Add.as_args(x*y + y)) == set([y, x*y])
+        True
+
+        """
+        if isinstance(expr, cls):
+            return expr.args
+        elif expr == cls.identity:
+            return ()
+        else:
+            return (expr,)
+
 class ShortCircuit(Exception):
     pass
 
@@ -267,6 +285,29 @@ class LatticeOp(AssocOp):
                     yield x
             else:
                 yield arg
+
+    @classmethod
+    def as_args(cls, expr):
+        """
+        Return a sequence of elements `args` such that cls(*args) == expr
+
+        >>> from sympy import Symbol, Mul, Add
+        >>> x, y = map(Symbol, 'xy')
+
+        >>> Mul.as_args(x*y)
+        (x, y)
+        >>> Add.as_args(x*y)
+        (x*y,)
+        >>> set(Add.as_args(x*y + y)) == set([y, x*y])
+        True
+
+        """
+        if isinstance(expr, cls):
+            return expr._argset
+        elif expr == cls.identity:
+            return frozenset()
+        else:
+            return frozenset([expr])
 
     @property
     def args(self):

@@ -10,6 +10,9 @@ class Add(AssocOp):
 
     is_Add = True
 
+    #identity = S.Zero
+    # cyclic import, so defined in numbers.py
+
     @classmethod
     def flatten(cls, seq):
         """
@@ -493,9 +496,6 @@ class Add(AssocOp):
             s += x._sage_()
         return s
 
-    def as_Add(self):
-        """Returns `self` as it was `Add` instance. """
-        return list(self.args)
 
 from mul import Mul
 from symbol import Symbol

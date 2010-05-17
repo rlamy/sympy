@@ -206,7 +206,7 @@ from sympy.simplify import collect, logcombine, powsimp, separatevars, \
     simplify, trigsimp
 from sympy.solvers import solve
 
-from sympy.utilities import numbered_symbols, all, any, make_list
+from sympy.utilities import numbered_symbols, all, any
 
 # This is a list of hints in the order that they should be applied.  That means
 # that, in general, hints earlier in the list should produce simpler results
@@ -1832,7 +1832,7 @@ def _homogeneous_order(eq, *symbols):
         if eq.func is log:
             # The only possibility to pull a t out of a function is a power in
             # a logarithm.  This is very likely due to calling of logcombine().
-            args = make_list(eq.args[0], Mul) # TODO what about log(a, b) which has args[1]?
+            args = Mul.as_args(eq.args[0]) # TODO what about log(a, b) which has args[1]?
             if all(i.is_Pow for i in args):
                 base = 1
                 expos = set()
@@ -2067,13 +2067,10 @@ def _nth_linear_match(eq, func, order):
         True
 
     """
-    from sympy import S
-    from sympy.utilities.iterables import make_list
-
     x = func.args[0]
     one_x = set([x])
     terms = dict([(i, S.Zero) for i in range(-1, order+1)])
-    for i in make_list(eq, Add):
+    for i in Add.as_args(eq):
         if not i.has(func):
             terms[-1] += i
         else:

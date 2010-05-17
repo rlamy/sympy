@@ -174,26 +174,24 @@ def conjuncts(expr):
     >>> from sympy.logic.boolalg import conjuncts
     >>> from sympy.abc import A, B
     >>> conjuncts(A & B)
-    [A, B]
+    frozenset([A, B])
     >>> conjuncts(A | B)
-    [Or(A, B)]
+    frozenset([Or(A, B)])
 
     """
-    from sympy.utilities import make_list
-    return make_list(expr, And)
+    return And.as_args(expr)
 
 def disjuncts(expr):
     """Return a list of the disjuncts in the sentence s.
     >>> from sympy.logic.boolalg import disjuncts
     >>> from sympy.abc import A, B
     >>> disjuncts(A | B)
-    [A, B]
+    frozenset([A, B])
     >>> disjuncts(A & B)
-    [And(A, B)]
+    frozenset([And(A, B)])
 
     """
-    from sympy.utilities import make_list
-    return make_list(expr, Or)
+    return Or.as_args(expr)
 
 def distribute_and_over_or(expr):
     """
@@ -278,6 +276,5 @@ def to_int_repr(clauses, symbols):
         else:
             return symbols.index(arg)+1
 
-    from sympy.utilities import make_list
-    return [set(append_symbol(arg, symbols) for arg in make_list(c, Or)) \
+    return [set(append_symbol(arg, symbols) for arg in Or.as_args(c)) \
                                                             for c in clauses]

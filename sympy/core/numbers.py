@@ -1710,3 +1710,7 @@ _intcache[-1]= S.NegativeOne
 from function import FunctionClass
 from power import Pow, integer_nthroot
 from mul import Mul
+
+Mul.identity = One()
+from add import Add
+Add.identity = Zero()
