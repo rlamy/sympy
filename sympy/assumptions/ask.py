@@ -4,7 +4,7 @@ import copy
 from sympy.core import sympify
 from sympy.utilities.source import get_class
 from sympy.assumptions import global_assumptions, Assume, Predicate
-from sympy.assumptions.assume import eliminate_assume
+from sympy.assumptions.assume import eliminate_assume, ApplyPredicate
 from sympy.logic.boolalg import to_cnf, conjuncts, disjuncts, \
     And, Not, Implies, Equivalent, to_int_repr
 from sympy.logic.inference import literal_symbol
@@ -106,17 +106,36 @@ def ask(expr, key=Q.is_true, assumptions=True):
         key = getattr(Q, str(key))
     assumptions = And(assumptions, And(*global_assumptions))
 
-    # direct resolution method, no logic
-    res = eval_predicate(key, expr, assumptions)
-    if res is not None:
+    res = refine_logic(key(expr), assumptions)
+    if res in (True, False):
         return res
+    else:
+        return None
+
+
+def refine_logic(prop, assumptions=True):
+    """
+    Simplify a logical proposition according to the assumptions.
+
+    This evaluates predicates and infers consequences from the assumptions.
+    """
+    # direct resolution method, no logic
+    if isinstance(prop, ApplyPredicate):
+        res = eval_predicate(prop.func, prop.arg, assumptions)
+    else:
+        res = eval_predicate(Q.is_true, prop, assumptions)
+    if res in (True, False):
+        return res
+    elif res is None:
+        res = prop
 
     # use logic inference
-    if assumptions is True:
-        return
+    if assumptions is True or not res.is_Atom:
+        return res
 
-    if not expr.is_Atom:
-        return
+    key = res.func
+    expr = res.arg
+
     clauses = copy.deepcopy(known_facts_compiled)
 
     assumptions = conjuncts(to_cnf(assumptions))
@@ -143,6 +162,7 @@ def ask(expr, key=Q.is_true, assumptions=True):
         # if the negation is satisfiable, it is entailed
         return True
     del clauses
+    return res
 
 
 def register_handler(key, handler):
