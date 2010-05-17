@@ -349,7 +349,7 @@ class Add(AssocOp):
 
     def _eval_as_leading_term(self, x):
         coeff, factors = self.as_coeff_factors(x)
-        has_unbounded = bool([f for f in self.args if f.is_unbounded])
+        has_unbounded = bool([f for f in self.args if f.is_bounded is False])
         if has_unbounded:
             if isinstance(factors, Basic):
                 factors = factors.args
