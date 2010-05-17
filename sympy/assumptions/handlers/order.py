@@ -10,14 +10,14 @@ class AskNegativeHandler(CommonHandler):
     """
     This is called by ask() when key='negative'
 
-    Test that an expression is less (strict) than zero.
+    Test that an expression is less than or equal to zero.
 
     Examples:
 
     >>> from sympy import ask, Q, pi
-    >>> ask(pi+1, Q.negative) # this calls AskNegativeHandler.Add
+    >>> ask(pi+1, Q.nonpositive) # this calls AskNegativeHandler.Add
     False
-    >>> ask(pi**2, Q.negative) # this calls AskNegativeHandler.Pow
+    >>> ask(pi**2, Q.nonpositive) # this calls AskNegativeHandler.Pow
     False
 
     """
@@ -25,7 +25,7 @@ class AskNegativeHandler(CommonHandler):
     @staticmethod
     def _number(expr, assumptions):
         if not expr.as_real_imag()[1]:
-            return expr.evalf() < 0
+            return expr.evalf() <= 0
         else:
             return False
 
@@ -44,7 +44,7 @@ class AskNegativeHandler(CommonHandler):
             return AskNegativeHandler._number(expr, assumptions)
         res = None
         for arg in expr.args:
-            neg = ask(arg, Q.negative, assumptions)
+            neg = ask(arg, Q.nonpositive, assumptions)
             if neg is None:
                 return
             if res is None:
@@ -61,8 +61,9 @@ class AskNegativeHandler(CommonHandler):
             return AskNegativeHandler._number(expr, assumptions)
         result = None
         for arg in expr.args:
-            if result is None: result = False
-            if ask(arg, Q.negative, assumptions):
+            if result is None:
+                result = False
+            if ask(arg, Q.nonpositive, assumptions):
                 result = not result
             elif ask(arg, Q.positive, assumptions):
                 pass
@@ -83,9 +84,9 @@ class AskNegativeHandler(CommonHandler):
             if ask(expr.base, Q.positive, assumptions):
                 return False
             if ask(expr.exp, Q.even, assumptions):
-                return False
+                return
             if ask(expr.exp, Q.odd, assumptions):
-                return ask(expr.base, Q.negative, assumptions)
+                return ask(expr.base, Q.nonpositive, assumptions)
 
     @staticmethod
     def ImaginaryUnit(expr, assumptions):
@@ -140,14 +141,15 @@ class AskNonZeroHandler(CommonHandler):
 class AskPositiveHandler(CommonHandler):
     """
     Handler for key 'positive'
-    Test that an expression is greater (strict) than zero
+    Test that an expression is greater than or equal to zero
     """
 
     @staticmethod
     def _number(expr, assumptions):
         if not expr.as_real_imag()[1]:
-            return expr.evalf() > 0
-        else: return False
+            return expr.evalf() >= 0
+        else:
+            return False
 
     @staticmethod
     def Basic(expr, assumptions):
@@ -160,9 +162,9 @@ class AskPositiveHandler(CommonHandler):
             return AskPositiveHandler._number(expr, assumptions)
         result = True
         for arg in expr.args:
-            if ask(arg, Q.positive, assumptions):
+            if ask(arg, Q.nonnegative, assumptions):
                 continue
-            elif ask(arg, Q.negative, assumptions):
+            elif ask(arg, Q.nonpositive, assumptions):
                 result = result ^ True
             else:
                 return
@@ -174,7 +176,7 @@ class AskPositiveHandler(CommonHandler):
             return AskPositiveHandler._number(expr, assumptions)
         res = None
         for arg in expr.args:
-            pos = ask(arg, Q.positive, assumptions)
+            pos = ask(arg, Q.nonnegative, assumptions)
             if pos is None:
                 return
             if res is None:
@@ -187,8 +189,9 @@ class AskPositiveHandler(CommonHandler):
 
     @staticmethod
     def Pow(expr, assumptions):
-        if expr.is_number: return expr.evalf() > 0
-        if ask(expr.base, Q.positive, assumptions):
+        if expr.is_number:
+            return expr.evalf() > 0
+        if ask(expr.base, Q.nonnegative, assumptions):
             return True
         if ask(expr.base, Q.negative, assumptions):
             if ask(expr.exp, Q.even, assumptions):
