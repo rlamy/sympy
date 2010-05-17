@@ -1,6 +1,7 @@
-from basic import S, C
+from core import C
+from singleton import S
 from expr import Expr
-from sympify import _sympify
+from sympify import _sympify, sympify
 from cache import cacheit
 
 # from add import Add   /cyclic/
@@ -239,7 +240,7 @@ class LatticeOp(AssocOp):
     is_commutative = True
 
     def __new__(cls, *args, **assumptions):
-        args = (_sympify(arg) for arg in args)
+        args = (sympify(arg) for arg in args)
         try:
             _args = frozenset(cls._new_args_filter(args))
         except ShortCircuit:

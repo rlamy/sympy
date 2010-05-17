@@ -1,12 +1,13 @@
-
-from basic import Atom, S, C
-from expr import Expr
+from core import C
+from sympify import sympify
+from singleton import S
+from expr import Expr, AtomicExpr
 from cache import cacheit
 from sympy.logic.boolalg import Boolean
 
 import re
 
-class Symbol(Atom, Expr, Boolean):
+class Symbol(AtomicExpr, Boolean):
     """
     Assumptions::
        commutative = True
@@ -290,5 +291,3 @@ def var(*names, **kwargs):
         # we should explicitly break cyclic dependencies as stated in inspect
         # doc
         del frame
-
-from sympify import sympify

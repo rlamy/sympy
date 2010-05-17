@@ -1,9 +1,11 @@
 """Core module. Provides the basic operations needed in sympy.
 """
 
-from basic import Basic, Atom, S, C
-from expr import Expr
 from sympify import sympify
+from cache import cacheit
+from basic import Basic, Atom, C
+from singleton import S
+from expr import Expr, AtomicExpr
 from symbol import Symbol, Wild, symbols, var
 from numbers import Number, Real, Rational, Integer, NumberSymbol,\
         RealNumber, igcd, ilcm, seterr
@@ -19,6 +21,14 @@ from function import Lambda, WildFunction, Derivative, diff, FunctionClass, \
 from sets import Set, Interval, Union, EmptySet
 from evalf import PrecisionExhausted, N
 
-# expose singletons like exp, log, oo, I, etc.
-for _n, _cls in Basic.singleton.items():
-    exec '%s = _cls()' % (_n)
+# expose singletons like oo, I, etc.
+Catalan = S.Catalan
+E = S.Exp1
+EulerGamma = S.EulerGamma
+GoldenRatio = S.GoldenRatio
+I = S.ImaginaryUnit
+nan = S.NaN
+oo = S.Infinity
+pi= S.Pi
+zoo = S.ComplexInfinity
+

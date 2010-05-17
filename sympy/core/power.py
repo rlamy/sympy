@@ -1,10 +1,12 @@
-from expr import Expr
+from math import log as _log
+
 from sympify import _sympify
 from cache import cacheit
+from core import C
+from singleton import S
+from expr import Expr
 
 from sympy import mpmath
-
-from math import log as _log
 
 def integer_nthroot(y, n):
     """
@@ -773,7 +775,6 @@ class Pow(Expr):
         """Returns `self` as it was `Pow` instance. """
         return (self.base, self.exp)
 
-from basic import S, C
 from add import Add
 from numbers import Integer
 from mul import Mul

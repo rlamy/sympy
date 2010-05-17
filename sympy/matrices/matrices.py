@@ -1,8 +1,7 @@
 import warnings
-from sympy import Basic, Symbol, Integer
-from sympy.core import sympify
+from sympy.core import S, Basic, Symbol, Integer
+from sympy.core.sympify import sympify, converter, SympifyError
 
-from sympy.core.basic import S
 from sympy.polys import Poly, roots, cancel
 from sympy.simplify import simplify
 from sympy.utilities import any
@@ -1840,6 +1839,12 @@ def block_diag(matrices):
         A[i+0:i+m.rows, i+0:i+m.cols] = m
         i += m.rows
     return A
+
+# Add sympify converters
+def _matrix_sympify(matrix):
+    raise SympifyError('Matrix cannot be sympified')
+converter[Matrix] = _matrix_sympify
+del _matrix_sympify
 
 
 class SMatrix(Matrix):

@@ -30,8 +30,9 @@ Example:
 
 """
 
-from basic import BasicMeta, Atom, S, C
-from expr import Expr
+from core import BasicMeta, C
+from singleton import S
+from expr import Expr, AtomicExpr
 from cache import cacheit
 from itertools import repeat
 #from numbers import Rational, Integer
@@ -52,6 +53,7 @@ class FunctionClass(BasicMeta):
     Use Function('<function name>' [ , signature ]) to create
     undefined function classes.
     """
+    __metaclass__ = BasicMeta
 
     _new = type.__new__
 
@@ -73,10 +75,10 @@ class FunctionClass(BasicMeta):
             if signature is not None:
                 attrdict['signature'] = signature
             bases = (ftype,)
-            return type.__new__(cls, name, bases, attrdict)
+            return BasicMeta.__new__(cls, name, bases, attrdict)
         else:
             name, bases, attrdict = arg1, arg2, arg3
-            return type.__new__(cls, name, bases, attrdict)
+            return BasicMeta.__new__(cls, name, bases, attrdict)
 
     def __repr__(cls):
         return cls.__name__
@@ -453,7 +455,7 @@ class Function(Expr):
         x = sympify(x)
         return cls(x).diff(x, n).subs(x, 0) * x**n / C.Factorial(n)
 
-class WildFunction(Function, Atom):
+class WildFunction(Function, AtomicExpr):
     """
     WildFunction() matches any expression but another WildFunction()
     XXX is this as intended, does it work ?

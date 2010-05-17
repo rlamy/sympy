@@ -21,8 +21,9 @@ from sympy.mpmath.libmp.gammazeta import mpf_bernoulli
 
 import math
 
-from basic import C, S
 from sympify import sympify
+from core import C
+from singleton import S
 
 LG10 = math.log(10,2)
 
