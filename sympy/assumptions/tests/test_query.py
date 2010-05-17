@@ -1022,3 +1022,10 @@ def test_type_extensibility():
     register_handler(Q.prime, MyAskHandler)
     assert ask(a, Q.prime) == True
 
+
+@XFAIL
+def test_symbol_assumptions():
+    x = Symbol('x', positive=True)
+    assert ask(x, Q.positive) is True
+    x = Symbol('x')
+    assert ask(x, Q.positive) is None
