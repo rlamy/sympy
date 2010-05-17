@@ -30,8 +30,15 @@ class Q:
     prime = Predicate('prime')
     real = Predicate('real')
     odd = Predicate('odd')
+
+    nonnegative = Predicate('nonnegative')
+    nonpositive = Predicate('nonpositive')
     is_true = Predicate('is_true')
 
+Q.zero = ~Q.nonzero
+Q.noninteger = Q.real & ~Q.integer
+Q.unbounded = ~Q.bounded
+Q.finite = Q.bounded & ~Q.zero & ~Q.infinitesimal
 
 def eval_predicate(predicate, expr, assumptions=True):
     """
@@ -208,7 +215,9 @@ known_facts = And(
     Equivalent(Q.rational, Q.real & ~Q.irrational),
     Equivalent(Q.real, Q.rational | Q.irrational),
     Implies   (Q.nonzero, Q.real),
-    Equivalent(Q.nonzero, Q.positive | Q.negative)
+    Equivalent(Q.nonzero, Q.positive | Q.negative),
+    Equivalent(Q.nonpositive, Q.real & ~Q.positive),
+    Equivalent(Q.nonnegative, Q.real & ~Q.negative),
 )
 
 known_facts_compiled = to_int_repr(conjuncts(to_cnf(known_facts)), known_facts_keys)

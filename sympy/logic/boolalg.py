@@ -33,7 +33,9 @@ class BooleanFunction(Function, Boolean):
     """Boolean function is a function that lives in a boolean space
     It is used as base class for And, Or, Not, etc.
     """
-    pass
+
+    def __call__(self, *args):
+        return self.func(*[arg(*args) for arg in self.args])
 
 class And(LatticeOp, BooleanFunction):
     """
