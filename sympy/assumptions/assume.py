@@ -30,6 +30,13 @@ class AssumptionsContext(set):
         for a in assumptions:
             super(AssumptionsContext, self).add(a)
 
+    def clear_symbol(self, symbol):
+        """
+        Clear all informations associated with a symbol.
+        """
+        self.difference_update(set([x for x in self if symbol in
+                                            [prop.arg for prop in x.atoms()]]))
+
 global_assumptions = AssumptionsContext()
 
 def Assume(expr, predicate=None, value=True):
