@@ -287,13 +287,13 @@ def test_Add_Mul_is_integer():
 
     assert (2*k).is_integer == True
     assert (-k).is_integer == True
-    assert (k/3).is_integer == False
+    assert (k/3).is_integer == None
     assert (x*k*n).is_integer == None
 
     assert (k+n).is_integer == True
     assert (k+x).is_integer == None
     assert (k+n*x).is_integer == None
-    assert (k+n/3).is_integer == False
+    assert (k+n/3).is_integer == None
 
 def test_Add_Mul_is_bounded():
     x = Symbol('x', real=True, bounded=False)
@@ -321,9 +321,9 @@ def test_Mul_is_even_odd():
     assert (3*x).is_even == None
     assert (3*x).is_odd == None
 
-    assert (k/3).is_integer == False
+    assert (k/3).is_integer == None
     assert (k/3).is_even    == False
-    assert (k/3).is_odd     == False
+    assert (k/3).is_odd     == None
 
     assert (2*n).is_even == True
     assert (2*n).is_odd == False
@@ -402,6 +402,7 @@ def test_Mul_is_negative_positive():
     assert (n*k).is_negative == True
     assert (2*n*k).is_negative == True
     assert (-n*k).is_negative == False
+    assert (n*k*y).is_real == False
     assert (n*k*y).is_negative == False     # y.is_real=F;  !real -> !neg
 
     assert u.is_negative == False
