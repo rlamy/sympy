@@ -956,8 +956,9 @@ def test_functions_in_assumptions():
     assert ask(x, Q.negative, Equivalent(Q.real(x), Q.positive(x))) is False
     assert ask(x, Q.integer, Xor(Q.real(x), Q.integer(x))) is False
 
-@XFAIL
 def test_composite_predicate_and_assumption():
+    from sympy.logic.boolalg import Equivalent, Xor
+    x = symbols('x')
     assert ask(x, Q.negative, Xor(Q.real(x), Q.negative(x))) is False
 
 def test_is_true():
@@ -1032,7 +1033,6 @@ def test_type_extensibility():
     assert ask(a, Q.prime) == True
 
 
-@XFAIL
 def test_symbol_assumptions():
     x = Symbol('x', positive=True)
     assert ask(x, Q.positive) is True
