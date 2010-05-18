@@ -25,7 +25,7 @@ def dpll_satisfiable(expr):
     False
 
     """
-    symbols = list(expr.atoms(Symbol))
+    symbols = list(expr.atoms())
     symbols_int_repr = set(range(1, len(symbols) + 1))
     clauses = conjuncts(to_cnf(expr))
     clauses_int_repr = to_int_repr(clauses, symbols)
