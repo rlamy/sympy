@@ -782,7 +782,6 @@ def test_odd():
     assert ask(3*x, Q.odd, Assume(x, Q.integer)) == None
 
     assert ask(x/3, Q.odd, Assume(x, Q.odd)) == None
-    assert ask(x/3, Q.odd, Assume(x, Q.even)) == None
 
     assert ask(x+1, Q.odd, Assume(x, Q.even)) == True
     assert ask(x+2, Q.odd, Assume(x, Q.even)) == False
@@ -811,6 +810,12 @@ def test_odd():
     assert ask(2*x*y, Q.odd, Assume(x, Q.irrational) & Assume(x, Q.irrational)) == None
 
     assert ask(abs(x), Q.odd, Assume(x, Q.odd)) == True
+    
+@XFAIL
+def test_odd_failing():
+    x = symbols('x')
+    assert ask(x/3, Q.odd, Assume(x, Q.even)) == False
+
 
 def test_prime():
     x, y = symbols('x y')
