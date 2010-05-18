@@ -704,7 +704,7 @@ def test_negative():
     assert ask(x, Q.negative, Assume(x, Q.prime, False)) == None
 
     assert ask(-x, Q.negative, Assume(x, Q.positive)) == True
-    assert ask(-x, Q.negative, Assume(x, Q.positive, False)) == None
+    assert ask(-x, Q.negative, Assume(x, Q.positive, False)) == False
     assert ask(-x, Q.negative, Assume(x, Q.negative)) == False
     assert ask(-x, Q.negative, Assume(x, Q.positive)) == True
 
