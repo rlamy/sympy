@@ -1,7 +1,7 @@
 from sympy.core import Symbol, symbols, S, Rational, Integer, I, pi, oo
 from sympy.functions import exp, log, sin, cos, sign, re, im, sqrt
 from sympy.assumptions import (Assume, global_assumptions, Q, ask,
-    register_handler, remove_handler)
+    register_handler, remove_handler, refine_logic)
 from sympy.assumptions.handlers import AskHandler
 from sympy.utilities.pytest import raises, XFAIL
 
@@ -762,6 +762,8 @@ def test_nonzero():
     assert ask(abs(x), Q.nonzero, Assume(x, Q.nonzero)) == True
 
     assert ask(exp(x), Q.nonzero) == True
+    
+    assert refine_logic(Q.zero(x * y)) == Q.zero(x) | Q.zero(y)
 
 def test_odd():
     x, y, z, t = symbols('x y z t')

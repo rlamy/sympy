@@ -4,6 +4,7 @@ AskHandlers related to order relations: positive, negative, etc.
 from sympy.utilities import all # python2.4 compatibility
 from sympy.assumptions import Q, ask, refine_logic
 from sympy.assumptions.handlers import CommonHandler
+from sympy.logic import And
 
 
 class AskNegativeHandler(CommonHandler):
@@ -116,11 +117,7 @@ class AskNonZeroHandler(CommonHandler):
 
     @staticmethod
     def Mul(expr, assumptions):
-        for arg in expr.args:
-            result = ask(arg, Q.nonzero, assumptions)
-            if result: continue
-            return result
-        return True
+        return And(*[refine_logic(Q.nonzero(arg), assumptions) for arg in expr.args])
 
     @staticmethod
     def Pow(expr, assumptions):
