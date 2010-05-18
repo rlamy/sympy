@@ -153,6 +153,7 @@ class Number(AtomicExpr):
     Rational(1) + sqrt(Rational(2))
     """
     is_comparable = True
+    is_commutative = True
 
     __slots__ = []
 

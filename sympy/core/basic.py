@@ -5,7 +5,7 @@ from cache import cacheit
 from core import BasicMeta, BasicType, C
 from sympify import _sympify, sympify, SympifyError
 
-_properties = ['bounded', 'commutative', 'complex', 'composite', 'even',
+_properties = ['bounded', 'complex', 'composite', 'even',
         'extended_real', 'imaginary', 'infinitesimal', 'infinity', 'integer',
         'irrational', 'rational', 'negative', 'nonzero', 'positive', 'prime',
         'real', 'odd', 'nonpositive', 'nonnegative', 'zero', 'noninteger',
@@ -77,6 +77,7 @@ class Basic(object):
     is_AlgebraicNumber = False
 
     is_comparable = False
+    is_commutative = None
 
     def __new__(cls, *args, **assumptions):
         obj = object.__new__(cls)
