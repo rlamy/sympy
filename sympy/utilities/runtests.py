@@ -324,6 +324,8 @@ class SymPyTests(object):
         self._count += 1
         gl = {'__file__':filename}
         try:
+            from sympy.assumptions import global_assumptions
+            global_assumptions.clear()
             execfile(filename, gl)
         except (ImportError, SyntaxError):
             self._reporter.import_error(filename, sys.exc_info())
