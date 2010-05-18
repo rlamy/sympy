@@ -916,7 +916,14 @@ def test_real():
     # Q.complexes
     assert ask(re(x), Q.real) == True
     assert ask(im(x), Q.real) == True
-
+    
+def test_real_products():
+    x,y,n,p = symbols('x y n p')
+    assert ask(Q.real(x*y), assumptions = Q.real(x) & ~Q.real(y)) == False
+    assert ask(Q.real(y*n*p), 
+            assumptions = ~Q.real(y) & Q.positive(p) & Q.negative(n)) == False
+    
+    
 def test_algebraic():
     x, y = symbols('x,y')
 

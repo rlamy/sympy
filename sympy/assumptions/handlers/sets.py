@@ -202,16 +202,26 @@ class AskRealHandler(CommonHandler):
         """
         if expr.is_number:
             return AskRealHandler._number(expr, assumptions)
-        result = True
+        im_count = 0
+        is_unknown = False
         for arg in expr.args:
-            if ask(arg, Q.real, assumptions):
-                pass
-            elif ask(arg, Q.imaginary, assumptions):
-                result = result ^ True
+            if ask(arg, Q.imaginary, assumptions):
+                im_count += 1
+                continue
+            t_real = ask(arg, Q.real, assumptions)
+            if t_real:
+                continue
+            elif t_real is False:
+                if is_unknown:
+                    return None
+                else:
+                    is_unknown = True
             else:
-                break
-        else:
-            return result
+                return None
+        if is_unknown:
+            return False
+        return (im_count % 2 == 0)
+
 
     @staticmethod
     def Pow(expr, assumptions):
