@@ -92,25 +92,33 @@ class AskNonZeroHandler(CommonHandler):
     Handler for key 'zero'
     Test that an expression is not identically zero
     """
-
+    @staticmethod
+    def _number(expr, assumptions=None):
+        return expr.evalf() != 0
+        
     @staticmethod
     def Basic(expr, assumptions):
         if expr.is_number:
-            # if there are no symbols just evalf
-            return expr.evalf() != 0
+            return AskNonZeroHandler._number(expr)
 
     @staticmethod
     def Add(expr, assumptions):
+        if expr.is_number:
+            return AskNonZeroHandler._number(expr)
         if all([ask(x, Q.positive, assumptions) for x in expr.args]) \
             or all([ask(x, Q.negative, assumptions) for x in expr.args]):
             return True
 
     @staticmethod
     def Mul(expr, assumptions):
+        if expr.is_number:
+            return AskNonZeroHandler._number(expr)
         return And(*[refine_logic(Q.nonzero(arg), assumptions) for arg in expr.args])
 
     @staticmethod
     def Pow(expr, assumptions):
+        if expr.is_number:
+            return AskNonZeroHandler._number(expr)
         return refine_logic(Q.nonzero(expr.base), assumptions)
 
     @staticmethod
