@@ -1,6 +1,7 @@
 from sympy import Symbol, sqrt, I, Integer, Rational, cos, atan, sin, im, re, \
         exp, sinh, cosh, tan, tanh, conjugate, sign, cot, coth, pi, expand_complex
-
+from sympy.functions import abs
+from sympy.assumptions import refine
 
 def test_complex():
     a = Symbol("a", real=True)
@@ -33,16 +34,16 @@ def test_conjugate():
 def test_abs1():
     a = Symbol("a", real=True)
     b = Symbol("b", real=True)
-    assert abs(a) == abs(a)
-    assert abs(-a) == abs(a)
-    assert abs(a+I*b) == sqrt(a**2+b**2)
+    assert refine(abs(a, refine=False)) == abs(a)
+    assert refine(abs(-a, refine=False)) == abs(a)
+    assert refine(abs(a+I*b, refine=False)) == sqrt(a**2+b**2)
 
 def test_abs2():
     a = Symbol("a", real=False)
     b = Symbol("b", real=False)
-    assert abs(a) != a
-    assert abs(-a) != a
-    assert abs(a+I*b) != sqrt(a**2+b**2)
+    assert refine(abs(a)) != a
+    assert refine(abs(-a)) != a
+    assert refine(abs(a+I*b, refine=False)) != sqrt(a**2+b**2)
 
 def test_evalc():
     x=Symbol("x", real=True)
