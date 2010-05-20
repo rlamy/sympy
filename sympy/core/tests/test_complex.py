@@ -31,8 +31,8 @@ def test_conjugate():
     assert conjugate(coth(z)) == coth(zc)
 
 def test_abs1():
-    a=Symbol("a", real=True)
-    b=Symbol("b", real=True)
+    a = Symbol("a", real=True)
+    b = Symbol("b", real=True)
     assert abs(a) == abs(a)
     assert abs(-a) == abs(a)
     assert abs(a+I*b) == sqrt(a**2+b**2)

@@ -2,7 +2,7 @@ from sympy import S, symbols, Assume, exp, pi, sqrt, Rational, I, Q, refine
 from sympy.utilities.pytest import XFAIL
 
 def test_abs():
-    x = symbols('x')
+    x, y = symbols('x y')
     assert refine(abs(x), Assume(x, Q.positive)) == x
     assert refine(1+abs(x), Assume(x, Q.positive)) == 1+x
     assert refine(abs(x), Assume(x, Q.negative)) == -x
@@ -10,6 +10,9 @@ def test_abs():
 
     assert refine(abs(x**2)) != x**2
     assert refine(abs(x**2), Assume(x, Q.real)) == x**2
+
+    assert refine(abs(x + I * y), Q.real(x) & Q.real(y)) == sqrt(x**2 + y**2)
+    assert refine(abs(x + I * y)) == abs(x + I * y)
 
 def test_pow():
     x, y, z = symbols('x y z')

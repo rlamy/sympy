@@ -1,3 +1,5 @@
+from __builtin__ import abs as _abs
+
 from sympy.core import S, C, Function, Derivative
 from sympy.functions.elementary.miscellaneous import sqrt
 
@@ -222,19 +224,12 @@ class abs(Function):
     def eval(cls, arg):
         if arg is S.NaN:
             return S.NaN
-        if arg.is_zero:     return arg
-        if arg.is_positive: return arg
-        if arg.is_negative: return -arg
+        if arg.is_Number:
+            return _abs(arg)
         coeff, terms = arg.as_coeff_terms()
         if coeff is not S.One:
             return cls(coeff) * cls(C.Mul(*terms))
-        if arg.is_real is False:
-            return sqrt( (arg * arg.conjugate()).expand() )
-        if arg.is_Pow:
-            base, exponent = arg.as_base_exp()
-            if exponent.is_even and base.is_real:
-                return arg
-        return
+
 
     def _eval_is_nonzero(self):
         return self._args[0].is_nonzero

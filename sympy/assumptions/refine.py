@@ -1,4 +1,4 @@
-from sympy.core import S, Add
+from sympy.core import S, Add, C
 from sympy.utilities.source import get_class
 from sympy.assumptions import Q, ask
 from sympy.logic.boolalg import fuzzy_not
@@ -51,12 +51,69 @@ def refine_abs(expr, assumptions):
 
     """
     arg = expr.args[0]
-    if ask(arg, Q.real, assumptions) and \
-            fuzzy_not(ask(arg, Q.negative, assumptions)):
-        # if it's nonnegative
+    if ask(arg, Q.nonnegative, assumptions):
         return arg
     if ask(arg, Q.negative, assumptions):
         return -arg
+    if ask(arg, Q.real, assumptions):
+        return
+    if ask(arg, Q.complex, assumptions):
+        from sympy.functions import re, im, sqrt
+        arg_re = re(arg)
+        arg_re2 = refine(arg_re, assumptions)
+        if arg_re2 != arg_re or arg_re.func != re:
+            return refine(sqrt(arg_re2**2 + refine(im(arg), assumptions)**2))
+
+
+def refine_re(expr, assumptions):
+    """
+    refine handler for re.
+    """
+    arg = expr.args[0]
+    if ask(arg, Q.real, assumptions):
+        return arg
+    included, reverted, excluded = [], [], []
+    arg = C.Add.as_args(arg)
+    for term in arg:
+        coeff = term.as_coefficient(S.ImaginaryUnit)
+        if coeff is not None:
+            if not ask(coeff, Q.real, assumptions):
+                reverted.append(coeff)
+        elif ask(term, Q.real, assumptions):
+            excluded.append(term)
+        else:
+            included.append(term)
+
+    if len(arg) != len(included):
+        a, b, c = map(lambda xs: C.Add(*xs),
+            [included, reverted, excluded])
+
+        return refine(C.re(a) - C.im(b) + c, assumptions)
+
+def refine_im(expr, assumptions):
+    """
+    refine handler for im.
+    """
+    arg = expr.args[0]
+    if ask(arg, Q.real, assumptions):
+        return S.Zero
+    included, reverted, excluded = [], [], []
+    arg = C.Add.as_args(arg)
+    for term in arg:
+        coeff = term.as_coefficient(S.ImaginaryUnit)
+        if coeff is not None:
+            if ask(coeff, Q.real, assumptions):
+                excluded.append(coeff)
+            else:
+                reverted.append(coeff)
+        elif not ask(term, Q.real, assumptions):
+            included.append(term)
+
+    if len(arg) != len(included):
+        a, b, c = map(lambda xs: C.Add(*xs),
+            [included, reverted, excluded])
+
+        return refine(C.im(a) + C.re(b) + c, assumptions)
 
 def refine_Pow(expr, assumptions):
     """
@@ -158,6 +215,8 @@ def refine_exp(expr, assumptions):
 
 handlers_dict = {
     'abs'        : refine_abs,
+    're'         : refine_re,
+    'im'         : refine_im,
     'Pow'        : refine_Pow,
     'exp'        : refine_exp,
 }
