@@ -3,7 +3,7 @@ from sympy.utilities.source import get_class
 from sympy.assumptions import Q, ask
 from sympy.logic.boolalg import fuzzy_not
 
-def refine(expr, assumptions=True):
+def refine(expr, assumptions=True, deep=True):
     """
     Simplify an expression using assumptions.
 
@@ -21,13 +21,14 @@ def refine(expr, assumptions=True):
         x
 
     """
-    if not expr.is_Atom:
+    if deep and not expr.is_Atom:
         args = [refine(arg, assumptions) for arg in expr.args]
         # TODO: this will probably not work with Integral or Polynomial
-        expr = type(expr)(*args)
+        expr = expr.func(*args)
     name = expr.__class__.__name__
     handler = handlers_dict.get(name, None)
-    if handler is None: return expr
+    if handler is None:
+        return expr
     new_expr = handler(expr, assumptions)
     if (new_expr is None) or (expr == new_expr):
         return expr

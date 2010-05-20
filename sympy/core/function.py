@@ -211,7 +211,11 @@ class Function(Application, Expr):
         # (2) create new instance of a class created in (1)
         #     UC: Function('f')(x)
         #     UC: sin(x)
-        return Application.__new__(cls, *args, **options)
+        obj = Application.__new__(cls, *args, **options)
+        if options.get('refine', True):
+            from sympy.assumptions import refine
+            obj = refine(obj, deep=False)
+        return obj
 
 
     @property
@@ -701,11 +705,11 @@ class Lambda(Function):
 
     # a minimum of 2 arguments (parameter, expression) are needed
     nargs = 2
-    def __new__(cls,*args):
+    def __new__(cls, *args):
         assert len(args) >= 2,"Must have at least one parameter and an expression"
         if len(args) == 2 and isinstance(args[0], (list, tuple)):
             args = tuple(args[0])+(args[1],)
-        obj = Function.__new__(cls,*args)
+        obj = Function.__new__(cls, *args)
         obj.nargs = len(args)-1
         return obj
 
