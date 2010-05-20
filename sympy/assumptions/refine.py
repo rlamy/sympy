@@ -24,7 +24,7 @@ def refine(expr, assumptions=True, deep=True):
     if deep and not expr.is_Atom:
         args = [refine(arg, assumptions) for arg in expr.args]
         # TODO: this will probably not work with Integral or Polynomial
-        expr = expr.func(*args)
+        expr = expr.func(*args, refine=False)
     name = expr.__class__.__name__
     handler = handlers_dict.get(name, None)
     if handler is None:
