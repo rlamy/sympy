@@ -129,14 +129,14 @@ class AskEvenHandler(CommonHandler):
                 if irrational:
                     break
                 irrational = True
-            else: 
+            else:
                 break
         else:
-            if irrational: 
+            if irrational:
                 return False
-            if even: 
+            if even:
                 return True
-            if odd == len(expr.args): 
+            if odd == len(expr.args):
                 return False
 
     @staticmethod
