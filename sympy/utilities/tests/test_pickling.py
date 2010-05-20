@@ -27,7 +27,7 @@ from sympy.core.cache import Memoizer
 from sympy import symbols
 
 
-def check(a, check_attr = True):
+def check(a, check_attr = False):
     """ Check that pickling and copying round-trips.
     """
     for protocol in [0, 1, 2, copy.copy, copy.deepcopy]:
@@ -59,9 +59,6 @@ def check(a, check_attr = True):
 
 #================== core =========================
 
-def test_core_assumptions():
-    for c in (AssumeMeths, AssumeMeths()):
-        check(c)
 
 def test_core_basic():
     for c in (Atom, Atom(), Basic, Basic(), BasicMeta, BasicMeta("test"),
