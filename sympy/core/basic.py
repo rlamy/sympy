@@ -76,7 +76,6 @@ class Basic(object):
     is_Poly = False
     is_AlgebraicNumber = False
 
-    is_comparable = False
     is_commutative = None
 
     def __new__(cls, *args, **assumptions):
@@ -299,6 +298,13 @@ class Basic(object):
 
     for name in _properties:
         exec _template % (name, name)
+
+    @property
+    def is_comparable(self):
+        try:
+            return self._eval_is_comparable()
+        except AttributeError:
+            return False
 
     def atoms(self, *types):
         """Returns the atoms that form the current object.
