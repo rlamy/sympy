@@ -140,6 +140,9 @@ class Temporary(Dummy):
         obj = Dummy.__new__(cls, 'T%i' % Dummy.dummycount, **assumptions)
         return obj
 
+    def __init__(self, **assumptions):
+        Dummy.__init__(self, self.name, **assumptions)
+
     def __getnewargs__(self):
         return ()
 
