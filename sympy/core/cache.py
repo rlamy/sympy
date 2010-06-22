@@ -78,6 +78,7 @@ def __cacheit(func):
             k = args + tuple(items)
         else:
             k = args
+
         try:
             return func_cache_it_cache[k]
         except KeyError:
