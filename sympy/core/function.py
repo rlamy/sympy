@@ -439,7 +439,7 @@ class Function(Application, Expr):
                 if rewritten is not None:
                     return rewritten
 
-        return self.func(*args, **self._assumptions)
+        return self.func(*args, **self._options)
 
     def fdiff(self, argindex=1):
         if self.nargs is not None:
