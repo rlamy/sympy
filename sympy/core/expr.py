@@ -213,7 +213,7 @@ class Expr(Basic, EvalfMixin):
                 return(result/const)
             else:
                 return None
-        if x.is_Integer:
+        if x.is_integer:
             return
 
         if expand:
@@ -448,22 +448,22 @@ class Expr(Basic, EvalfMixin):
                     return S.ComplexInfinity
             elif self is S.NaN:
                 return S.NaN
-            elif self.is_Integer:
-                if not quotient.is_Integer:
+            elif self.is_integer:
+                if not quotient.is_integer:
                     return None
                 elif self.is_positive and quotient.is_negative:
                     return None
                 else:
                     return quotient
-            elif self.is_Rational:
-                if not quotient.is_Rational:
+            elif self.is_rational:
+                if not quotient.is_rational:
                     return None
                 elif self.is_positive and quotient.is_negative:
                     return None
                 else:
                     return quotient
-            elif self.is_Real:
-                if not quotient.is_Real:
+            elif self.is_real:
+                if not quotient.is_real:
                     return None
                 elif self.is_positive and quotient.is_negative:
                     return None
@@ -471,9 +471,9 @@ class Expr(Basic, EvalfMixin):
                     return quotient
         elif self.is_NumberSymbol or self.is_Symbol or self is S.ImaginaryUnit:
             if quotient.is_Mul and len(quotient.args) == 2:
-                if quotient.args[0].is_Integer and quotient.args[0].is_positive and quotient.args[1] == self:
+                if quotient.args[0].is_integer and quotient.args[0].is_positive and quotient.args[1] == self:
                     return quotient
-            elif quotient.is_Integer:
+            elif quotient.is_integer:
                 return quotient
         elif self.is_Add:
             newargs = []
@@ -537,22 +537,22 @@ class Expr(Basic, EvalfMixin):
                 return x.extract_additively(c.as_two_terms()[1])
         sub = self - c
         if self.is_Number:
-            if self.is_Integer:
-                if not sub.is_Integer:
+            if self.is_integer:
+                if not sub.is_integer:
                     return None
                 elif self.is_positive and sub.is_negative:
                     return None
                 else:
                     return sub
-            elif self.is_Rational:
-                if not sub.is_Rational:
+            elif self.is_rational:
+                if not sub.is_rational:
                     return None
                 elif self.is_positive and sub.is_negative:
                     return None
                 else:
                     return sub
-            elif self.is_Real:
-                if not sub.is_Real:
+            elif self.is_real:
+                if not sub.is_real:
                     return None
                 elif self.is_positive and sub.is_negative:
                     return None
@@ -560,9 +560,9 @@ class Expr(Basic, EvalfMixin):
                     return sub
         elif self.is_NumberSymbol or self.is_Symbol or self is S.ImaginaryUnit:
             if sub.is_Mul and len(sub.args) == 2:
-                if sub.args[0].is_Integer and sub.args[0].is_positive and sub.args[1] == self:
+                if sub.args[0].is_integer and sub.args[0].is_positive and sub.args[1] == self:
                     return sub
-            elif sub.is_Integer:
+            elif sub.is_integer:
                 return sub
         elif self.is_Add:
             terms = self.as_two_terms()
@@ -898,6 +898,14 @@ class Expr(Basic, EvalfMixin):
 
     @property
     def is_even(self):
+        # Note: Assuming here that is_even != is_odd
+        check_odd = self._is_odd_check()
+        if check_odd in [True, False] and self.is_integer:
+            return not check_odd
+        else:
+            return self._is_even_check()
+
+    def _is_even_check(self):
         from sympy import global_assumptions, Assume, Q
         if Assume(self, Q.even, True) in global_assumptions:
             return True
@@ -910,6 +918,14 @@ class Expr(Basic, EvalfMixin):
 
     @property
     def is_odd(self):
+        # Note: Assuming here that is_odd != is_even
+        check_even = self._is_even_check()
+        if check_even in [True, False] and self.is_integer:
+            return not check_even
+        else:
+            return self._is_odd_check()
+
+    def _is_odd_check(self):
         from sympy import global_assumptions, Assume, Q
         if Assume(self, Q.odd, True) in global_assumptions:
             return True
@@ -927,6 +943,8 @@ class Expr(Basic, EvalfMixin):
             return True
         elif Assume(self, Q.positive, False) in global_assumptions:
             return False
+        elif Assume(self, Q.negative, True) in global_assumptions:
+            return False
         elif '_eval_is_positive' in dir(self):
             return self._eval_is_positive()
         else:
@@ -938,6 +956,8 @@ class Expr(Basic, EvalfMixin):
         if Assume(self, Q.negative, True) in global_assumptions:
             return True
         elif Assume(self, Q.negative, False) in global_assumptions:
+            return False
+        elif Assume(self, Q.positive, True) in global_assumptions:
             return False
         elif '_eval_is_negative' in dir(self):
             return self._eval_is_negative()
@@ -953,7 +973,37 @@ class Expr(Basic, EvalfMixin):
             return False
         elif '_eval_is_real' in dir(self):
             return self._eval_is_real()
-        elif self.is_positive or self.is_negative or self.is_integer:
+        elif self.is_positive or self.is_negative or self.is_rational:
+            return True
+        elif self.is_imaginary:
+            return False
+        else:
+            return None
+
+    @property
+    def is_rational(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.rational, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.rational, False) in global_assumptions:
+            return False
+        elif '_eval_is_rational' in dir(self):
+            return self._eval_is_rational()
+        elif self.is_integer:
+            return True
+        else:
+            return None
+
+    @property
+    def is_complex(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.complex, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.complex, False) in global_assumptions:
+            return False
+        elif '_eval_is_complex' in dir(self):
+            return self._eval_is_complex()
+        elif self.is_real or self.is_imaginary:
             return True
         else:
             return None
@@ -1003,6 +1053,8 @@ class Expr(Basic, EvalfMixin):
             return False
         elif '_eval_is_commutative' in dir(self):
             return self._eval_is_commutative()
+        elif self.is_complex:
+            return True
         else:
             return None
 
@@ -1016,7 +1068,7 @@ class Expr(Basic, EvalfMixin):
         elif '_eval_is_bounded' in dir(self):
             return self._eval_is_bounded()
         else:
-            return False
+            return None
 
     @property
     def is_unbounded(self):
@@ -1051,11 +1103,18 @@ class Expr(Basic, EvalfMixin):
     def is_zero(self):
         if '_eval_is_zero' in dir(self):
             return self._eval_is_zero()
+        if self.is_nonzero in [True, False]:
+            return not self.is_nonzero
         else:
             return None
 
     @property
     def is_nonzero(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.nonzero, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.nonzero, False) in global_assumptions:
+            return False
         if '_eval_is_nonzero' in dir(self):
             return self._eval_is_nonzero()
         else:
@@ -1070,6 +1129,8 @@ class Expr(Basic, EvalfMixin):
             return False
         elif '_eval_is_integer' in dir(self):
             return self._eval_is_integer()
+        elif self.is_even or self.is_odd:
+            return True
         else:
             return None
 
