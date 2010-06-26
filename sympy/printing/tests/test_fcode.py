@@ -2,6 +2,7 @@ from sympy import sin, cos, atan2, gamma, conjugate, sqrt, Factorial, \
     Integral, Piecewise, Add, diff, symbols, S, raises
 from sympy import Catalan, EulerGamma, E, GoldenRatio, I, pi
 from sympy import Function, Rational, Integer
+from sympy import global_assumptions, Assume, Q
 
 from sympy.printing.fcode import fcode, FCodePrinter
 from sympy.tensor import Indexed, Idx
@@ -85,8 +86,10 @@ def test_user_functions():
     assert fcode(gamma(x), user_functions={gamma: "mygamma"}) == "      mygamma(x)"
     g = Function('g')
     assert fcode(g(x), user_functions={g: "great"}) == "      great(x)"
-    n = symbols('n', integer=True)
+    n = symbols('n')
+    global_assumptions.add(Assume(n, Q.integer, True))
     assert fcode(Factorial(n), user_functions={Factorial: "fct"}) == "      fct(n)"
+    global_assumptions.discard(Assume(n, Q.integer, True))
 
 def test_assign_to():
     x = symbols('x')
