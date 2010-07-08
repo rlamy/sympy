@@ -337,7 +337,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_power_exp(self, deep=True, **hints):
         if not deep:
@@ -349,7 +349,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_power_base(self, deep=True, **hints):
         if not deep:
@@ -361,7 +361,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_mul(self, deep=True, **hints):
         if not deep:
@@ -373,7 +373,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_multinomial(self, deep=True, **hints):
         if not deep:
@@ -385,7 +385,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_log(self, deep=True, **hints):
         if not deep:
@@ -397,7 +397,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_complex(self, deep=True, **hints):
         if deep:
@@ -414,7 +414,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_expand_func(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -424,7 +424,7 @@ class Function(Application, Expr):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def _eval_rewrite(self, pattern, rule, **hints):
         if hints.get('deep', False):

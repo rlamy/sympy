@@ -1036,7 +1036,7 @@ class Basic(AssumeMeths):
             return self
         sargs = self.args
         terms = [ t._eval_rewrite(pattern, rule, **hints) for t in sargs ]
-        return self.new(*terms)
+        return self.__class__(*terms)
 
     def rewrite(self, *args, **hints):
         """Rewrites expression containing applications of functions
