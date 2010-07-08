@@ -76,7 +76,7 @@ class exp(Function):
                         else:
                             log_term = None
                             break
-                    elif term.is_comparable:
+                    elif term.is_number:
                         coeffs.append(term)
                     else:
                         log_term = None
@@ -273,8 +273,8 @@ class log(Function):
         if base is not None:
             base = sympify(base)
 
-            if arg.is_positive and arg.is_Integer and \
-               base.is_positive and base.is_Integer:
+            if arg.is_positive and arg.is_integer and \
+               base.is_positive and base.is_integer:
                 base = int(base)
                 arg = int(arg)
                 n = multiplicity(base, arg)
@@ -321,7 +321,7 @@ class log(Function):
                     return S.Infinity
                 elif coeff is S.NegativeInfinity:
                     return S.Infinity
-                elif coeff.is_Rational:
+                elif coeff.is_rational:
                     if coeff.is_nonnegative:
                         return S.Pi * S.ImaginaryUnit * S.Half + cls(coeff)
                     else:
@@ -408,6 +408,9 @@ class log(Function):
         # XXX This is not quite useless. Try evaluating log(0.5).is_negative
         #     without it. There's probably a nicer way though.
         return (self.args[0] is S.One)
+
+    def _eval_is_negative(self):
+        return not (self.is_positive or self.is_zero)
 
     def as_numer_denom(self):
         n, d = self.args[0].as_numer_denom()
