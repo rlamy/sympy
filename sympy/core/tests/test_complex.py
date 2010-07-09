@@ -1,5 +1,6 @@
 from sympy import Symbol, sqrt, I, Integer, Rational, cos, atan, sin, im, re, \
-        exp, sinh, cosh, tan, tanh, conjugate, sign, cot, coth, pi, expand_complex
+        exp, sinh, cosh, tan, tanh, conjugate, sign, cot, coth, pi, expand_complex, \
+        global_assumptions, Assume, Q
 
 
 def test_complex():
@@ -10,11 +11,15 @@ def test_complex():
     assert sqrt(I) == (-1)**Rational(1,4)
 
 def test_conjugate():
-    a = Symbol("a", real=True)
-    b = Symbol("b", real=True)
+    a = Symbol("a")
+    b = Symbol("b")
     x = Symbol('x')
     z = a + I*b
     zc = a - I*b
+
+    global_assumptions.add(Assume(a, Q.real, True))
+    global_assumptions.add(Assume(b, Q.real, True))
+
     assert conjugate(z) == zc
     assert conjugate(exp(z)) == exp(zc)
     assert conjugate(exp(I*x)) == exp(-I*conjugate(x))
@@ -30,24 +35,47 @@ def test_conjugate():
     assert conjugate(tanh(z)) == tanh(zc)
     assert conjugate(coth(z)) == coth(zc)
 
+    global_assumptions.discard(Assume(a, Q.real, True))
+    global_assumptions.discard(Assume(b, Q.real, True))
+
 def test_abs1():
-    a=Symbol("a", real=True)
-    b=Symbol("b", real=True)
+    a=Symbol("a")
+    b=Symbol("b")
+
+    global_assumptions.add(Assume(a, Q.real, True))
+    global_assumptions.add(Assume(b, Q.real, True))
+
     assert abs(a) == abs(a)
     assert abs(-a) == abs(a)
     assert abs(a+I*b) == sqrt(a**2+b**2)
 
+    global_assumptions.discard(Assume(a, Q.real, True))
+    global_assumptions.discard(Assume(b, Q.real, True))
+
 def test_abs2():
-    a=Symbol("a", real=False)
-    b=Symbol("b", real=False)
+
+    a=Symbol("a")
+    b=Symbol("b")
+
+    global_assumptions.add(Assume(a, Q.real, False))
+    global_assumptions.add(Assume(b, Q.real, False))
+
     assert abs(a) != a
     assert abs(-a) != a
     assert abs(a+I*b) != sqrt(a**2+b**2)
 
+    global_assumptions.discard(Assume(a, Q.real, False))
+    global_assumptions.discard(Assume(b, Q.real, False))
+
 def test_evalc():
-    x=Symbol("x", real=True)
-    y=Symbol("y", real=True)
+
+    x=Symbol("x")
+    y=Symbol("y")
     z=Symbol("z")
+
+    global_assumptions.add(Assume(x, Q.real, True))
+    global_assumptions.add(Assume(y, Q.real, True))
+
     assert ((x+I*y)**2).expand(complex=True) == x**2+2*I*x*y - y**2
     assert expand_complex(z**(2*I)) == I*im(z**(2*I)) + re(z**(2*I))
 
@@ -78,6 +106,9 @@ def test_evalc():
     assert tanh(I*x).expand(complex=True) == tan(x) * I
     assert tanh(x+I*y).expand(complex=True) == \
             ((sinh(x)*cosh(x) + I*cos(y)*sin(y)) / (sinh(x)**2 + cos(y)**2)).expand()
+
+    global_assumptions.discard(Assume(x, Q.real, True))
+    global_assumptions.discard(Assume(y, Q.real, True))
 
 
 def test_pythoncomplex():

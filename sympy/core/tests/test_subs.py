@@ -62,6 +62,7 @@ def test_subbug2():
     # Ensure this does not cause infinite recursion
     x = Symbol('x')
     assert Real(7.7).epsilon_eq(abs(x).subs(x, -7.7))
+    assert Real(7.7).epsilon_eq(abs(x.subs(x, -7.7)))
 
 def test_dict():
     x = Symbol('x')

@@ -78,5 +78,6 @@ def test_symbol_expand():
 def test_function():
     f = Function('f')
     l,x = map(Symbol, 'lx')
+
     assert exp(l(x))*l(x)/exp(l(x)) == l(x)
     assert exp(f(x))*f(x)/exp(f(x)) == f(x)

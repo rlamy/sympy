@@ -1,6 +1,6 @@
 from sympy import Lambda, Symbol, Function, WildFunction, Derivative, sqrt, \
         log, exp, Rational, Real, sign, Basic, sin, cos, diff, I, re, im, \
-        oo, zoo, nan, E, expand, pi, raises, O, Sum
+        oo, zoo, nan, E, expand, pi, raises, O, Sum, global_assumptions, Assume, Q
 from sympy.utilities.pytest import XFAIL
 from sympy.abc import x, y
 from sympy.core.function import PoleError
@@ -17,8 +17,11 @@ def test_exp_log():
     assert exp(log(x)) == x
 
 def test_log_expansion():
-    x = Symbol("x", positive=True)
-    y = Symbol("y", positive=True)
+    x = Symbol("x")
+    y = Symbol("y")
+
+    global_assumptions.add(Assume(x, Q.positive, True))
+    global_assumptions.add(Assume(y, Q.positive, True))
 
     # ok in interactive, fails in py.test
     #assert log(x*y) != log(x)+log(y)
@@ -27,6 +30,9 @@ def test_log_expansion():
     assert log(x*y).expand() == log(x)+log(y)
     assert log(x**2).expand() == 2*log(x)
     assert (log(x**-5)**-1).expand() == -1/log(x)/5
+
+    global_assumptions.discard(Assume(x, Q.positive, True))
+    global_assumptions.discard(Assume(y, Q.positive, True))
 
 def test_log_hashing_bug():
     x = Symbol("y")
@@ -64,15 +70,20 @@ def test_exp_expand():
 
 
 def test_f_expand_complex():
+
     f = Function('f')
-    x = Symbol('x', real=True)
+    x = Symbol('x')
     z = Symbol('z')
+
+    global_assumptions.add(Assume(x, Q.real, True))
 
     assert f(x).expand(complex=True)        == I*im(f(x)) + re(f(x))
     assert exp(x).expand(complex=True)      == exp(x)
     assert exp(I*x).expand(complex=True)    == cos(x) + I*sin(x)
     assert exp(z).expand(complex=True)      == cos(im(z))*exp(re(z)) + \
                                              I*sin(im(z))*exp(re(z))
+
+    global_assumptions.discard(Assume(x, Q.real, True))
 
 def test_bug1():
     x = Symbol("x")

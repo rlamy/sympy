@@ -1,7 +1,7 @@
 from sympy import Basic, S, Symbol, Wild,  Real, Integer, Rational,  \
     sin, cos, exp, log, oo, sqrt, symbols, Integral, sympify, \
     WildFunction, Poly, Function, Derivative, Number, pi, var, \
-    NumberSymbol, zoo, Piecewise, Mul, Pow
+    NumberSymbol, zoo, Piecewise, Mul, Pow, global_assumptions, Q, Assume
 
 from sympy.core.cache import clear_cache
 
@@ -240,7 +240,12 @@ def test_atoms():
 def test_is_polynomial():
     z = Symbol('z')
 
-    k = Symbol('k', nonnegative=True, integer=True)
+    k = Symbol('k')
+
+    global_assumptions.add(Assume(k, Q.integer, True))
+    global_assumptions.add(Assume(k, Q.negative, False))
+
+    #nonnegative=True
 
     assert Rational(2).is_polynomial(x, y, z) == True
     assert (S.Pi).is_polynomial(x, y, z) == True
@@ -264,6 +269,7 @@ def test_is_polynomial():
     assert (k**x).is_polynomial(k) == None
 
     assert (x**(-k)).is_polynomial(x) == None
+
     assert ((2*x)**k).is_polynomial(x) == True
 
     assert (x**2 + 3*x - 8).is_polynomial(x) == True
@@ -283,6 +289,9 @@ def test_is_polynomial():
 
     assert ((x**2)*(y**2) + x*(y**2) + y*x + exp(2)).is_polynomial(x, y) == True
     assert ((x**2)*(y**2) + x*(y**2) + y*x + exp(x)).is_polynomial(x, y) == False
+
+    global_assumptions.discard(Assume(k, Q.integer, True))
+    global_assumptions.discard(Assume(k, Q.negative, False))
 
 def test_is_rational_function():
     x,y = symbols('xy')
