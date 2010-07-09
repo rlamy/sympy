@@ -1092,7 +1092,7 @@ class Integer(Rational):
         else:
             b = _sympify(b)
 
-            if b.is_Integer:
+            if b.is_integer:
                 return tuple(map(Integer, igcdex(int(a), int(b))))
             else:
                 raise ValueError("expected an integer, got %s" % b)
@@ -1104,7 +1104,7 @@ class Integer(Rational):
         else:
             b = _sympify(b)
 
-            if b.is_Integer:
+            if b.is_integer:
                 a, b = int(a), int(b)
             else:
                 raise ValueError("expected an integer, got %s" % b)
@@ -1124,7 +1124,7 @@ class Integer(Rational):
         else:
             b = _sympify(b)
 
-            if b.is_Integer:
+            if b.is_integer:
                 gcd = Integer(igcd(int(a), int(b)))
                 return gcd, a//gcd, b//gcd
             else:
@@ -1137,7 +1137,7 @@ class Integer(Rational):
         else:
             b = _sympify(b)
 
-            if b.is_Integer:
+            if b.is_integer:
                 return Integer(igcd(int(a), int(b)))
             else:
                 raise ValueError("expected an integer, got %s" % b)
@@ -1149,7 +1149,7 @@ class Integer(Rational):
         else:
             b = _sympify(b)
 
-            if b.is_Integer:
+            if b.is_integer:
                 return Integer(ilcm(int(a), int(b)))
             else:
                 raise ValueError("expected an integer, got %s" % b)
