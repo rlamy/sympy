@@ -267,9 +267,18 @@ class Add(AssocOp):
         if c.is_nonpositive and r.is_nonpositive:
             return False
 
+        # Check the case where one is positive and greater than the other
+        # We make sure that they're real so we can compare them properly
+        if c.is_number and r.is_number and c.is_real and r.is_real:
+            if c.is_positive:
+                return c.evalf() > abs(r).evalf()
+            if r.is_positive:
+                return r.evalf() > abs(c).evalf()
+
     def _eval_is_negative(self):
         c = self.args[0]
         r = Add(*self.args[1:])
+
         if c.is_negative and r.is_negative:
             return True
         if c.is_unbounded:
@@ -286,6 +295,14 @@ class Add(AssocOp):
             return True
         if c.is_nonnegative and r.is_nonnegative:
             return False
+
+        # Check the case where one is positive and greater than the other
+        # We make sure that they're real so we can compare them properly
+        if c.is_number and r.is_number and c.is_real and r.is_real:
+            if c.is_negative:
+                return abs(c).evalf() > r.evalf()
+            if r.is_negative:
+                return abs(r).evalf() > c.evalf()
 
     def as_coeff_terms(self, x=None):
         # -2 + 2 * a -> -1, 2-2*a

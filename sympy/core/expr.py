@@ -898,51 +898,192 @@ class Expr(Basic, EvalfMixin):
 
     @property
     def is_even(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.even, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.even, False) in global_assumptions:
+            return False
+        elif '_eval_is_even' in dir(self):
+            return self._eval_is_even()
+        else:
+            return None
 
     @property
     def is_odd(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.odd, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.odd, False) in global_assumptions:
+            return False
+        elif '_eval_is_odd' in dir(self):
+            return self._eval_is_odd()
+        else:
+            return None
 
     @property
     def is_positive(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.positive, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.positive, False) in global_assumptions:
+            return False
+        elif '_eval_is_positive' in dir(self):
+            return self._eval_is_positive()
+        else:
+            return None
 
     @property
     def is_negative(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.negative, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.negative, False) in global_assumptions:
+            return False
+        elif '_eval_is_negative' in dir(self):
+            return self._eval_is_negative()
+        else:
+            return None
 
     @property
     def is_real(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.real, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.real, False) in global_assumptions:
+            return False
+        elif '_eval_is_real' in dir(self):
+            return self._eval_is_real()
+        elif self.is_positive or self.is_negative or self.is_integer:
+            return True
+        else:
+            return None
 
     @property
     def is_nonnegative(self):
-        return False
+        if '_eval_is_nonnegative' in dir(self):
+            return self._eval_is_nonnegative()
+
+        is_neg = self.is_negative
+        is_pos = self.is_positive
+        is_zero = self.is_zero
+
+        if is_neg in [True, False]:
+            return not is_neg
+        elif is_pos:
+            return True
+        elif is_zero:
+            return True
+        else:
+            return is_neg
 
     @property
     def is_nonpositive(self):
-        return False
+        if '_eval_is_nonpositive' in dir(self):
+            return self._eval_is_nonpositive()
+
+        is_neg = self.is_negative
+        is_pos = self.is_positive
+        is_zero = self.is_zero
+
+        if is_pos in [True, False]:
+            return not is_pos
+        elif is_neg:
+            return True
+        elif is_zero:
+            return True
+        else:
+            return is_pos
 
     @property
     def is_commutative(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.commutative, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.commutative, False) in global_assumptions:
+            return False
+        elif '_eval_is_commutative' in dir(self):
+            return self._eval_is_commutative()
+        else:
+            return None
+
+    @property
+    def is_bounded(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.bounded, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.bounded, False) in global_assumptions:
+            return False
+        elif '_eval_is_bounded' in dir(self):
+            return self._eval_is_bounded()
+        else:
+            return False
 
     @property
     def is_unbounded(self):
-        return False
+        if '_eval_is_unbounded' in dir(self):
+            return self._eval_is_unbounded()
+        is_bound = self.is_bounded
+        if is_bound in [True, False]:
+            return not is_bound
+        else:
+            return is_bound
 
     @property
     def is_comparable(self):
-        return False
+        if '_eval_is_comparable' in dir(self):
+            return self._eval_is_comparable()
+        else:
+            return None
 
     @property
     def is_imaginary(self):
-        return False
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.imaginary, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.imaginary, False) in global_assumptions:
+            return False
+        elif '_eval_is_imaginary' in dir(self):
+            return self._eval_is_imaginary()
+        else:
+            return None
 
     @property
     def is_zero(self):
-        return False
+        if '_eval_is_zero' in dir(self):
+            return self._eval_is_zero()
+        else:
+            return None
+
+    @property
+    def is_nonzero(self):
+        if '_eval_is_nonzero' in dir(self):
+            return self._eval_is_nonzero()
+        else:
+            return None
+
+    @property
+    def is_integer(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.integer, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.integer, False) in global_assumptions:
+            return False
+        elif '_eval_is_integer' in dir(self):
+            return self._eval_is_integer()
+        else:
+            return None
+
+    @property
+    def is_infinitesimal(self):
+        from sympy import global_assumptions, Assume, Q
+        if Assume(self, Q.infinitesimal, True) in global_assumptions:
+            return True
+        elif Assume(self, Q.infinitesimal, False) in global_assumptions:
+            return False
+        elif '_eval_is_infinitesimal' in dir(self):
+            return self._eval_is_infinitesimal()
+        else:
+            return None
 
 from mul import Mul
 from power import Pow
