@@ -42,6 +42,9 @@ class Symbol(Atom, Expr, Boolean):
 
         """
 
+        # FIXME: This should be stripped out along with any mention of the assumptions.
+        cls.assumptions0 = assumptions
+
         # XXX compatibility stuff
         if dummy==True:
             return Dummy(name, commutative=commutative, **assumptions)
@@ -81,6 +84,12 @@ class Symbol(Atom, Expr, Boolean):
     @property
     def is_number(self):
         return False
+
+    def _eval_is_positive(self):
+        return None
+
+    def _eval_is_negative(self):
+        return None
 
 class Dummy(Symbol):
     """Dummy Symbol
