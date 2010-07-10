@@ -8,7 +8,7 @@ class CycleDetected(Exception):
     pass
 
 
-class AssumeMeths(object):
+class AssumeMixin(object):
     """ Define default assumption methods.
 
     AssumeMeths should be used to derive Basic class only.
@@ -70,10 +70,7 @@ class AssumeMeths(object):
         - None (if you don't know if the property is True or false)
     """
 
-    __slots__ = ['_assumptions',    # assumptions
-                 '_a_inprogress',   # already-seen requests (when deducing
-                                    # through prerequisites -- see CycleDetected)
-                ]
+    __slots__ = []
 
 
     # This are the rules under which our assumptions function
@@ -156,32 +153,6 @@ class AssumeMeths(object):
     # as negative
     _real_cmp0_table['nonpositive'] = _real_cmp0_table['negative']
     _real_cmp0_table['nonnegative'] = _real_cmp0_table['positive']
-
-    def __getstate__(self, cls=None):
-        if cls is None:
-            # This is the case for the instance that gets pickled
-            cls = self.__class__
-
-        d = {}
-        # Get all data that should be stored from super classes
-        for c in cls.__bases__:
-            if hasattr(c, "__getstate__"):
-                d.update(c.__getstate__(self, c))
-
-        # Get all information that should be stored from cls and return the dic
-        for name in cls.__slots__:
-            if hasattr(self, name):
-                d[name] = getattr(self, name)
-        return d
-
-    def __setstate__(self, d):
-        # All values that were pickled are now assigned to a fresh instance
-        for name, value in d.iteritems():
-            try:
-                setattr(self, name, value)
-            except:
-                pass
-
 
 
     def _what_known_about(self, k):

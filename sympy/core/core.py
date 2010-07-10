@@ -1,6 +1,6 @@
 """ The core's core. """
 
-from assumptions import AssumeMeths, make__get_assumption
+from assumptions import AssumeMixin, make__get_assumption
 
 # used for canonical ordering of symbolic sequences
 # via __cmp__ method:
@@ -91,7 +91,7 @@ class BasicMeta(BasicType):
                 continue
 
             # this is not an assumption (e.g. is_Integer)
-            if k[3:] not in AssumeMeths._assume_defined:
+            if k[3:] not in AssumeMixin._assume_defined:
                 continue
 
             k = k[3:]
@@ -124,7 +124,7 @@ class BasicMeta(BasicType):
 
 
         # deduce all consequences from default assumptions -- make it complete
-        xass = AssumeMeths._assume_rules.deduce_all_facts(default_assumptions)
+        xass = AssumeMixin._assume_rules.deduce_all_facts(default_assumptions)
 
         # and store completed set into cls -- this way we'll avoid rededucing
         # extensions of class default assumptions each time on instance

@@ -1,12 +1,12 @@
 """Base class for all objects in sympy"""
 
 from decorators import _sympifyit
-from assumptions import AssumeMeths, make__get_assumption
+from assumptions import AssumeMixin, make__get_assumption
 from cache import cacheit
 from core import BasicMeta, BasicType, C
 from sympify import _sympify, sympify, SympifyError
 
-class Basic(AssumeMeths):
+class Basic(AssumeMixin):
     """
     Base class for all objects in sympy.
 
@@ -43,7 +43,10 @@ class Basic(AssumeMeths):
 
     __metaclass__ = BasicMeta
 
-    __slots__ = ['_mhash',              # hash value
+    __slots__ = ['_assumptions',    # assumptions
+                 '_a_inprogress',   # already-seen requests (when deducing
+                                    # through prerequisites -- see CycleDetected)
+                 '_mhash',              # hash value
                  '_args',               # arguments
                  '_assume_type_keys',   # assumptions typeinfo keys
                 ]
@@ -173,7 +176,7 @@ class Basic(AssumeMeths):
     #     raise Warning('no way, *all* attribute access will be 2.5x slower')
 
     # here is what we do instead:
-    for k in AssumeMeths._assume_defined:
+    for k in AssumeMixin._assume_defined:
         exec "is_%s  = property(make__get_assumption('Basic', '%s'))" % (k,k)
     del k
 
@@ -214,6 +217,31 @@ class Basic(AssumeMeths):
         # then this method should be updated accordingly to return
         # relevant attributes as tuple.
         return self._args
+
+    def __getstate__(self, cls=None):
+        if cls is None:
+            # This is the case for the instance that gets pickled
+            cls = self.__class__
+
+        d = {}
+        # Get all data that should be stored from super classes
+        for c in cls.__bases__:
+            if hasattr(c, "__getstate__"):
+                d.update(c.__getstate__(self, c))
+
+        # Get all information that should be stored from cls and return the dic
+        for name in cls.__slots__:
+            if hasattr(self, name):
+                d[name] = getattr(self, name)
+        return d
+
+    def __setstate__(self, d):
+        # All values that were pickled are now assigned to a fresh instance
+        for name, value in d.iteritems():
+            try:
+                setattr(self, name, value)
+            except:
+                pass
 
     def compare(self, other):
         """
