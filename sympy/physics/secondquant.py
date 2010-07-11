@@ -92,7 +92,7 @@ class Dagger(Expr):
         r = cls.eval(arg)
         if isinstance(r, Basic):
             return r
-        obj = Basic.__new__(cls, arg)
+        obj = Expr.__new__(cls, arg)
         return obj
 
     @classmethod
@@ -578,7 +578,7 @@ class SqOperator(Expr):
     op_symbol = 'sq'
 
     def __new__(cls, k):
-        obj = Basic.__new__(cls, sympify(k), commutative=False)
+        obj = Expr.__new__(cls, sympify(k), commutative=False)
         return obj
 
     def _eval_subs(self, old, new):
@@ -1108,7 +1108,7 @@ class FockState(Expr):
           is the i'th occupied state.
         """
         occupations = map(sympify, occupations)
-        obj = Basic.__new__(cls, Tuple(*occupations), commutative=False)
+        obj = Expr.__new__(cls, Tuple(*occupations), commutative=False)
         return obj
 
     def _eval_subs(self, old, new):
@@ -1475,7 +1475,7 @@ def apply_operators(e):
     return e.subs(subs_list)
 
 
-class InnerProduct(Basic):
+class InnerProduct(Expr):
     """
     An unevaluated inner product between a bra and ket.
 
@@ -1491,7 +1491,7 @@ class InnerProduct(Basic):
         r = cls.eval(bra, ket)
         if isinstance(r, Basic):
             return r
-        obj = Basic.__new__(cls, *(bra, ket), **dict(commutative=True))
+        obj = Expr.__new__(cls, *(bra, ket), **dict(commutative=True))
         return obj
 
     @classmethod
@@ -1499,7 +1499,8 @@ class InnerProduct(Basic):
         result = S.One
         for i,j in zip(bra.args[0], ket.args[0]):
             result *= KroneckerDelta(i,j)
-            if result == 0: break
+            if result == 0:
+                break
         return result
 
     @property
@@ -2927,9 +2928,9 @@ class PermutationOperator(Expr):
     def __new__(cls, i,j):
         i,j = map(sympify,(i,j))
         if (i>j):
-            obj =  Basic.__new__(cls,j,i)
+            obj = Expr.__new__(cls,j,i)
         else:
-            obj =  Basic.__new__(cls,i,j)
+            obj = Expr.__new__(cls,i,j)
         return obj
 
 

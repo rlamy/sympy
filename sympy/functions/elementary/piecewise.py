@@ -1,8 +1,8 @@
-from sympy.core import Basic, S, Function, diff, Number, sympify
+from sympy.core import Basic, Expr, S, Function, diff, Number, sympify
 from sympy.core.relational import Equality, Relational
 from sympy.core.sets import Set
 
-class ExprCondPair(Function):
+class ExprCondPair(Expr):
     """Represents an expression, condition pair."""
 
     def __new__(cls, *args, **assumptions):
@@ -14,7 +14,7 @@ class ExprCondPair(Function):
             cond = sympify(args[1])
         else:
             raise TypeError("args must be a (expr, cond) pair")
-        return Basic.__new__(cls, expr, cond, **assumptions)
+        return Expr.__new__(cls, expr, cond, **assumptions)
 
     @property
     def expr(self):
@@ -88,7 +88,7 @@ class Piecewise(Function):
         r = cls.eval(*newargs)
 
         if r is None:
-            return Basic.__new__(cls, *newargs, **options)
+            return Expr.__new__(cls, *newargs, **options)
         else:
             return r
 

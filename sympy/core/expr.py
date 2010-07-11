@@ -1,13 +1,116 @@
 from core import C
 from basic import Basic, Atom
+from assumptions import AssumeMixin, make__get_assumption, _assume_defined
 from singleton import S
 from evalf import EvalfMixin
 from decorators import _sympifyit, call_highest_priority
 from cache import cacheit
 from sympy.core.compatibility import all
 
-class Expr(Basic, EvalfMixin):
-    __slots__ = []
+
+class Expr(Basic, EvalfMixin, AssumeMixin):
+    __slots__ = ['_assumptions',    # assumptions
+                 '_a_inprogress',   # already-seen requests (when deducing
+                                    # through prerequisites -- see CycleDetected)
+                 '_assume_type_keys',   # assumptions typeinfo keys
+                ]
+
+    def __new__(cls, *args, **assumptions):
+        obj = Basic.__new__(cls, *args, **assumptions)
+
+        # initially assumptions are shared between instances and class
+        obj._assumptions  = cls.default_assumptions
+        obj._a_inprogress = []
+
+        # NOTE this could be made lazy -- probably not all instances will need
+        # fully derived assumptions?
+        if assumptions:
+            obj._learn_new_facts(assumptions)
+            basek = set(cls.default_assumptions)
+            k2    = set(obj._assumptions)
+            newk  = k2.difference(basek)
+            obj._assume_type_keys = frozenset(newk)
+        else:
+            obj._assume_type_keys = None
+
+        obj._mhash = None # will be set by __hash__ method.
+        obj._args = args  # all items in args must be Basic objects
+        return obj
+
+    @property
+    def assumptions0(self):
+        """
+        Return object `type` assumptions.
+
+        For example:
+
+          Symbol('x', real=True)
+          Symbol('x', integer=True)
+
+        are different objects. In other words, besides Python type (Symbol in
+        this case), the initial assumptions are also forming their typeinfo.
+
+        Example:
+
+        >>> from sympy import Symbol
+        >>> from sympy.abc import x
+        >>> x.assumptions0
+        {}
+        >>> x = Symbol("x", positive=True)
+        >>> x.assumptions0
+        {'commutative': True, 'complex': True, 'imaginary': False,
+        'negative': False, 'nonnegative': True, 'nonpositive': False,
+        'nonzero': True, 'positive': True, 'real': True, 'zero': False}
+
+        """
+        cls = type(self)
+        A = self._assumptions
+        if A is cls.default_assumptions or (self._assume_type_keys is None):
+            assumptions0 = {}
+        else:
+            assumptions0 = dict((k, A[k]) for k in self._assume_type_keys)
+        return assumptions0
+
+
+    def new(self, *args):
+        """
+        Create new 'similar' object.
+
+        this is conceptually equivalent to:
+
+          type(self) (*args)
+
+        but takes type assumptions into account. See also: assumptions0
+
+        Example:
+
+        >>> from sympy.abc import x
+        >>> x.new("x")
+        x
+
+        """
+        obj = self.func(*args, **self.assumptions0)
+        return obj
+
+    for k in _assume_defined:
+        exec "is_%s  = property(make__get_assumption('Basic', '%s'))" % (k,k)
+    del k
+
+
+    def __hash__(self):
+        # hash cannot be cached using cache_it because infinite recurrence
+        # occurs as hash is needed for setting cache dictionary keys
+        h = self._mhash
+        if h is None:
+            h = (type(self).__name__,) + self._hashable_content()
+            if self._assume_type_keys is not None:
+                assum = self._assumptions
+                a = tuple((k, assum[k]) for k in sorted(self._assume_type_keys))
+                h = hash(h + tuple(a))
+            else:
+                h = hash(h)
+            self._mhash = h
+        return h
 
     # ***************
     # * Arithmetics *
@@ -23,8 +126,10 @@ class Expr(Basic, EvalfMixin):
 
     def __pos__(self):
         return self
+
     def __neg__(self):
         return Mul(S.NegativeOne, self)
+
     def __abs__(self):
         return C.Abs(self)
 
@@ -32,6 +137,7 @@ class Expr(Basic, EvalfMixin):
     @call_highest_priority('__radd__')
     def __add__(self, other):
         return Add(self, other)
+
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__add__')
     def __radd__(self, other):
@@ -41,6 +147,7 @@ class Expr(Basic, EvalfMixin):
     @call_highest_priority('__rsub__')
     def __sub__(self, other):
         return Add(self, -other)
+
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__sub__')
     def __rsub__(self, other):
@@ -50,6 +157,7 @@ class Expr(Basic, EvalfMixin):
     @call_highest_priority('__rmul__')
     def __mul__(self, other):
         return Mul(self, other)
+
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__mul__')
     def __rmul__(self, other):
@@ -59,6 +167,7 @@ class Expr(Basic, EvalfMixin):
     @call_highest_priority('__rpow__')
     def __pow__(self, other):
         return Pow(self, other)
+
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__pow__')
     def __rpow__(self, other):
@@ -68,6 +177,7 @@ class Expr(Basic, EvalfMixin):
     @call_highest_priority('__rdiv__')
     def __div__(self, other):
         return Mul(self, Pow(other, S.NegativeOne))
+
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__div__')
     def __rdiv__(self, other):
@@ -75,7 +185,6 @@ class Expr(Basic, EvalfMixin):
 
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
-
 
     def __float__(self):
         result = self.evalf()

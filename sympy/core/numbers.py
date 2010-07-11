@@ -560,7 +560,6 @@ class Rational(Number):
         obj = Expr.__new__(cls)
         obj.p = p
         obj.q = q
-        #obj._args = (p, q)
         return obj
 
     def limit_denominator(self, max_denominator=1000000):
@@ -880,7 +879,6 @@ class Rational(Number):
 # int -> Integer
 _intcache = {}
 
-
 # TODO move this tracing facility to  sympy/core/trace.py  ?
 def _intcache_printinfo():
     ints = sorted(_intcache.keys())
@@ -932,8 +930,6 @@ def int_trace(f):
     atexit.register(_intcache_printinfo)
 
     return Integer_tracer
-
-
 
 
 class Integer(Rational):
