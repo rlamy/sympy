@@ -1851,9 +1851,10 @@ def count_ops(expr, visual=False):
 
     """
     from sympy.simplify.simplify import fraction
+    from sympy.logic.boolalg import Boolean
 
     expr = sympify(expr)
-    if isinstance(expr, Expr):
+    if isinstance(expr, (Expr, Boolean)):
 
         ops = []
         args = [expr]

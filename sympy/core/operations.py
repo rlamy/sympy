@@ -1,12 +1,11 @@
 from core import C
+from basic import Basic
+from singleton import S
 from expr import Expr
 from sympify import _sympify, sympify
 from cache import cacheit
 from compatibility import cmp
 
-# from add import Add /cyclic/
-# from mul import Mul /cyclic/
-# from function import Lambda, WildFunction /cyclic/
 
 class AssocOp(Expr):
     """ Associative operations, can separate noncommutative and
@@ -248,7 +247,7 @@ class AssocOp(Expr):
 class ShortCircuit(Exception):
     pass
 
-class LatticeOp(AssocOp):
+class LatticeOp(Basic):
     """
     Join/meet operations of an algebraic lattice[1].
 
@@ -293,7 +292,7 @@ class LatticeOp(AssocOp):
         elif len(_args) == 1:
             return set(_args).pop()
         else:
-            obj = Expr.__new__(cls, _args)
+            obj = Basic.__new__(cls, _args)
             obj._argset = _args
             return obj
 
