@@ -31,7 +31,7 @@ Example:
 """
 from itertools import repeat
 
-from core import C
+from core import C, BasicMeta
 from basic import Basic
 from singleton import S
 from expr import Expr, AtomicExpr, AssumeMeta
@@ -53,20 +53,8 @@ class ArgumentIndexError(ValueError):
         return ("Invalid operation with argument number %s for Function %s" %
                         (self.args[1], self.args[0]))
 
-class FunctionClass(AssumeMeta):
-    """
-    Base class for function classes. FunctionClass is a subclass of type.
-
-    Use Function('<function name>' [ , signature ]) to create
-    undefined function classes.
-    """
-    _new = type.__new__
-
-    def __repr__(cls):
-        return cls.__name__
-
-    def __contains__(self, obj):
-        return (self == obj)
+class FunctionClass(ApplicationClass, type(Expr)):
+    pass
 
 class UndefinedFunction(FunctionClass):
     """
@@ -77,114 +65,13 @@ class UndefinedFunction(FunctionClass):
         bases = (Function,)
         return super(UndefinedFunction, mcl).__new__(mcl, name, bases, attrdict)
 
-class Application(Basic):
-    """
-    Base class for applied functions.
-
-    Instances of Application represent the result of applying an application of
-    any type to any object.
-    """
-    __metaclass__ = FunctionClass
-    __slots__ = []
-
-    is_Function = True
-
-    nargs = None
-
-    @classmethod
-    def _should_evalf(cls, arg):
-        """
-        Decide if the function should automatically evalf().
-        By default (in this implementation), this happens if (and only if) the
-        ARG is a floating point number.
-        This function is used by __new__.
-        """
-        if arg.is_Real:
-            return True
-        if not arg.is_Add:
-            return False
-        re, im = arg.as_real_imag()
-        return re.is_Real or im.is_Real
-
-    @cacheit
-    def __new__(cls, *args, **options):
-        args = map(sympify, args)
-        # these lines should be refactored
-        for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
-            if opt in options:
-                del options[opt]
-        # up to here.
-        if not options.pop('evaluate', True):
-            return super(Application, cls).__new__(cls, *args, **options)
-        evaluated = cls.eval(*args)
-        if evaluated is not None:
-            return evaluated
-        # Just undefined functions have nargs == None
-        if not cls.nargs and hasattr(cls, 'undefined_Function'):
-            r = super(Application, cls).__new__(cls, *args, **options)
-            r.nargs = len(args)
-            return r
-        r = super(Application, cls).__new__(cls, *args, **options)
-        if any([cls._should_evalf(a) for a in args]):
-            return r.evalf()
-        return r
-
-    @classmethod
-    def eval(cls, *args):
-        """
-        Returns a canonical form of cls applied to arguments args.
-
-        The eval() method is called when the class cls is about to be
-        instantiated and it should return either some simplified instance
-        (possible of some other class), or if the class cls should be
-        unmodified, return None.
-
-        Example of eval() for the function "sign"
-        ---------------------------------------------
-
-        @classmethod
-        def eval(cls, arg):
-            if arg is S.NaN:
-                return S.NaN
-            if arg is S.Zero: return S.Zero
-            if arg.is_positive: return S.One
-            if arg.is_negative: return S.NegativeOne
-            if isinstance(arg, C.Mul):
-                coeff, terms = arg.as_coeff_mul()
-                if coeff is not S.One:
-                    return cls(coeff) * cls(arg._new_rawargs(*terms))
-
-        """
-        return
-
-    @property
-    def func(self):
-        return self.__class__
-
-    def _eval_subs(self, old, new):
-        if self == old:
-            return new
-        elif old.is_Function and new.is_Function:
-            if old == self.func:
-                if self.nargs == new.nargs or not new.nargs:
-                    return new(*self.args)
-                # Written down as an elif to avoid a super-long line
-                elif isinstance(new.nargs, tuple) and self.nargs in new.nargs:
-                    return new(*self.args)
-        return self.func(*[s.subs(old, new) for s in self.args])
-
-    def __contains__(self, obj):
-        if self.func == obj:
-            return True
-        return super(Application, self).__contains__(obj)
-
-
 class Function(Application, Expr):
     """
     Base class for applied numeric functions.
     Constructor of undefined function classes.
 
     """
+    __metaclass__ = FunctionClass
 
     @cacheit
     def __new__(cls, *args, **options):
