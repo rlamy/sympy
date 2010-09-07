@@ -72,47 +72,6 @@ class Logic(object):
     # {} 'op' -> LogicClass
     op_2class = {}
 
-
-    def __new__(cls, args):
-        obj = object.__new__(cls)
-        obj.args = tuple(args)
-
-        # XXX do we need this:
-        #print 'L: %s' % (obj.args,)
-        assert not isinstance(obj.args[0], tuple)
-
-        return obj
-
-
-    def __hash__(self):
-        return hash( (type(self).__name__, self.args) )
-
-
-    def __eq__(a, b):
-        if not isinstance(b, type(a)):
-            return False
-        else:
-            return a.args == b.args
-
-    def __ne__(a, b):
-        if not isinstance(b, type(a)):
-            return True
-        else:
-            return a.args != b.args
-
-
-    def __cmp__(a, b):
-        if type(a) is not type(b):
-            return cmp( str(type(a)), str(type(b)) )
-
-        else:
-            return cmp(a.args, b.args)
-
-    def __str__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(str(a) for a in self.args))
-
-    __repr__ = __str__
-
     @staticmethod
     def fromstring(text):
         """Logic from string
@@ -159,55 +118,7 @@ class Logic(object):
         return lexpr
 
 
-class AndOr_Base(Logic):
-
-    def __new__(cls, *args):
-        bargs = []
-        for a in args:
-            if a == cls.op_x_notx:
-                return a
-            elif a == (not cls.op_x_notx):
-                continue    # skip this argument
-            bargs.append(a)
-
-        args = cls.flatten(bargs)
-        args = set(args)
-
-        for a in args:
-            if Not(a) in args:
-                return cls.op_x_notx
-
-        if len(args) == 1:
-            return args.pop()
-        elif len(args) == 0:
-            return not cls.op_x_notx
-
-        return Logic.__new__(cls, sorted(args))
-
-
-    @classmethod
-    def flatten(cls, args):
-        # quick-n-dirty flattening for And and Or
-        args_queue = list(args)
-        res = []
-
-        while True:
-            try:
-                arg = args_queue.pop(0)
-            except IndexError:
-                break
-            if isinstance(arg, Logic):
-                if isinstance(arg, cls):
-                    args_queue.extend(arg.args)
-                    continue
-            res.append(arg)
-
-        args = tuple(res)
-        return args
-
-
-class And(_And, AndOr_Base):
-    op_x_notx = False
+class And(_And, Logic):
 
     def __new__(cls, *args):
         args = map(wrap_strings, args)
@@ -244,8 +155,7 @@ class And(_And, AndOr_Base):
             return self
 
 
-class Or(_Or, AndOr_Base):
-    op_x_notx = True
+class Or(_Or, Logic):
 
     def __new__(cls, *args):
         args = map(wrap_strings, args)
