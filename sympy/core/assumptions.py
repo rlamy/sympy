@@ -394,4 +394,3 @@ class AssumeMixin(object):
             self._assumptions = base
         # NOTE it modifies base inplace
         _assume_rules.deduce_all_facts(facts, base)
-
