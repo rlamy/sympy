@@ -32,7 +32,7 @@ class Expr(Basic, EvalfMixin, AssumeMixin):
             h = (type(self).__name__,) + self._hashable_content()
             if self._assume_type_keys is not None:
                 assum = self._assumptions
-                a = tuple((k, assum[k]) for k in sorted(self._assume_type_keys))
+                a = tuple((k, assum[k]) for k in sorted(self._assume_type_keys, key=str))
                 h = hash(h + tuple(a))
             else:
                 h = hash(h)

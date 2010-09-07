@@ -2,6 +2,8 @@
 
 This is mainly needed for facts.py.
 """
+from sympy.logic.boolalg import fuzzy_not, Boolean, And as _And, Or as _Or, Not as _Not
+from sympy.core.basic import Basic, Atom
 
 def fuzzy_bool(x):
     """Return True, False or None according to x.
@@ -41,10 +43,31 @@ def fuzzy_and(*args):
     elif a is False or b is False:
         return False
 
+class Fact(Atom, Boolean):
+    @property
+    def arg(self):
+        return self._args[0]
+
+    def __str__(self):
+        return self.arg
+
+    def __eq__(self, other):
+        return other == self.arg
+
+    def __ne__(self, other):
+        return other != self.arg
+
+    def __hash__(self):
+        return hash(self.arg)
+
+def wrap_strings(obj):
+    if isinstance(obj, str):
+        return Fact(obj)
+    else:
+        return obj
+
 class Logic(object):
     """Logical expression"""
-
-    __slots__ = ['args']
 
     # {} 'op' -> LogicClass
     op_2class = {}
@@ -111,6 +134,8 @@ class Logic(object):
                 continue
             if term[0] == '!':
                 term = Not(term[1:])
+            else:
+                term = Fact(term)
 
             # already scheduled operation, e.g. '&'
             if schedop:
@@ -135,8 +160,6 @@ class Logic(object):
 
 
 class AndOr_Base(Logic):
-
-    __slots__ = []
 
     def __new__(cls, *args):
         bargs = []
@@ -183,10 +206,17 @@ class AndOr_Base(Logic):
         return args
 
 
-class And(AndOr_Base):
+class And(_And, AndOr_Base):
     op_x_notx = False
 
-    __slots__ = []
+    def __new__(cls, *args):
+        args = map(wrap_strings, args)
+        obj = super(And, cls).__new__(cls, *args)
+        argset = _And.make_args(obj)
+        for a in argset:
+            if Not(a) in argset:
+                return False
+        return obj
 
     def _eval_propagate_not(self):
         # !(a&b&c ...) == !a | !b | !c ...
@@ -214,21 +244,27 @@ class And(AndOr_Base):
             return self
 
 
-class Or(AndOr_Base):
+class Or(_Or, AndOr_Base):
     op_x_notx = True
 
-    __slots__ = []
+    def __new__(cls, *args):
+        args = map(wrap_strings, args)
+        obj = super(Or, cls).__new__(cls, *args)
+        argset = _Or.make_args(obj)
+        for a in argset:
+            if Not(a) in argset:
+                return True
+        return obj
 
     def _eval_propagate_not(self):
         # !(a|b|c ...) == !a & !b & !c ...
         return And( *[Not(a) for a in self.args] )
 
-class Not(Logic):
-    __slots__ = []
+class Not(_Not, Logic):
 
     def __new__(cls, arg):
-        if isinstance(arg, str):
-            return Logic.__new__(cls, (arg,))
+        if type(arg) in (str, Fact):
+            return Basic.__new__(cls, wrap_strings(arg))
 
         elif isinstance(arg, bool):
             return not arg

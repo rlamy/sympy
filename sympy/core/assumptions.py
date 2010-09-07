@@ -207,9 +207,9 @@ class AssumeMixin(object):
 
         try:
             # First try the assumption evaluation function if it exists
-            if hasattr(self, '_eval_is_' + k):
+            if hasattr(self, '_eval_is_' + str(k)):
                 try:
-                    a = getattr(self, '_eval_is_' + k)()
+                    a = getattr(self, '_eval_is_' + str(k))()
                 except CycleDetected:
                     pass
                 else:
@@ -219,11 +219,11 @@ class AssumeMixin(object):
 
             # Try assumption's prerequisites
             for pk in _assume_rules.prereq.get(k, ()):
-                if hasattr(self, '_eval_is_' + pk):
+                if hasattr(self, '_eval_is_' + str(pk)):
                     # cycle
                     if pk in seen:
                         continue
-                    a = getattr(self, 'is_' + pk)
+                    a = getattr(self, 'is_' + str(pk))
                     if a is not None:
                         self._learn_new_facts( ((pk,a),) )
                         # it is possible that we either know or don't know k at
@@ -438,10 +438,10 @@ class AssumeMeta(BasicMeta):
         cls._derived_premises = derived_premises
 
         for k,v in xass.iteritems():
-            assert v == cls.__dict__.get('is_'+k, v),  (cls,k,v)
+            assert v == cls.__dict__.get('is_'+ str(k), v),  (cls,k,v)
             # NOTE: this way Integer.is_even = False (inherited from Rational)
             # NOTE: the next code blocks add 'protection-properties' to overcome this
-            setattr(cls, 'is_'+k, v)
+            setattr(cls, 'is_'+ str(k), v)
 
         # protection e.g. for Initeger.is_even=F <- (Rational.is_integer=F)
         for base in cls.__bases__:

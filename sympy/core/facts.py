@@ -584,11 +584,6 @@ class FactRules(object):
 
             # --- alpha chains ---
             for k, v in fseq:
-                # first, convert name to be not a not-name
-                if k[0] == '!':
-                    k = k[1:]
-                    v = fuzzy_not(v)
-
                 #new_fact(k, v)
                 if k in new_facts:
                     assert new_facts[k] is None or new_facts[k] == v, \
