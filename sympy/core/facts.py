@@ -47,7 +47,7 @@ http://en.wikipedia.org/wiki/Propositional_formula
 http://en.wikipedia.org/wiki/Inference_rule
 http://en.wikipedia.org/wiki/List_of_rules_of_inference
 """
-from logic import fuzzy_not, name_not, Logic, And, Not
+from logic import fuzzy_not, Logic, And, Or, Not
 
 # XXX this prepares forward-chaining rules for alpha-network
 def deduce_alpha_implications(implications):
@@ -90,7 +90,7 @@ def deduce_alpha_implications(implications):
     # Clean up tautologies and check consistency
     for a, impl in res.iteritems():
         impl.discard(a)
-        na = name_not(a)
+        na = Not(a)
         if na in impl:
             raise ValueError('implications are inconsistent: %s -> %s %s' % (a, na, impl))
 
@@ -361,7 +361,7 @@ class Prover(object):
         if isinstance(b, Logic):
             # a -> b & c    -->  a -> b  ;  a -> c
             # (?) FIXME this is only correct when b & c != null !
-            if b.op == '&':
+            if isinstance(b, And):
                 for barg in b.args:
                     self.process_rule(a, barg)
 
@@ -371,7 +371,7 @@ class Prover(object):
             #
             # NB: the last two rewrites add 1 term, so the rule *grows* in size.
             # NB: without catching terminating conditions this could continue infinitely
-            elif b.op == '|':
+            elif isinstance(b, Or):
                 # detect tautology first
                 if not isinstance(a, Logic):    # Atom
                     # tautology:  a -> a|c|...
@@ -391,14 +391,14 @@ class Prover(object):
         elif isinstance(a, Logic):
             # a & b -> c    -->  IRREDUCIBLE CASE -- WE STORE IT AS IS
             #                    (this will be the basis of beta-network)
-            if a.op == '&':
+            if isinstance(a, And):
                 assert not isinstance(b, Logic)
                 if b in a.args:
                     raise TautologyDetected(a,b, 'a & b -> a')
                 self.proved_rules.append((a,b))
                 # XXX NOTE at present we ignore  !c -> !a | !b
 
-            elif a.op == '|':
+            elif isinstance(a, Or):
                 if b in a.args:
                     raise TautologyDetected(a,b, 'a | b -> a')
                 for aarg in a.args:
@@ -407,9 +407,8 @@ class Prover(object):
                 raise ValueError('unknown a.op %r' % a.op)
         else:
             # both `a` and `b` are atoms
-            na, nb = name_not(a), name_not(b)
             self.proved_rules.append((a,b))     # a  -> b
-            self.proved_rules.append((nb,na))   # !b -> !a
+            self.proved_rules.append((Not(b), Not(a)))   # !b -> !a
 
 ########################################
 
@@ -504,7 +503,7 @@ class FactRules(object):
         for k, (impl,betaidxs) in impl_ab.iteritems():
             if k[:1] == '!':
                 rel_xbeta = rel_fbeta
-                k = name_not(k)
+                k = Not(k)
             else:
                 rel_xbeta = rel_tbeta
             rel_xbeta[k] = betaidxs
@@ -591,7 +590,7 @@ class FactRules(object):
             for k,v in fseq:
                 # first, convert name to be not a not-name
                 if k[:1] == '!':
-                    k = name_not(k)
+                    k = Not(k)
                     v = fuzzy_not(v)
 
                 #new_fact(k, v)
