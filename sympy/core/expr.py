@@ -1,6 +1,6 @@
 from core import C
 from basic import Basic, Atom
-from assumptions import AssumeMeta, AssumeMixin, make__get_assumption, _assume_defined
+from assumptions import AssumeMeta, AssumeMixin
 from singleton import S, Singleton
 from evalf import EvalfMixin
 from decorators import _sympifyit, call_highest_priority
@@ -22,79 +22,6 @@ class Expr(Basic, EvalfMixin, AssumeMixin):
         return obj
 
 
-    def _init_assumptions(self, assumptions):
-        # initially assumptions are shared between instances and class
-        self._assumptions  = self.default_assumptions
-        self._a_inprogress = []
-
-        # NOTE this could be made lazy -- probably not all instances will need
-        # fully derived assumptions?
-        if assumptions:
-            self._learn_new_facts(assumptions)
-            basek = set(self.default_assumptions)
-            k2    = set(self._assumptions)
-            newk  = k2.difference(basek)
-            self._assume_type_keys = frozenset(newk)
-        else:
-            self._assume_type_keys = None
-
-    @property
-    def assumptions0(self):
-        """
-        Return object `type` assumptions.
-
-        For example:
-
-          Symbol('x', real=True)
-          Symbol('x', integer=True)
-
-        are different objects. In other words, besides Python type (Symbol in
-        this case), the initial assumptions are also forming their typeinfo.
-
-        Example:
-
-        >>> from sympy import Symbol
-        >>> from sympy.abc import x
-        >>> x.assumptions0
-        {}
-        >>> x = Symbol("x", positive=True)
-        >>> x.assumptions0
-        {'commutative': True, 'complex': True, 'imaginary': False,
-        'negative': False, 'nonnegative': True, 'nonpositive': False,
-        'nonzero': True, 'positive': True, 'real': True, 'zero': False}
-
-        """
-        A = self._assumptions
-        if A is self.default_assumptions or (self._assume_type_keys is None):
-            assumptions0 = {}
-        else:
-            assumptions0 = dict((k, A[k]) for k in self._assume_type_keys)
-        return assumptions0
-
-
-    def new(self, *args):
-        """
-        Create new 'similar' object.
-
-        this is conceptually equivalent to:
-
-          type(self) (*args)
-
-        but takes type assumptions into account. See also: assumptions0
-
-        Example:
-
-        >>> from sympy.abc import x
-        >>> x.new("x")
-        x
-
-        """
-        obj = self.func(*args, **self.assumptions0)
-        return obj
-
-    for k in _assume_defined:
-        exec "is_%s  = property(make__get_assumption('Basic', '%s'))" % (k,k)
-    del k
 
 
     def __hash__(self):

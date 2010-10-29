@@ -273,15 +273,86 @@ class AssumeMixin(object):
         _assume_rules.deduce_all_facts(facts, base)
 
 
-def make__get_assumption(classname, name):
+    def _init_assumptions(self, assumptions):
+        # initially assumptions are shared between instances and class
+        self._assumptions  = self.default_assumptions
+        self._a_inprogress = []
+
+        # NOTE this could be made lazy -- probably not all instances will need
+        # fully derived assumptions?
+        if assumptions:
+            self._learn_new_facts(assumptions)
+            self._assume_type_keys = frozenset(set(self._assumptions) -
+                                            set(self.default_assumptions))
+        else:
+            self._assume_type_keys = None
+
+
+
+    @property
+    def assumptions0(self):
+        """
+        Return object `type` assumptions.
+
+        For example:
+
+          Symbol('x', real=True)
+          Symbol('x', integer=True)
+
+        are different objects. In other words, besides Python type (Symbol in
+        this case), the initial assumptions are also forming their typeinfo.
+
+        Example:
+
+        >>> from sympy import Symbol
+        >>> from sympy.abc import x
+        >>> x.assumptions0
+        {}
+        >>> x = Symbol("x", positive=True)
+        >>> x.assumptions0
+        {'commutative': True, 'complex': True, 'imaginary': False,
+        'negative': False, 'nonnegative': True, 'nonpositive': False,
+        'nonzero': True, 'positive': True, 'real': True, 'zero': False}
+
+        """
+        A = self._assumptions
+        if A is self.default_assumptions or (self._assume_type_keys is None):
+            assumptions0 = {}
+        else:
+            assumptions0 = dict((k, A[k]) for k in self._assume_type_keys)
+        return assumptions0
+
+
+    def new(self, *args):
+        """
+        Create new 'similar' object.
+
+        this is conceptually equivalent to:
+
+          type(self) (*args)
+
+        but takes type assumptions into account. See also: assumptions0
+
+        Example:
+
+        >>> from sympy.abc import x
+        >>> x.new("x")
+        x
+
+        """
+        obj = self.func(*args, **self.assumptions0)
+        return obj
+
+
+def make__get_assumption(name):
     """Cooks function which will get named assumption
 
        e.g.
 
        class C:
 
-           is_xxx = make__get_assumption('C', 'xxx')
-           is_yyy = property( make__get_assumption('C', 'yyy'))
+           is_xxx = make__get_assumption('xxx')
+           is_yyy = property( make__get_assumption('yyy'))
 
 
        then
@@ -297,9 +368,12 @@ def make__get_assumption(classname, name):
         except KeyError:
             return self._what_known_about(name)
 
-    getit.func_name = '%s__is_%s' % (classname, name)
+    getit.func_name = make_attrname(name)
     return getit
 
+def make_attrname(fact):
+    """Return the attribute name corresponding to a fact"""
+    return 'is_%s' % (fact)
 
 class AssumeMeta(BasicMeta):
     """Metaclass for classes with old-style assumptions"""
@@ -307,7 +381,10 @@ class AssumeMeta(BasicMeta):
     def __init__(cls, *args, **kws):
         BasicMeta.__init__(cls, *args, **kws)
 
-        # --- assumptions ---
+        for k in _assume_defined:
+            attr = make_attrname(k)
+            if not hasattr(cls, attr):
+                setattr(cls, attr, property(make__get_assumption(str(k))))
 
         # initialize default_assumptions dictionary
         default_assumptions = {}
@@ -374,7 +451,7 @@ class AssumeMeta(BasicMeta):
                 continue    # no ._derived_premises is ok
 
             for k,v in base_derived_premises.iteritems():
-                if not cls.__dict__.has_key('is_'+k):
-                    is_k = make__get_assumption(cls.__name__, k)
-                    setattr(cls, 'is_'+k, property(is_k))
+                if not cls.__dict__.has_key('is_' + str(k)):
+                    is_k = make__get_assumption(str(k))
+                    setattr(cls, 'is_'+ str(k), property(is_k))
 
