@@ -60,11 +60,6 @@ class Fact(Atom, Boolean):
     def __hash__(self):
         return hash(self.arg)
 
-def wrap_strings(obj):
-    if isinstance(obj, str):
-        return Fact(obj)
-    else:
-        return obj
 
 class Logic(object):
     """Logical expression"""
@@ -92,7 +87,7 @@ class Logic(object):
                 schedop = term
                 continue
             if term[0] == '!':
-                term = Not(term[1:])
+                term = Not(Fact(term[1:]))
             else:
                 term = Fact(term)
 
@@ -121,7 +116,6 @@ class Logic(object):
 class And(_And, Logic):
 
     def __new__(cls, *args):
-        args = map(wrap_strings, args)
         obj = super(And, cls).__new__(cls, *args)
         argset = _And.make_args(obj)
         for a in argset:
@@ -158,7 +152,6 @@ class And(_And, Logic):
 class Or(_Or, Logic):
 
     def __new__(cls, *args):
-        args = map(wrap_strings, args)
         obj = super(Or, cls).__new__(cls, *args)
         argset = _Or.make_args(obj)
         for a in argset:
@@ -173,21 +166,15 @@ class Or(_Or, Logic):
 class Not(_Not, Logic):
 
     def __new__(cls, arg):
-        if type(arg) in (str, Fact):
-            return Basic.__new__(cls, wrap_strings(arg))
-
-        elif isinstance(arg, bool):
-            return not arg
-        elif isinstance(arg, Not):
-            return arg.args[0]
-
-        elif isinstance(arg, Logic):
+        if isinstance(arg, Logic):
             # XXX this is a hack to expand right from the beginning
             arg = arg._eval_propagate_not()
             return arg
-
         else:
-            raise ValueError('Not: unknown argument %r' % (arg,))
+            return _Not.__new__(cls, arg)
+
+    def _eval_propagate_not(self):
+        return self.arg
 
     @property
     def arg(self):
