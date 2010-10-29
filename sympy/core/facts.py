@@ -49,7 +49,50 @@ http://en.wikipedia.org/wiki/List_of_rules_of_inference
 """
 from collections import defaultdict
 
-from logic import fuzzy_not, Logic, And, Or, Not, Fact
+from logic import fuzzy_not, And, Or, Not, Fact
+
+def str2logic(text):
+    """Logic from string
+
+       e.g.
+
+       !a & !b | c
+    """
+    op_2class = {'&': And, '|': Or, '!': Not}
+
+    lexpr   = None  # current logical expression
+    schedop = None  # scheduled operation
+    for term in text.split():
+        # operation symbol
+        if term in '&|':
+            if schedop is not None:
+                raise ValueError('double op forbidden: "%s %s"' % (term, schedop))
+            if lexpr is None:
+                raise ValueError('%s cannot be in the beginning of expression' % term)
+            schedop = term
+            continue
+        if term[0] == '!':
+            term = Not(Fact(term[1:]))
+        else:
+            term = Fact(term)
+
+        # already scheduled operation, e.g. '&'
+        if schedop:
+            lexpr = op_2class[schedop](lexpr, term)
+            schedop = None
+            continue
+
+        if lexpr is not None:
+            raise ValueError('missing op between "%s" and "%s"' % (lexpr, term))
+        lexpr = term
+
+    if schedop is not None:
+        raise ValueError('premature end-of-expression in "%s"' % text)
+    if lexpr is None:
+        raise ValueError('"%s" is empty' % text)
+
+    return lexpr
+
 
 # XXX this prepares forward-chaining rules for alpha-network
 def deduce_alpha_implications(implications):
@@ -371,10 +414,9 @@ class Prover(object):
         # NB: without catching terminating conditions this could continue infinitely
         elif isinstance(b, Or):
             # detect tautology first
-            if not isinstance(a, Logic):    # Atom
-                # tautology:  a -> a|c|...
+            if isinstance(a, Fact):
                 if a in b.args:
-                    raise TautologyDetected(a,b, 'a -> a|c|...')
+                    raise TautologyDetected(a, b, 'a -> a|c|...')
             self.process_rule(And(*[Not(barg) for barg in b.args]), Not(a))
 
             for bidx in range(len(b.args)):
@@ -459,8 +501,8 @@ class FactRules(object):
             # XXX `a` is hardcoded to be always atom
             a, op, b = rule.split(None, 2)
 
-            a = Logic.fromstring(a)
-            b = Logic.fromstring(b)
+            a = str2logic(a)
+            b = str2logic(b)
 
             if op == '->':
                 P.process_rule(a, b)
