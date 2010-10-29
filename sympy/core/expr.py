@@ -17,26 +17,26 @@ class Expr(Basic, EvalfMixin, AssumeMixin):
                 ]
 
     def __new__(cls, *args, **assumptions):
-        obj = Basic.__new__(cls, *args, **assumptions)
+        obj = Basic.__new__(cls, *args)
+        obj._init_assumptions(assumptions)
+        return obj
 
+
+    def _init_assumptions(self, assumptions):
         # initially assumptions are shared between instances and class
-        obj._assumptions  = cls.default_assumptions
-        obj._a_inprogress = []
+        self._assumptions  = self.default_assumptions
+        self._a_inprogress = []
 
         # NOTE this could be made lazy -- probably not all instances will need
         # fully derived assumptions?
         if assumptions:
-            obj._learn_new_facts(assumptions)
-            basek = set(cls.default_assumptions)
-            k2    = set(obj._assumptions)
+            self._learn_new_facts(assumptions)
+            basek = set(self.default_assumptions)
+            k2    = set(self._assumptions)
             newk  = k2.difference(basek)
-            obj._assume_type_keys = frozenset(newk)
+            self._assume_type_keys = frozenset(newk)
         else:
-            obj._assume_type_keys = None
-
-        obj._mhash = None # will be set by __hash__ method.
-        obj._args = args  # all items in args must be Basic objects
-        return obj
+            self._assume_type_keys = None
 
     @property
     def assumptions0(self):
@@ -64,9 +64,8 @@ class Expr(Basic, EvalfMixin, AssumeMixin):
         'nonzero': True, 'positive': True, 'real': True, 'zero': False}
 
         """
-        cls = type(self)
         A = self._assumptions
-        if A is cls.default_assumptions or (self._assume_type_keys is None):
+        if A is self.default_assumptions or (self._assume_type_keys is None):
             assumptions0 = {}
         else:
             assumptions0 = dict((k, A[k]) for k in self._assume_type_keys)
