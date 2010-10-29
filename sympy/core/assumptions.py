@@ -1,4 +1,4 @@
-from sympy.core.facts import FactRules
+from sympy.core.facts import FactRules, Fact
 from sympy.core.core import BasicMeta
 
 # This are the rules under which our assumptions function

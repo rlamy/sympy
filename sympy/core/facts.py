@@ -49,7 +49,7 @@ http://en.wikipedia.org/wiki/List_of_rules_of_inference
 """
 from collections import defaultdict
 
-from logic import fuzzy_not, Logic, And, Or, Not
+from logic import fuzzy_not, Logic, And, Or, Not, Fact
 
 # XXX this prepares forward-chaining rules for alpha-network
 def deduce_alpha_implications(implications):
