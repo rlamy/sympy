@@ -63,54 +63,7 @@ class Fact(Atom, Boolean):
 
 class Logic(object):
     """Logical expression"""
-
-    # {} 'op' -> LogicClass
-    op_2class = {}
-
-    @staticmethod
-    def fromstring(text):
-        """Logic from string
-
-           e.g.
-
-           !a & !b | c
-        """
-        lexpr   = None  # current logical expression
-        schedop = None  # scheduled operation
-        for term in text.split():
-            # operation symbol
-            if term in '&|':
-                if schedop is not None:
-                    raise ValueError('double op forbidden: "%s %s"' % (term, schedop))
-                if lexpr is None:
-                    raise ValueError('%s cannot be in the beginning of expression' % term)
-                schedop = term
-                continue
-            if term[0] == '!':
-                term = Not(Fact(term[1:]))
-            else:
-                term = Fact(term)
-
-            # already scheduled operation, e.g. '&'
-            if schedop:
-                lexpr = Logic.op_2class[schedop](lexpr, term)
-                schedop = None
-                continue
-
-            # this should be atom
-            if lexpr is not None:
-                raise ValueError('missing op between "%s" and "%s"' % (lexpr, term))
-
-            lexpr = term
-
-        # let's check that we ended up in correct state
-        if schedop is not None:
-            raise ValueError('premature end-of-expression in "%s"' % text)
-        if lexpr is None:
-            raise ValueError('"%s" is empty' % text)
-
-        # everything looks good now
-        return lexpr
+    pass
 
 
 class And(_And, Logic):
@@ -179,7 +132,3 @@ class Not(_Not, Logic):
     @property
     def arg(self):
         return self.args[0]
-
-Logic.op_2class['&'] = And
-Logic.op_2class['|'] = Or
-Logic.op_2class['!'] = Not

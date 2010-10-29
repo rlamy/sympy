@@ -91,24 +91,6 @@ def test_logic_expand():
     t = And(Or(a,b), Or(c,'d'))
     assert t.expand()  == Or(And(a,c), And(a,'d'), And(b,c), And(b,'d'))
 
-def test_logic_fromstring():
-    S = Logic.fromstring
-
-    assert S('a')           == a
-    assert S('!a')          == Not(a)
-    assert S('a & b')       == And(a,b)
-    assert S('a | b')       == Or (a,b)
-    assert S('a | b & c')   == And(Or (a,b), c)
-    assert S('a & b | c')   == Or (And(a,b), c)
-    assert S('a & b & c')   == And(a,b,c)
-    assert S('a | b | c')   == Or (a,b,c)
-
-    raises(ValueError, "S('| a')")
-    raises(ValueError, "S('& a')")
-    raises(ValueError, "S('a | | b')")
-    raises(ValueError, "S('a | & b')")
-    raises(ValueError, "S('a & & b')")
-    raises(ValueError, "S('a |')")
 
 def test_logic_not():
     # NOTE: we may want to change default Not behaviour and put this

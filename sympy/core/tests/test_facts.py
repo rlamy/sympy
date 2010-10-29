@@ -1,6 +1,6 @@
 from sympy.core.facts import deduce_alpha_implications, apply_beta_to_alpha_route, \
-        rules_2prereq, split_rules_tt_tf_ft_ff, FactRules
-from sympy.core.logic import And, Not, Fact
+        rules_2prereq, split_rules_tt_tf_ft_ff, FactRules, str2logic
+from sympy.core.logic import And, Or, Not, Fact
 from sympy.utilities.pytest import XFAIL, raises
 
 T = True
@@ -8,6 +8,25 @@ F = False
 U = None
 
 x,y,z, a, b, c, d, e, f = map(Fact, 'xyzabcdef')
+
+def test_str2logic():
+    S = str2logic
+
+    assert S('a')           == a
+    assert S('!a')          == Not(a)
+    assert S('a & b')       == And(a,b)
+    assert S('a | b')       == Or (a,b)
+    assert S('a | b & c')   == And(Or (a,b), c)
+    assert S('a & b | c')   == Or (And(a,b), c)
+    assert S('a & b & c')   == And(a,b,c)
+    assert S('a | b | c')   == Or (a,b,c)
+
+    raises(ValueError, "S('| a')")
+    raises(ValueError, "S('& a')")
+    raises(ValueError, "S('a | | b')")
+    raises(ValueError, "S('a | & b')")
+    raises(ValueError, "S('a & & b')")
+    raises(ValueError, "S('a |')")
 
 def test_deduce_alpha_implications():
     def D(i):
