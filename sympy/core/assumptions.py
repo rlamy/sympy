@@ -1,4 +1,4 @@
-from facts import FactRules
+from facts import FactRules, Fact
 from core import BasicMeta
 
 # This are the rules under which our assumptions function
@@ -362,11 +362,12 @@ def make__get_assumption(name):
        c.is_xxx()   # note braces -- it's a function call
        c.is_yyy     # no braces   -- it's a property
     """
+    fact = Fact(name)
     def getit(self):
         try:
-            return self._assumptions[name]
+            return self._assumptions[fact]
         except KeyError:
-            return self._what_known_about(name)
+            return self._what_known_about(fact)
 
     getit.func_name = make_attrname(name)
     return getit
@@ -397,7 +398,7 @@ class AssumeMeta(BasicMeta):
             if k[3:] not in _assume_defined:
                 continue
 
-            k = k[3:]
+            k = Fact(k[3:])
             if isinstance(v,(bool,int,long,type(None))):
                 if v is not None:
                     v = bool(v)

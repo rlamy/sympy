@@ -1,6 +1,5 @@
 """Base class for all objects in sympy"""
 
-from decorators import _sympifyit
 from cache import cacheit
 from core import BasicMeta, BasicType, C
 from sympify import _sympify, sympify, SympifyError
