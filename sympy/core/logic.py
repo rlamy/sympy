@@ -5,6 +5,7 @@ This is mainly needed for facts.py.
 from sympy.core.compatibility import iterable, cmp
 from sympy.logic.boolalg import fuzzy_not, Boolean, And as _And, Or as _Or, Not as _Not
 from sympy.core.basic import Basic, Atom
+from sympy.core.cache import cacheit
 
 def fuzzy_bool(x):
     """Return True, False or None according to x.
@@ -45,6 +46,11 @@ def fuzzy_and(*args):
         return False
 
 class Fact(Atom, Boolean):
+
+    @cacheit
+    def __new__(cls, arg):
+        return super(Fact, cls).__new__(cls, arg)
+
     @property
     def arg(self):
         return self._args[0]
@@ -53,6 +59,10 @@ class Fact(Atom, Boolean):
         return self.arg
 
     def __eq__(self, other):
+        if other is self:
+            return True
+        if other.__class__ is Fact:
+            return other.arg == self.arg
         return other == self.arg
 
     def __ne__(self, other):
