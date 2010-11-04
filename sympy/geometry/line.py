@@ -347,7 +347,6 @@ class Line(LinearEntity):
 
         >>> import sympy
         >>> from sympy import Point
-        >>> from sympy.abc import L
         >>> from sympy.geometry import Line
         >>> L = Line(Point(2,3), Point(3,5))
         >>> L
