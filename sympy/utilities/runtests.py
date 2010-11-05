@@ -80,13 +80,14 @@ def isgeneratorfunction(object):
     return False
 
 def setup_pprint():
-    from sympy import pprint_use_unicode, init_printing
+    from sympy import pprint_use_unicode, sstrrepr
 
     # force pprint to be in ascii mode in doctests
     pprint_use_unicode(False)
 
     # hook our nice, hash-stable strprinter
-    init_printing(pretty_print=False)
+    import sys
+    sys.displayhook = sstrrepr
 
 def test(*paths, **kwargs):
     """
@@ -441,7 +442,6 @@ class SymPyDocTests(object):
 
     def test_file(self, filename):
 
-        import unittest
         from StringIO import StringIO
 
         rel_name = filename[len(self._root_dir)+1:]
