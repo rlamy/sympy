@@ -1,6 +1,6 @@
 """Boolean algebra module for SymPy"""
 from sympy.core.basic import Basic
-from sympy.core.operations import LatticeOp
+from sympy.core.containers import LatticeOp
 from sympy.core.function import Application, sympify
 
 class Boolean(Basic):

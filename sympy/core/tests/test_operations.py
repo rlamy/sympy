@@ -1,5 +1,5 @@
 from sympy import Integer, S
-from sympy.core.operations import LatticeOp
+from sympy.core.containers import LatticeOp
 from sympy.utilities.pytest import raises
 from sympy.core.sympify import SympifyError
 
