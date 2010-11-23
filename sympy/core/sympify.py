@@ -3,7 +3,7 @@
 from types import NoneType
 from inspect import getmro
 
-from core import BasicMeta
+from sympy.core.generic import generic
 
 class SympifyError(ValueError):
     def __init__(self, expr, base_exc=None):
@@ -15,10 +15,8 @@ class SympifyError(ValueError):
 
         return "Sympify of expression '%s' failed, because of exception being raised:\n%s: %s" % (self.expr, self.base_exc.__class__.__name__, str(self.base_exc))
 
-sympy_classes = BasicMeta.all_classes
 
-converter = {}
-
+@generic
 def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
     """
     Converts an arbitrary expression to a type that can be used inside sympy.
@@ -72,27 +70,6 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
     SympifyError: SympifyError: True
 
     """
-    try:
-        cls = a.__class__
-    except AttributeError:  #a is probably an old-style class object
-        cls = type(a)
-    if cls in sympy_classes:
-        return a
-    if cls in (bool, NoneType):
-        if strict:
-            raise SympifyError(a)
-        else:
-            return a
-
-    try:
-        return converter[cls](a)
-    except KeyError:
-        for superclass in getmro(cls):
-            try:
-                return converter[superclass](a)
-            except KeyError:
-                continue
-
     try:
         return a._sympy_()
     except AttributeError:
@@ -210,6 +187,15 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
 
     import ast_parser
     return ast_parser.parse_expr(a, locals or {})
+
+converter = sympify.implementation
+
+@sympify.when(bool, NoneType)
+def _sympify_booleans(a, strict=False, **opts):
+    if strict:
+        raise SympifyError(a)
+    else:
+        return a
 
 def _sympify(a):
     """Short version of sympify for internal usage for __add__ and __eq__

@@ -440,8 +440,9 @@ class Real(Number):
         import sage.all as sage
         return sage.RealNumber(str(self))
 
-# Add sympify converters
-converter[float] = converter[decimal.Decimal] = Real
+@sympify.when(float, decimal.Decimal)
+def sympify_float(x, **opts):
+    return Real(x)
 
 # this is here to work nicely in Sage
 RealNumber = Real
@@ -1181,8 +1182,9 @@ class Integer(Rational):
             else:
                 raise ValueError("expected an integer, got %s" % b)
 
-# Add sympify converters
-converter[int] = converter[long] = Integer
+@sympify.when(int, long)
+def sympify_int(n, **opts):
+    return Integer(n)
 
 
 class Zero(Integer):
@@ -1776,7 +1778,8 @@ class ImaginaryUnit(Atom, Expr):
         return sage.I
 
 
-def sympify_complex(a):
+
+def sympify_complex(a, **opts):
     real, imag = map(sympify, (a.real, a.imag))
     return real + S.ImaginaryUnit * imag
 converter[complex] = sympify_complex

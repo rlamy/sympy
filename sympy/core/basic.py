@@ -1090,6 +1090,11 @@ class Basic(AssumeMeths):
             raise TypeError("argument must be a dictionary")
         return self.subs(subsdict)
 
+@sympify.when(Basic, BasicMeta)
+def identity(x, **opts):
+    return x
+
+
 class Atom(Basic):
     """
     A parent class for atomic things. An atom is an expression with no subexpressions.

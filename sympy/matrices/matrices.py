@@ -1866,11 +1866,9 @@ def block_diag(matrices):
         i += m.rows
     return A
 
-# Add sympify converters
-def _matrix_sympify(matrix):
+@sympify.when(Matrix)
+def _matrix_sympify(matrix, **opts):
     raise SympifyError('Matrix cannot be sympified')
-converter[Matrix] = _matrix_sympify
-del _matrix_sympify
 
 
 class SMatrix(Matrix):
