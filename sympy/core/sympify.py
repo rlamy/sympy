@@ -84,19 +84,12 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
     if strict:
         raise SympifyError(a)
 
-    # At this point we were given an arbitrary expression
-    # which does not inherit from Basic and doesn't implement
-    # _sympy_ (which is a canonical and robust way to convert
-    # anything to SymPy expression).
-    #
-    # As a last chance, we try to take "a"'s  normal form via unicode()
-    # and try to parse it. If it fails, then we have no luck and
-    # return an exception
     try:
         return sympify(unicode(a), locals=locals, convert_xor=convert_xor,
             strict=strict, rational=rational)
     except Exception, exc:
         raise SympifyError(a, exc)
+
 
 @sympify.when(list, tuple, set)
 def _sympify_sequence(a, locals=None, convert_xor=True, strict=False, rational=False):
