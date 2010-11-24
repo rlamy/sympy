@@ -75,18 +75,14 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
     except AttributeError:
         pass
 
-    if not isinstance(a, basestring):
-        for coerce in (float, int):
-            try:
-                return sympify(coerce(a))
-            except (TypeError, ValueError, AttributeError, SympifyError):
-                continue
+    for coerce in (float, int):
+        try:
+            return sympify(coerce(a))
+        except (TypeError, ValueError, AttributeError, SympifyError):
+            continue
 
     if strict:
         raise SympifyError(a)
-
-    if isinstance(a, (list, tuple, set)):
-        return type(a)([sympify(x, locals=locals, convert_xor=convert_xor, rational=rational) for x in a])
 
     # At this point we were given an arbitrary expression
     # which does not inherit from Basic and doesn't implement
@@ -97,10 +93,22 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
     # and try to parse it. If it fails, then we have no luck and
     # return an exception
     try:
-        a = unicode(a)
+        return sympify(unicode(a), locals=locals, convert_xor=convert_xor,
+            strict=strict, rational=rational)
     except Exception, exc:
         raise SympifyError(a, exc)
 
+@sympify.when(list, tuple, set)
+def _sympify_sequence(a, locals=None, convert_xor=True, strict=False, rational=False):
+    if strict:
+        raise SympifyError(a)
+    return type(a)([sympify(x, locals=locals, convert_xor=convert_xor, rational=rational) for x in a])
+
+
+@sympify.when(unicode)
+def _parse_unicode(a, locals=None, convert_xor=True, strict=False, rational=False):
+    if strict:
+        raise SympifyError(a)
     # In the following,
     # o process the xor symbol ^ -> **
     #
@@ -196,6 +204,13 @@ def _sympify_booleans(a, strict=False, **opts):
         raise SympifyError(a)
     else:
         return a
+
+@sympify.when(str)
+def _sympify_str(a, locals=None, strict=False, **opts):
+    if strict:
+        raise SympifyError(a)
+    return sympify(unicode(a), locals=locals, **opts)
+
 
 def _sympify(a):
     """Short version of sympify for internal usage for __add__ and __eq__

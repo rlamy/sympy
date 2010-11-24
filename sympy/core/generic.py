@@ -37,7 +37,7 @@ class Signature(object):
             raise ValueError("Implementation must accept any positional args")
         if other.keywords and not self.keywords:
             raise ValueError("Implementation must accept any kwargs")
-        if not self.keywords and other.kwargs.items() not in self.kwargs.items():
+        if not self.keywords and not set(other.kwargs.keys()) <= set(self.kwargs.keys()):
             raise ValueError("Kwarg mismatch: %s instead of %s"
                     % (self.kwargs, other.kwargs))
 
