@@ -1,5 +1,5 @@
 from core import C
-from sympify import converter, sympify, _sympify, SympifyError
+from sympify import sympify, _sympify, SympifyError
 from basic import Atom, Basic
 from singleton import S, SingletonMeta
 from expr import Expr
@@ -1778,11 +1778,10 @@ class ImaginaryUnit(Atom, Expr):
         return sage.I
 
 
-
+@sympify.when(complex)
 def sympify_complex(a, **opts):
     real, imag = map(sympify, (a.real, a.imag))
     return real + S.ImaginaryUnit * imag
-converter[complex] = sympify_complex
 
 _intcache[0] = S.Zero
 _intcache[1] = S.One

@@ -9,6 +9,7 @@ class SympifyError(ValueError):
     def __init__(self, expr, base_exc=None):
         self.expr = expr
         self.base_exc = base_exc
+
     def __str__(self):
         if self.base_exc is None:
             return "SympifyError: %r" % (self.expr,)
@@ -99,7 +100,7 @@ def _sympify_sequence(a, locals=None, convert_xor=True, strict=False, rational=F
 
 
 @sympify.when(unicode)
-def _parse_unicode(a, locals=None, convert_xor=True, strict=False, rational=False):
+def sympify_unicode(a, locals=None, convert_xor=True, strict=False, rational=False):
     if strict:
         raise SympifyError(a)
     # In the following,
@@ -189,17 +190,14 @@ def _parse_unicode(a, locals=None, convert_xor=True, strict=False, rational=Fals
     import ast_parser
     return ast_parser.parse_expr(a, locals or {})
 
-converter = sympify.implementation
-
 @sympify.when(bool, NoneType)
-def _sympify_booleans(a, strict=False, **opts):
+def sympify_booleans(a, strict=False, **opts):
     if strict:
         raise SympifyError(a)
-    else:
-        return a
+    return a
 
 @sympify.when(str)
-def _sympify_str(a, locals=None, strict=False, **opts):
+def sympify_str(a, locals=None, strict=False, **opts):
     if strict:
         raise SympifyError(a)
     return sympify(unicode(a), locals=locals, **opts)
