@@ -2,7 +2,7 @@ from sympy.core.basic import Basic, S
 from sympy.core.function import Function, diff
 from sympy.core.numbers import Number
 from sympy.core.relational import Relational
-from sympy.core.sympify import sympify
+from sympy.core.sympify import sympify, convert
 from sympy.core.sets import Interval, Set
 
 class ExprCondPair(Function):
@@ -13,8 +13,8 @@ class ExprCondPair(Function):
             expr = args[0].expr
             cond = args[0].cond
         elif len(args) == 2:
-            expr = sympify(args[0])
-            cond = sympify(args[1])
+            expr = convert(args[0])
+            cond = convert(args[1])
         else:
             raise TypeError("args must be a (expr, cond) pair")
         return Basic.__new__(cls, expr, cond, **assumptions)

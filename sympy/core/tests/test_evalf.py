@@ -2,7 +2,7 @@ from sympy.core.evalf import PrecisionExhausted, complex_accuracy
 
 from sympy import pi, I, Symbol, Add, Rational, exp, sqrt, sin, cos, \
     fibonacci, Integral, oo, E, atan, log, integrate, floor, ceiling, \
-    factorial, binomial, Sum, zeta, Catalan, Pow, GoldenRatio, sympify, \
+    factorial, binomial, Sum, zeta, Catalan, Pow, GoldenRatio, S, \
     sstr, Function
 
 from sympy.mpmath.libmp.libmpf import from_float
@@ -14,7 +14,7 @@ y = Symbol('y')
 n = Symbol('n')
 
 def NS(e, n=15, **options):
-    return sstr(sympify(e).evalf(n, **options), full_prec=True)
+    return sstr(S(e).evalf(n, **options), full_prec=True)
 
 def test_evalf_helpers():
     assert complex_accuracy((from_float(2.0),None,35,None)) == 35

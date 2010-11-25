@@ -1,12 +1,9 @@
 from basic import S, C
 from expr import Expr
-from sympify import _sympify, sympify
+from sympify import _sympify, sympify, convert
 from cache import cacheit
 from sympy.utilities.iterables import all
 
-# from add import Add   /cyclic/
-# from mul import Mul   /cyclic/
-# from function import Lambda, WildFunction /cyclic/
 
 class AssocOp(Expr):
     """ Associative operations, can separate noncommutative and
@@ -260,7 +257,7 @@ class LatticeOp(AssocOp):
     is_commutative = True
 
     def __new__(cls, *args, **assumptions):
-        args = (sympify(arg) for arg in args)
+        args = (convert(arg) for arg in args)
         try:
             _args = frozenset(cls._new_args_filter(args))
         except ShortCircuit:

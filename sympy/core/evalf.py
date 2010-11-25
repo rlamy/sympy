@@ -22,7 +22,7 @@ from sympy.mpmath.libmp.gammazeta import mpf_bernoulli
 import math
 
 from basic import C, S
-from sympify import sympify
+from sympify import convert
 
 LG10 = math.log(10,2)
 
@@ -656,7 +656,7 @@ def evalf_bernoulli(expr, prec, options):
 #----------------------------------------------------------------------------#
 
 def as_mpmath(x, prec, options):
-    x = sympify(x)
+    x = convert(x)
     if isinstance(x, C.Zero):
         return mpf(0)
     if isinstance(x, C.Infinity):
@@ -917,7 +917,7 @@ def evalf_symbol(x, prec, options):
         cached, cached_prec = cache.get(x.name, (None, MINUS_INF))
         if cached_prec >= prec:
             return cached
-        v = evalf(sympify(val), prec, options)
+        v = evalf(convert(val), prec, options)
         cache[x.name] = (v, prec)
         return v
 
@@ -1120,4 +1120,4 @@ def N(x, n=15, **options):
     1.291
 
     """
-    return sympify(x).evalf(n, **options)
+    return convert(x).evalf(n, **options)

@@ -30,13 +30,14 @@ Example:
 
 """
 
-from basic import Basic, BasicMeta, Atom, S, C
-from expr import Expr
-from cache import cacheit
 from itertools import repeat
+
+from sympy.core.basic import Basic, BasicMeta, Atom, S, C
+from sympy.core.expr import Expr
+from sympy.core.cache import cacheit
 #from numbers import Rational, Integer
-#from symbol import Symbol
-from multidimensional import vectorize
+from sympy.core.multidimensional import vectorize
+from sympy.core.sympify import convert, sympify
 from sympy.utilities.decorator import deprecated
 from sympy.utilities import all
 
@@ -99,7 +100,7 @@ class Application(Basic):
     @vectorize(1)
     @cacheit
     def __new__(cls, *args, **options):
-        args = map(sympify, args)
+        args = map(convert, args)
         # these lines should be refactored
         for opt in ["nargs", "dummy", "comparable", "noncommutative", "commutative"]:
             if opt in options:
@@ -1087,5 +1088,4 @@ def expand_complex(expr, deep=True):
     log=False, mul=False, power_exp=False, power_base=False, multinomial=False)
 
 from numbers import Rational, Integer
-from sympify import sympify
 from add    import Add

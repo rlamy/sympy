@@ -16,9 +16,52 @@ class SympifyError(ValueError):
 
         return "Sympify of expression '%s' failed, because of exception being raised:\n%s: %s" % (self.expr, self.base_exc.__class__.__name__, str(self.base_exc))
 
+@generic
+def sympify(a):
+    """Short version of sympify for internal usage for __add__ and __eq__
+       methods where it is ok to allow some things (like Python integers
+       and floats) in the expression. This excludes things (like strings)
+       that are unwise to allow into such an expression.
+
+       >>> from sympy import Integer
+       >>> Integer(1) == 1
+       True
+
+       >>> Integer(1) == '1'
+       False
+
+       >>> from sympy import Symbol
+       >>> from sympy.abc import x
+       >>> x + 1
+       1 + x
+
+       >>> x + '1'
+       Traceback (most recent call last):
+           ...
+       TypeError: unsupported operand type(s) for +: 'Symbol' and 'str'
+
+       see: sympify
+    """
+    try:
+        return a._sympy_()
+    except AttributeError:
+        pass
+
+    for coerce in (float, int):
+        try:
+            return sympify(coerce(a))
+        except (TypeError, ValueError, AttributeError, SympifyError):
+            continue
+    raise SympifyError(a)
+
+@sympify.when(list, tuple, set, str, unicode, bool, NoneType)
+def _sympify_error(a):
+    raise SympifyError(a)
+
+_sympify = sympify
 
 @generic
-def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
+def convert(a, locals=None, convert_xor=True, rational=False):
     """
     Converts an arbitrary expression to a type that can be used inside sympy.
 
@@ -72,37 +115,24 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False):
 
     """
     try:
-        return a._sympy_()
-    except AttributeError:
+        return sympify(a)
+    except SympifyError:
         pass
 
-    for coerce in (float, int):
-        try:
-            return sympify(coerce(a))
-        except (TypeError, ValueError, AttributeError, SympifyError):
-            continue
-
-    if strict:
-        raise SympifyError(a)
-
     try:
-        return sympify(unicode(a), locals=locals, convert_xor=convert_xor,
-            strict=strict, rational=rational)
+        return convert(unicode(a), locals=locals, convert_xor=convert_xor,
+            rational=rational)
     except Exception, exc:
         raise SympifyError(a, exc)
 
 
-@sympify.when(list, tuple, set)
-def _sympify_sequence(a, locals=None, convert_xor=True, strict=False, rational=False):
-    if strict:
-        raise SympifyError(a)
-    return type(a)([sympify(x, locals=locals, convert_xor=convert_xor, rational=rational) for x in a])
+@convert.when(list, tuple, set)
+def _sympify_sequence(a, locals=None, convert_xor=True, rational=False):
+    return type(a)([convert(x, locals=locals, convert_xor=convert_xor, rational=rational) for x in a])
 
 
-@sympify.when(unicode)
-def sympify_unicode(a, locals=None, convert_xor=True, strict=False, rational=False):
-    if strict:
-        raise SympifyError(a)
+@convert.when(unicode)
+def sympify_unicode(a, locals=None, convert_xor=True, rational=False):
     # In the following,
     # o process the xor symbol ^ -> **
     #
@@ -190,42 +220,10 @@ def sympify_unicode(a, locals=None, convert_xor=True, strict=False, rational=Fal
     import ast_parser
     return ast_parser.parse_expr(a, locals or {})
 
-@sympify.when(bool, NoneType)
+@convert.when(bool, NoneType)
 def sympify_booleans(a, strict=False, **opts):
-    if strict:
-        raise SympifyError(a)
     return a
 
-@sympify.when(str)
-def sympify_str(a, locals=None, strict=False, **opts):
-    if strict:
-        raise SympifyError(a)
-    return sympify(unicode(a), locals=locals, **opts)
-
-
-def _sympify(a):
-    """Short version of sympify for internal usage for __add__ and __eq__
-       methods where it is ok to allow some things (like Python integers
-       and floats) in the expression. This excludes things (like strings)
-       that are unwise to allow into such an expression.
-
-       >>> from sympy import Integer
-       >>> Integer(1) == 1
-       True
-
-       >>> Integer(1) == '1'
-       False
-
-       >>> from sympy import Symbol
-       >>> from sympy.abc import x
-       >>> x + 1
-       1 + x
-
-       >>> x + '1'
-       Traceback (most recent call last):
-           ...
-       TypeError: unsupported operand type(s) for +: 'Symbol' and 'str'
-
-       see: sympify
-    """
-    return sympify(a, strict=True)
+@convert.when(str)
+def sympify_str(a, locals=None, **opts):
+    return convert(unicode(a), locals=locals, **opts)

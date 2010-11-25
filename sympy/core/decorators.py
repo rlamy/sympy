@@ -41,12 +41,12 @@ def __sympifyit(func, arg, retval=None):
 
     if retval is None:
         def __sympifyit_wrapper(a, b):
-            return func(a, sympify(b, strict=True))
+            return func(a, sympify(b))
 
     else:
         def __sympifyit_wrapper(a, b):
             try:
-                return func(a, sympify(b, strict=True))
+                return func(a, sympify(b))
             except SympifyError:
                 return retval
 

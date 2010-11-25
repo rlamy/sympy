@@ -1,7 +1,7 @@
 """Singleton mechanism"""
 
 from core import BasicMeta, C
-from sympify import sympify
+from sympify import convert
 from basic import Basic
 
 class SingletonMeta(BasicMeta):
@@ -77,4 +77,4 @@ class SingletonFactory:
 
 S = SingletonFactory()
 
-S.__call__ = sympify
+S.__call__ = convert

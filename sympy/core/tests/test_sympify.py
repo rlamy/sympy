@@ -1,52 +1,52 @@
 from sympy import Symbol, exp, Integer, Real, sin, cos, log, Poly, Lambda, \
         Function, I, S, sqrt,  raises, srepr, Rational
 from sympy.abc import x, y
-from sympy.core.sympify import sympify, _sympify, SympifyError
+from sympy.core.sympify import convert, _sympify, SympifyError
 from sympy.core.decorators import _sympifyit
 
 def test_439():
-    v = sympify("exp(x)")
+    v = convert("exp(x)")
     x = Symbol("x")
     assert v == exp(x)
     assert type(v) == type(exp(x))
     assert str(type(v)) == str(type(exp(x)))
 
-def test_sympify1():
-    assert sympify("x") == Symbol("x")
-    assert sympify("   x") == Symbol("x")
-    assert sympify("   x   ") == Symbol("x")
+def test_convert1():
+    assert convert("x") == Symbol("x")
+    assert convert("   x") == Symbol("x")
+    assert convert("   x   ") == Symbol("x")
     # 1778
     n1 = Rational(1, 2)
-    assert sympify('--.5') == n1
-    assert sympify('-1/2') == -n1
-    assert sympify('-+--.5') == -n1
-    assert sympify('-.[3]') == Rational(-1, 3)
-    assert sympify('.[3]') == Rational(1, 3)
-    assert sympify('+.[3]') == Rational(1, 3)
-    assert sympify('+0.[3]*10**-2') == Rational(1, 300)
+    assert convert('--.5') == n1
+    assert convert('-1/2') == -n1
+    assert convert('-+--.5') == -n1
+    assert convert('-.[3]') == Rational(-1, 3)
+    assert convert('.[3]') == Rational(1, 3)
+    assert convert('+.[3]') == Rational(1, 3)
+    assert convert('+0.[3]*10**-2') == Rational(1, 300)
     # options to make reals into rationals
-    assert sympify('1.22[345]', rational=1) == \
+    assert convert('1.22[345]', rational=1) == \
            1 + Rational(22, 100) + Rational(345, 99900)
-    assert sympify('2/2.6', rational=1) == Rational(10, 13)
-    assert sympify('2.6/2', rational=1) == Rational(13, 10)
-    assert sympify('2.6e2/17', rational=1) == Rational(260, 17)
-    assert sympify('2.6e+2/17', rational=1) == Rational(260, 17)
-    assert sympify('2.6e-2/17', rational=1) == Rational(26, 17000)
-    assert sympify('2.1+3/4', rational=1) == Rational(21, 10) + Rational(3, 4)
-    assert sympify('2.234456', rational=1) == Rational(279307, 125000)
-    assert sympify('2.234456e23', rational=1) == 223445600000000000000000
-    assert sympify('2.234456e-23', rational=1) == Rational(279307, 12500000000000000000000000000)
-    assert sympify('-2.234456e-23', rational=1) == Rational(-279307, 12500000000000000000000000000)
-    assert sympify('12345678901/17', rational=1) == Rational(12345678901, 17)
-    assert sympify('1/.3 + x', rational=1) == Rational(10, 3) + x
+    assert convert('2/2.6', rational=1) == Rational(10, 13)
+    assert convert('2.6/2', rational=1) == Rational(13, 10)
+    assert convert('2.6e2/17', rational=1) == Rational(260, 17)
+    assert convert('2.6e+2/17', rational=1) == Rational(260, 17)
+    assert convert('2.6e-2/17', rational=1) == Rational(26, 17000)
+    assert convert('2.1+3/4', rational=1) == Rational(21, 10) + Rational(3, 4)
+    assert convert('2.234456', rational=1) == Rational(279307, 125000)
+    assert convert('2.234456e23', rational=1) == 223445600000000000000000
+    assert convert('2.234456e-23', rational=1) == Rational(279307, 12500000000000000000000000000)
+    assert convert('-2.234456e-23', rational=1) == Rational(-279307, 12500000000000000000000000000)
+    assert convert('12345678901/17', rational=1) == Rational(12345678901, 17)
+    assert convert('1/.3 + x', rational=1) == Rational(10, 3) + x
     # make sure longs in fractions work
-    assert sympify('222222222222/11111111111') == Rational(222222222222, 11111111111)
+    assert convert('222222222222/11111111111') == Rational(222222222222, 11111111111)
     # ... even if they come from repetend notation
-    assert sympify('1/.2[123456789012]') == Rational(333333333333, 70781892967)
+    assert convert('1/.2[123456789012]') == Rational(333333333333, 70781892967)
     # ... or from high precision reals
-    assert sympify('.1234567890123456', rational=1) == Rational(19290123283179,  156250000000000)
+    assert convert('.1234567890123456', rational=1) == Rational(19290123283179,  156250000000000)
 
-def test_sympify2():
+def test_convert2():
     class A:
         def _sympy_(self):
             return Symbol("x")**3
@@ -54,13 +54,13 @@ def test_sympify2():
     a = A()
 
     assert _sympify(a)== x**3
-    assert sympify(a) == x**3
+    assert convert(a) == x**3
     assert a == x**3
 
-def test_sympify3():
-    assert sympify("x**3") == x**3
-    assert sympify("x^3") == x**3
-    assert sympify("1/2") == Integer(1)/2
+def test_convert3():
+    assert convert("x**3") == x**3
+    assert convert("x^3") == x**3
+    assert convert("1/2") == Integer(1)/2
 
     raises(SympifyError, "_sympify('x**3')")
     raises(SympifyError, "_sympify('1/2')")
@@ -68,14 +68,14 @@ def test_sympify3():
 def test_sympify_bool():
     """Test that sympify accepts boolean values
     and that output leaves them unchanged"""
-    assert sympify(True) == True
-    assert sympify(False)== False
+    assert convert(True) == True
+    assert convert(False)== False
 
 def test_sympyify_iterables():
     ans = [Rational(3, 10), Rational(1, 5)]
-    assert sympify(['.3', '.2'], rational=1) == ans
-    assert sympify(set(['.3', '.2']), rational=1) == set(ans)
-    assert sympify(tuple(['.3', '.2']), rational=1) == tuple(ans)
+    assert convert(['.3', '.2'], rational=1) == ans
+    assert convert(set(['.3', '.2']), rational=1) == set(ans)
+    assert convert(tuple(['.3', '.2']), rational=1) == tuple(ans)
 
 def test_sympify4():
     class A:
@@ -85,28 +85,28 @@ def test_sympify4():
     a = A()
 
     assert _sympify(a)**3== x**3
-    assert sympify(a)**3 == x**3
+    assert convert(a)**3 == x**3
     assert a == x
 
-def test_sympify_text():
-    assert sympify('some') == Symbol('some')
-    assert sympify('core') == Symbol('core')
+def test_convert_text():
+    assert convert('some') == Symbol('some')
+    assert convert('core') == Symbol('core')
 
-    assert sympify('True') == True
-    assert sympify('False') == False
+    assert convert('True') == True
+    assert convert('False') == False
 
-    assert sympify('Poly') == Poly
-    assert sympify('sin') == sin
+    assert convert('Poly') == Poly
+    assert convert('sin') == sin
 
-def test_sympify_function():
-    assert sympify('factor(x**2-1, x)') == -(1-x)*(x+1)
-    assert sympify('sin(pi/2)*cos(pi)') == -Integer(1)
+def test_convert_function():
+    assert convert('factor(x**2-1, x)') == -(1-x)*(x+1)
+    assert convert('sin(pi/2)*cos(pi)') == -Integer(1)
 
 def test_sympify_poly():
     p = Poly(x**2+x+1, x)
 
     assert _sympify(p) is p
-    assert sympify(p) is p
+    assert convert(p) is p
 
 def test_sage():
     # how to effectivelly test for the _sage_() method without having SAGE
@@ -121,19 +121,19 @@ def test_sage():
     assert hasattr(log(x), "_sage_")
 
 def test_bug496():
-    a_ = sympify("a_")
-    _a = sympify("_a")
+    a_ = convert("a_")
+    _a = convert("_a")
 
 def test_lambda():
     x = Symbol('x')
-    assert sympify('lambda : 1') == Lambda(x, 1)
-    assert sympify('lambda x: 2*x') == Lambda(x, 2*x)
-    assert sympify('lambda x, y: 2*x+y') == Lambda([x, y], 2*x+y)
+    assert convert('lambda : 1') == Lambda(x, 1)
+    assert convert('lambda x: 2*x') == Lambda(x, 2*x)
+    assert convert('lambda x, y: 2*x+y') == Lambda([x, y], 2*x+y)
 
     raises(SympifyError, "_sympify('lambda : 1')")
 
 def test_sympify_raises():
-    raises(SympifyError, 'sympify("fx)")')
+    raises(SympifyError, 'convert("fx)")')
 
 
 def test__sympify():
@@ -251,15 +251,15 @@ def test_int_float():
     f1_1 = F1_1()
     f1_1b = F1_1b()
     f1_1c = F1_1c()
-    assert sympify(i5) == 5
-    assert isinstance(sympify(i5), Integer)
-    assert sympify(i5b) == 5
-    assert isinstance(sympify(i5b), Real)
-    assert sympify(i5c) == 5
-    assert isinstance(sympify(i5c), Integer)
-    assert abs(sympify(f1_1) - 1.1) < 1e-5
-    assert abs(sympify(f1_1b) - 1.1) < 1e-5
-    assert abs(sympify(f1_1c) - 1.1) < 1e-5
+    assert convert(i5) == 5
+    assert isinstance(convert(i5), Integer)
+    assert convert(i5b) == 5
+    assert isinstance(convert(i5b), Real)
+    assert convert(i5c) == 5
+    assert isinstance(convert(i5c), Integer)
+    assert abs(convert(f1_1) - 1.1) < 1e-5
+    assert abs(convert(f1_1b) - 1.1) < 1e-5
+    assert abs(convert(f1_1c) - 1.1) < 1e-5
 
     assert _sympify(i5) == 5
     assert isinstance(_sympify(i5), Integer)
@@ -273,19 +273,19 @@ def test_int_float():
 
 
 def test_issue1034():
-    a = sympify('Integer(4)')
+    a = convert('Integer(4)')
 
     assert a == Integer(4)
     assert a.is_Integer
 
 def test_issue883():
     a = [3,2.0]
-    assert sympify(a) == [Integer(3), Real(2.0)]
-    assert sympify(tuple(a)) == (Integer(3), Real(2.0))
-    assert sympify(set(a)) == set([Integer(3), Real(2.0)])
+    assert convert(a) == [Integer(3), Real(2.0)]
+    assert convert(tuple(a)) == (Integer(3), Real(2.0))
+    assert convert(set(a)) == set([Integer(3), Real(2.0)])
 
-def test_S_sympify():
-    assert S(1)/2 == sympify(1)/2
+def test_S_convert():
+    assert S(1)/2 == convert(1)/2
     assert (-2)**(S(1)/2) == sqrt(2)*I
 
 def test_issue1689():
@@ -299,8 +299,8 @@ def test_issue1889_Builtins():
     C = Symbol('C')
     vars = {}
     vars['C'] = C
-    exp1 = sympify('C')
+    exp1 = convert('C')
     assert( exp1 == C )	# Make sure it did not get mixed up with sympy.C
 
-    exp2 = sympify('C', vars)
+    exp2 = convert('C', vars)
     assert( exp2 == C ) # Make sure it did not get mixed up with sympy.C
