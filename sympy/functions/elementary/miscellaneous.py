@@ -1,4 +1,22 @@
-from sympy.core import S, C, sympify, Function
+from sympy.core import S, C, sympify, Function, Lambda
+from sympy.core.singleton import Singleton
+from sympy.core.symbol import Dummy
+
+class IdentityFunction(Lambda):
+    """The identity function
+
+    >>> from sympy import Id, Symbol
+    >>> x = Symbol('x')
+    >>> Id(x)
+    x
+    """
+    __metaclass__ = Singleton
+    __slots__ = []
+    nargs = 1
+    def __new__(cls):
+        x = C.Dummy('x')
+        return Lambda([x], x)
+Id = S.IdentityFunction
 
 ###############################################################################
 ############################# SQUARE ROOT FUNCTION ############################
