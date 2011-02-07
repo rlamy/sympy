@@ -1,4 +1,4 @@
-from sympy.core import S, C, sympify, Function, Lambda
+from sympy.core import S, C, sympify, Function, Lambda, Expr, Tuple
 from sympy.core.singleton import Singleton
 from sympy.core.symbol import Dummy
 
@@ -15,7 +15,8 @@ class IdentityFunction(Lambda):
     nargs = 1
     def __new__(cls):
         x = C.Dummy('x')
-        return Lambda([x], x)
+        #construct "by hand" to avoid infinite loop
+        return Expr.__new__(cls, Tuple(x), x)
 Id = S.IdentityFunction
 
 ###############################################################################
