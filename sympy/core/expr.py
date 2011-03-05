@@ -1,7 +1,7 @@
-from core import C
+from core import C, AssumeMeta
 from basic import Basic, Atom
 from assumptions import AssumeMixin, make__get_assumption, _assume_defined
-from singleton import S
+from singleton import S, Singleton
 from evalf import EvalfMixin
 from decorators import _sympifyit, call_highest_priority
 from cache import cacheit
@@ -9,6 +9,7 @@ from sympy.core.compatibility import all
 
 
 class Expr(Basic, EvalfMixin, AssumeMixin):
+    __metaclass__ = AssumeMeta
     __slots__ = ['_assumptions',    # assumptions
                  '_a_inprogress',   # already-seen requests (when deducing
                                     # through prerequisites -- see CycleDetected)
@@ -1950,6 +1951,10 @@ class AtomicExpr(Atom, Expr):
 
     def _eval_nseries(self, x, n, logx):
         return self
+
+class SingletonExpr(Singleton, AssumeMeta):
+    pass
+
 
 from mul import Mul
 from add import Add

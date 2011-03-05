@@ -101,6 +101,52 @@ class BasicMeta(BasicType):
     def __init__(cls, *args, **kws):
         setattr(C, cls.__name__, cls)
 
+    def __cmp__(cls, other):
+        # If the other object is not a Basic subclass, then we are not equal to
+        # it.
+        if not isinstance(other, BasicType):
+            return -1
+        n1 = cls.__name__
+        n2 = other.__name__
+        c = cmp(n1,n2)
+        if not c:
+            return 0
+
+        UNKNOWN = len(ordering_of_classes) + 1
+        try:
+            i1 = ordering_of_classes.index(n1)
+        except ValueError:
+            #print 'Add',n1,'to basic.ordering_of_classes list'
+            #return c
+            i1 = UNKNOWN
+        try:
+            i2 = ordering_of_classes.index(n2)
+        except ValueError:
+            #print 'Add',n2,'to basic.ordering_of_classes list'
+            #return c
+            i2 = UNKNOWN
+        if i1 == UNKNOWN and i2 == UNKNOWN:
+            return c
+        return cmp(i1,i2)
+
+    def __lt__(cls, other):
+        if cls.__cmp__(other) == -1:
+            return True
+        return False
+
+    def __gt__(cls, other):
+        if cls.__cmp__(other) == 1:
+            return True
+        return False
+
+C.BasicMeta = BasicMeta
+
+class AssumeMeta(BasicMeta):
+    """Metaclass for classes with old-style assumptions"""
+    __metaclass__ = BasicMeta
+    def __init__(cls, *args, **kws):
+        BasicMeta.__init__(cls, *args, **kws)
+
         # --- assumptions ---
 
         # initialize default_assumptions dictionary
@@ -171,43 +217,3 @@ class BasicMeta(BasicType):
                 if ('is_'+k) not in cls.__dict__:
                     is_k = make__get_assumption(cls.__name__, k)
                     setattr(cls, 'is_'+k, property(is_k))
-
-
-    def __cmp__(cls, other):
-        # If the other object is not a Basic subclass, then we are not equal to
-        # it.
-        if not isinstance(other, BasicType):
-            return -1
-        n1 = cls.__name__
-        n2 = other.__name__
-        c = cmp(n1,n2)
-        if not c: return 0
-
-        UNKNOWN = len(ordering_of_classes)+1
-        try:
-            i1 = ordering_of_classes.index(n1)
-        except ValueError:
-            #print 'Add',n1,'to basic.ordering_of_classes list'
-            #return c
-            i1 = UNKNOWN
-        try:
-            i2 = ordering_of_classes.index(n2)
-        except ValueError:
-            #print 'Add',n2,'to basic.ordering_of_classes list'
-            #return c
-            i2 = UNKNOWN
-        if i1 == UNKNOWN and i2 == UNKNOWN:
-            return c
-        return cmp(i1,i2)
-
-    def __lt__(cls, other):
-        if cls.__cmp__(other)==-1:
-            return True
-        return False
-
-    def __gt__(cls, other):
-        if cls.__cmp__(other)==1:
-            return True
-        return False
-
-C.BasicMeta = BasicMeta

@@ -1,6 +1,5 @@
-from sympy.core import S, C, sympify, Function, Lambda, Expr, Tuple
-from sympy.core.singleton import Singleton
-from sympy.core.symbol import Dummy
+from sympy.core import S, C, sympify, Function, Lambda, Expr, Tuple, Dummy
+from sympy.core.expr import SingletonExpr
 
 class IdentityFunction(Lambda):
     """The identity function
@@ -10,7 +9,7 @@ class IdentityFunction(Lambda):
     >>> Id(x)
     x
     """
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
     __slots__ = []
     nargs = 1
     def __new__(cls):

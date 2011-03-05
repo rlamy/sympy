@@ -31,7 +31,7 @@ Example:
 """
 from itertools import repeat
 
-from core import BasicMeta, C
+from core import AssumeMeta, BasicMeta, C
 from basic import Basic
 from singleton import S
 from expr import Expr, AtomicExpr
@@ -54,7 +54,7 @@ class ArgumentIndexError(ValueError):
         return ("Invalid operation with argument number %s for Function %s" %
                         (self.args[1], self.args[0]))
 
-class FunctionClass(BasicMeta):
+class FunctionClass(AssumeMeta):
     """
     Base class for function classes. FunctionClass is a subclass of type.
 

@@ -1,8 +1,8 @@
 from core import C
 from sympify import converter, sympify, _sympify, SympifyError
 from basic import Basic
-from singleton import S, Singleton
-from expr import Expr, AtomicExpr
+from singleton import S
+from expr import Expr, AtomicExpr, SingletonExpr
 from decorators import _sympifyit
 from cache import cacheit, clear_cache
 import sympy.mpmath as mpmath
@@ -1273,7 +1273,7 @@ class IntegerConstant(Integer):
 
 
 class Zero(IntegerConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = 0
     q = 1
@@ -1318,7 +1318,7 @@ class Zero(IntegerConstant):
         return False
 
 class One(IntegerConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = 1
     q = 1
@@ -1346,7 +1346,7 @@ class One(IntegerConstant):
         return {1: 1}
 
 class NegativeOne(IntegerConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = -1
     q = 1
@@ -1386,7 +1386,7 @@ class NegativeOne(IntegerConstant):
         return
 
 class Half(RationalConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = 1
     q = 2
@@ -1399,7 +1399,7 @@ class Half(RationalConstant):
 
 
 class Infinity(RationalConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = 1
     q = 0
@@ -1472,7 +1472,7 @@ class Infinity(RationalConstant):
 oo = S.Infinity
 
 class NegativeInfinity(RationalConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = -1
     q = 0
@@ -1539,7 +1539,7 @@ class NegativeInfinity(RationalConstant):
 
 
 class NaN(RationalConstant):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     p = 0
     q = 0
@@ -1572,7 +1572,7 @@ class NaN(RationalConstant):
 nan = S.NaN
 
 class ComplexInfinity(AtomicExpr):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
     is_commutative = True
     is_comparable = None
     is_bounded = False
@@ -1606,7 +1606,6 @@ class ComplexInfinity(AtomicExpr):
 zoo = S.ComplexInfinity
 
 class NumberSymbol(AtomicExpr):
-    __metaclass__ = Singleton
 
     is_commutative = True
     is_comparable = True
@@ -1701,7 +1700,7 @@ class NumberSymbol(AtomicExpr):
 
 
 class Exp1(NumberSymbol):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     is_real = True
     is_positive = True
@@ -1732,7 +1731,7 @@ class Exp1(NumberSymbol):
 E = S.Exp1
 
 class Pi(NumberSymbol):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
 
     is_real = True
@@ -1761,7 +1760,7 @@ class Pi(NumberSymbol):
 pi = S.Pi
 
 class GoldenRatio(NumberSymbol):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     is_real = True
     is_positive = True
@@ -1787,7 +1786,7 @@ class GoldenRatio(NumberSymbol):
         return sage.golden_ratio
 
 class EulerGamma(NumberSymbol):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     is_real = True
     is_positive = True
@@ -1811,7 +1810,7 @@ class EulerGamma(NumberSymbol):
         return sage.euler_gamma
 
 class Catalan(NumberSymbol):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     is_real = True
     is_positive = True
@@ -1834,7 +1833,7 @@ class Catalan(NumberSymbol):
         return sage.catalan
 
 class ImaginaryUnit(AtomicExpr):
-    __metaclass__ = Singleton
+    __metaclass__ = SingletonExpr
 
     is_commutative = True
     is_imaginary = True
