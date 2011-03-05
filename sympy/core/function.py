@@ -41,7 +41,7 @@ from sympy.core.containers import Tuple
 #from symbol import Symbol, Dummy
 from sympy.utilities.decorator import deprecated
 from sympy.utilities import all, any
-
+from containers import ApplicationClass, Application
 from sympy import mpmath
 
 

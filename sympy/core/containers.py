@@ -5,8 +5,11 @@
     The containers implemented in this module are subclassed to Basic.
     They are supposed to work seamlessly within the Sympy framework.
 """
-from sympify import sympify
-from basic import Basic
+from sympy.core.sympify import sympify
+from sympy.core.basic import Basic
+from sympy.core.multidimensional import vectorize
+from sympy.core.core import BasicMeta
+from sympy.core.cache import cacheit
 
 class Tuple(Basic):
     """
