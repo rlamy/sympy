@@ -1,10 +1,6 @@
 """Logic expressions handling
 
-NOTE
-----
-
-at present this is mainly needed for facts.py , feel free however to improve
-this stuff for general purpose.
+This is mainly needed for facts.py.
 """
 
 def fuzzy_bool(x):
@@ -44,13 +40,6 @@ def fuzzy_and(*args):
         return True
     elif a is False or b is False:
         return False
-
-def fuzzy_not(v):
-    """'not' in fuzzy logic"""
-    if v is None:
-        return v
-    else:
-        return not v
 
 class Logic(object):
     """Logical expression"""

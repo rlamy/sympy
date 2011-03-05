@@ -6,7 +6,15 @@
 CACHE = []  # [] of
             #    (item, {} or tuple of {})
 
-from sympy.core.logic import fuzzy_bool
+def fuzzy_bool(x):
+    """Return True, False or None according to x.
+
+    Whereas bool(x) returns True or False, fuzzy_bool allows
+    for the None value.
+    """
+    if x is None:
+        return None
+    return bool(x)
 
 def print_cache():
     """print cache content"""
