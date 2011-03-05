@@ -42,7 +42,8 @@ from compatibility import iterable,is_sequence
 from cache import cacheit
 from numbers import Rational, Float
 
-from sympy.core.containers import Tuple, Dict
+from sympy.core.containers import Tuple, ApplicationClass, Application
+from sympy.core.decorators import deprecated
 from sympy.utilities import default_sort_key
 from sympy.utilities.iterables import uniq
 

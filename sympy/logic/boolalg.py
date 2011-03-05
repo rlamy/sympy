@@ -1,7 +1,7 @@
 """Boolean algebra module for SymPy"""
 from sympy.core.basic import Basic
-from sympy.core.containers import LatticeOp
-from sympy.core.function import Application, sympify
+from sympy.core.containers import LatticeOp, Application
+from sympy.core.sympify import sympify
 
 class Boolean(Basic):
     """A boolean object is an object for which logic operations make sense."""
