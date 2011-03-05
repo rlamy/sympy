@@ -195,7 +195,7 @@ class Set(Basic):
                 new_args.append(arg._eval_subs(old, new))
             else:
                 new_args.append(arg)
-        return self.__class__(*new_args)
+        return self.func(*new_args)
 
     @property
     def is_number(self):
@@ -361,7 +361,7 @@ class Interval(Set, EvalfMixin):
         if empty:
             return S.EmptySet
 
-        return self.__class__(start, end, left_open, right_open)
+        return self.func(start, end, left_open, right_open)
 
     @property
     def _complement(self):
@@ -562,13 +562,13 @@ class Union(Set):
             intersections = []
             for interval in self.args:
                 intersections.append(interval.intersect(other))
-            return self.__class__(*intersections)
+            return self.func(*intersections)
 
         elif isinstance(other, Union):
             intersections = []
             for interval in other.args:
                 intersections.append(self.intersect(interval))
-            return self.__class__(*intersections)
+            return self.func(*intersections)
 
         else:
             return other.intersect(self)

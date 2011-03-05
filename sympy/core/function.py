@@ -409,7 +409,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_power_exp(self, deep=True, **hints):
         if not deep:
@@ -421,7 +421,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_power_base(self, deep=True, **hints):
         if not deep:
@@ -433,7 +433,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_mul(self, deep=True, **hints):
         if not deep:
@@ -445,7 +445,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_multinomial(self, deep=True, **hints):
         if not deep:
@@ -457,7 +457,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_log(self, deep=True, **hints):
         if not deep:
@@ -469,7 +469,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_complex(self, deep=True, **hints):
         if deep:
@@ -486,7 +486,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_func(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -496,7 +496,7 @@ functions are not supported.')
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_rewrite(self, pattern, rule, **hints):
         if hints.get('deep', False):
@@ -511,7 +511,7 @@ functions are not supported.')
                 if rewritten is not None:
                     return rewritten
 
-        return self.func(*args, **self._assumptions)
+        return self.func(*args)
 
     def fdiff(self, argindex=1):
         if self.nargs is not None:

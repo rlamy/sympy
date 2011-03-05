@@ -479,7 +479,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_power_exp(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -489,7 +489,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_power_base(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -499,7 +499,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_mul(self, deep=True, **hints):
         plain, sums, rewrite = [], [], False
@@ -526,10 +526,9 @@ class Mul(AssocOp):
             if sums:
                 terms = Mul._expandsums(sums)
                 plain = Mul(*plain)
-                return Add(*[Mul(plain, term) for term in terms],
-                           **self.assumptions0)
+                return Add(*[Mul(plain, term) for term in terms])
             else:
-                return Mul(*plain, **self.assumptions0)
+                return Mul(*plain)
 
     def _eval_expand_multinomial(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -539,7 +538,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_log(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -549,7 +548,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_complex(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -559,7 +558,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_trig(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -569,7 +568,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_expand_func(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -579,7 +578,7 @@ class Mul(AssocOp):
             else:
                 newterm = term
             terms.append(newterm)
-        return self.new(*terms)
+        return self.func(*terms)
 
     def _eval_derivative(self, s):
         terms = list(self.args)
