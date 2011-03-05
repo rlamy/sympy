@@ -31,11 +31,10 @@ Example:
 """
 from itertools import repeat
 
-from core import AssumeMeta, BasicMeta, C
+from core import C
 from basic import Basic
 from singleton import S
-from expr import Expr, AtomicExpr
-
+from expr import Expr, AtomicExpr, AssumeMeta
 from cache import cacheit
 from sympy.core.containers import Tuple
 #from numbers import Rational, Integer
@@ -61,8 +60,6 @@ class FunctionClass(AssumeMeta):
     Use Function('<function name>' [ , signature ]) to create
     undefined function classes.
     """
-    __metaclass__ = BasicMeta
-
     _new = type.__new__
 
     def __repr__(cls):
@@ -78,7 +75,7 @@ class UndefinedFunction(FunctionClass):
     def __new__(mcl, name):
         attrdict = {'undefined_Function': True}
         bases = (Function,)
-        return BasicMeta.__new__(mcl, name, bases, attrdict)
+        return super(UndefinedFunction, mcl).__new__(mcl, name, bases, attrdict)
 
 class Application(Basic):
     """

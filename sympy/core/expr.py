@@ -1,6 +1,6 @@
-from core import C, AssumeMeta
+from core import C
 from basic import Basic, Atom
-from assumptions import AssumeMixin, make__get_assumption, _assume_defined
+from assumptions import AssumeMeta, AssumeMixin, make__get_assumption, _assume_defined
 from singleton import S, Singleton
 from evalf import EvalfMixin
 from decorators import _sympifyit, call_highest_priority
