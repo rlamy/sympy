@@ -756,8 +756,8 @@ def tsolve(eq, sym):
 
     #                    -1
     # f(x) = g  ->  x = f  (g)
-    if lhs.is_Function and lhs.nargs==1 and hasattr(lhs, 'inverse'):
-        rhs = lhs.inverse() (rhs)
+    if lhs.is_Function and len(lhs.args) == 1 and hasattr(lhs, 'inverse'):
+        rhs = lhs.inverse()(rhs)
         lhs = lhs.args[0]
 
         sol = solve(lhs-rhs, sym)
