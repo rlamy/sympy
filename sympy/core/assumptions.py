@@ -1,6 +1,82 @@
 from facts import FactRules
 
 
+# This are the rules under which our assumptions function
+#
+# References
+# ----------
+#
+# negative,     -- http://en.wikipedia.org/wiki/Negative_number
+# nonnegative
+#
+# even, odd     -- http://en.wikipedia.org/wiki/Parity_(mathematics)
+# imaginary     -- http://en.wikipedia.org/wiki/Imaginary_number
+# composite     -- http://en.wikipedia.org/wiki/Composite_number
+# finite        -- http://en.wikipedia.org/wiki/Finite
+# infinitesimal -- http://en.wikipedia.org/wiki/Infinitesimal
+# irrational    -- http://en.wikipedia.org/wiki/Irrational_number
+# ...
+
+_assume_rules = FactRules([
+
+    'integer        ->  rational',
+    'rational       ->  real',
+    'real           ->  complex',
+    'imaginary      ->  complex',
+    'complex        ->  commutative',
+
+    'odd            ==  integer & !even',
+    'even           ==  integer & !odd',
+
+    'real           ==  negative | zero | positive',
+
+    'positive       ->  real & !negative & !zero',
+    'negative       ->  real & !positive & !zero',
+
+    'nonpositive    ==  real & !positive',
+    'nonnegative    ==  real & !negative',
+
+    'zero           ->  infinitesimal & even',
+
+    'prime          ->  integer & positive',
+    'composite      ==  integer & positive & !prime',
+
+    'irrational     ==  real & !rational',
+
+    'imaginary      ->  !real',
+
+
+    '!bounded     ==  unbounded',
+    'noninteger     ==  real & !integer',
+    '!zero        ==  nonzero',
+
+    # XXX do we need this ?
+    'finite     ->  bounded',       # XXX do we need this?
+    'finite     ->  !zero',         # XXX wrong?
+    'infinitesimal ->  !finite',    # XXX is this ok?
+])
+
+_assume_defined = _assume_rules.defined_facts.copy()
+_assume_defined.add('comparable')
+_assume_defined = frozenset(_assume_defined)
+
+
+###################################
+# positive/negative from .evalf() #
+###################################
+
+# properties that indicate ordering on real axis
+_real_ordering = set(['negative', 'nonnegative', 'positive', 'nonpositive'])
+
+# what can be said from cmp(x.evalf(),0)
+# if x.evalf() is zero we can say nothing so nonpositive is the same as negative
+_real_cmp0_table= {
+        'positive': {1: True,  -1: False, 0: None},
+        'negative': {1: False, -1: True,  0: None},
+        }
+_real_cmp0_table['nonpositive'] = _real_cmp0_table['negative']
+_real_cmp0_table['nonnegative'] = _real_cmp0_table['positive']
+
 class CycleDetected(Exception):
     """(internal) used to detect cycles when evaluating assumptions
        through prerequisites
@@ -69,94 +145,10 @@ class AssumeMeths(object):
 
         - None (if you don't know if the property is True or false)
     """
-
     __slots__ = ['_assumptions',    # assumptions
                  '_a_inprogress',   # already-seen requests (when deducing
                                     # through prerequisites -- see CycleDetected)
                 ]
-
-
-    # This are the rules under which our assumptions function
-    #
-    # References
-    # ----------
-    #
-    # negative,     -- http://en.wikipedia.org/wiki/Negative_number
-    # nonnegative
-    #
-    # even, odd     -- http://en.wikipedia.org/wiki/Parity_(mathematics)
-    # imaginary     -- http://en.wikipedia.org/wiki/Imaginary_number
-    # composite     -- http://en.wikipedia.org/wiki/Composite_number
-    # finite        -- http://en.wikipedia.org/wiki/Finite
-    # infinitesimal -- http://en.wikipedia.org/wiki/Infinitesimal
-    # irrational    -- http://en.wikipedia.org/wiki/Irrational_number
-    # ...
-
-    _assume_rules = FactRules([
-
-        'integer        ->  rational',
-        'rational       ->  real',
-        'real           ->  complex',
-        'imaginary      ->  complex',
-        'complex        ->  commutative',
-
-        'odd            ==  integer & !even',
-        'even           ==  integer & !odd',
-
-        'real           ==  negative | zero | positive',
-
-        'positive       ->  real & !negative & !zero',
-        'negative       ->  real & !positive & !zero',
-
-        'nonpositive    ==  real & !positive',
-        'nonnegative    ==  real & !negative',
-
-        'zero           ->  infinitesimal & even',
-
-        'prime          ->  integer & positive',
-        'composite      ==  integer & positive & !prime',
-
-        'irrational     ==  real & !rational',
-
-        'imaginary      ->  !real',
-
-
-        '!bounded     ==  unbounded',
-        'noninteger     ==  real & !integer',
-        '!zero        ==  nonzero',
-
-        # XXX do we need this ?
-        'finite     ->  bounded',       # XXX do we need this?
-        'finite     ->  !zero',         # XXX wrong?
-        'infinitesimal ->  !finite',    # XXX is this ok?
-
-    ])
-
-    _assume_defined = _assume_rules.defined_facts.copy()
-    _assume_defined.add('comparable')
-    _assume_defined = frozenset(_assume_defined)
-
-
-
-    ###################################
-    # positive/negative from .evalf() #
-    ###################################
-
-    # properties that indicate ordering on real axis
-    _real_ordering = set(['negative', 'nonnegative', 'positive', 'nonpositive'])
-
-    # what can be said from cmp(x.evalf(),0)
-    # NOTE: if x.evalf() is zero we can say nothing
-    _real_cmp0_table= {
-            'positive': {1: True,  -1: False, 0: None},
-            'negative': {1: False, -1: True,  0: None},
-            }
-
-    # because we can say nothing if x.evalf() is zero, nonpositive is the same
-    # as negative
-    _real_cmp0_table['nonpositive'] = _real_cmp0_table['negative']
-    _real_cmp0_table['nonnegative'] = _real_cmp0_table['positive']
-
 
     def _what_known_about(self, k):
         """tries hard to give an answer to: what is known about fact `k`
@@ -208,10 +200,9 @@ class AssumeMeths(object):
            _learn_new_facts to deduce all its implications, and also the result
            is cached in ._assumptions for later quick access.
         """
-        if k not in self._assume_defined:
+        if k not in _assume_defined:
             raise AttributeError('undefined assumption %r' % (k))
 
-        assumptions = self._assumptions
         seen = self._a_inprogress
         if k in seen:
             raise CycleDetected
@@ -230,7 +221,7 @@ class AssumeMeths(object):
                         return a
 
             # Try assumption's prerequisites
-            for pk in self._assume_rules.prereq.get(k,()):
+            for pk in _assume_rules.prereq.get(k, ()):
                 if hasattr(self, '_eval_is_' + pk):
                     # cycle
                     if pk in seen:
@@ -247,18 +238,12 @@ class AssumeMeths(object):
         finally:
             seen.pop()
 
-
         # For positive/negative try to ask evalf
-        if k in self._real_ordering:
-            if self.is_comparable:
-                v = self.evalf()
-
-                c = cmp(v, 0)
-                a = self._real_cmp0_table[k][c]
-
-                if a is not None:
-                    self._learn_new_facts( ((k,a),) )
-                    return a
+        if k in _real_ordering and self.is_comparable:
+            a = _real_cmp0_table[k][cmp(self.evalf(), 0)]
+            if a is not None:
+                self._learn_new_facts( ((k,a),) )
+                return a
 
         # No result -- unknown
         # cache it  (NB ._learn_new_facts(k, None) to learn other properties,
@@ -280,22 +265,15 @@ class AssumeMeths(object):
 
            The result is stored back into ._assumptions
         """
-        # no new facts
         if not facts:
             return
 
-        default_assumptions = type(self).default_assumptions
         base = self._assumptions
-
-        # ._assumptions were shared with the class
-        if base is default_assumptions:
+        if base is self.default_assumptions:
             base = base.copy()
             self._assumptions = base
-            self._assume_rules.deduce_all_facts(facts, base)
-
-        else:
-            # NOTE it modifies base inplace
-            self._assume_rules.deduce_all_facts(facts, base)
+        # NOTE it modifies base inplace
+        _assume_rules.deduce_all_facts(facts, base)
 
 
 def make__get_assumption(classname, name):
