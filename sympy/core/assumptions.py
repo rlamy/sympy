@@ -84,7 +84,7 @@ class CycleDetected(Exception):
     pass
 
 
-class AssumeMeths(object):
+class AssumeMixin(object):
     """ Define default assumption methods.
 
     AssumeMeths should be used to derive Basic class only.
@@ -145,10 +145,7 @@ class AssumeMeths(object):
 
         - None (if you don't know if the property is True or false)
     """
-    __slots__ = ['_assumptions',    # assumptions
-                 '_a_inprogress',   # already-seen requests (when deducing
-                                    # through prerequisites -- see CycleDetected)
-                ]
+    __slots__ = []
 
     def _what_known_about(self, k):
         """tries hard to give an answer to: what is known about fact `k`
