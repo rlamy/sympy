@@ -110,21 +110,44 @@ class Application(Basic):
 
     nargs = None
 
+    @classmethod
+    def _should_evalf(cls, arg):
+        """
+        Decide if the function should automatically evalf().
+        By default (in this implementation), this happens if (and only if) the
+        ARG is a floating point number.
+        This function is used by __new__.
+        """
+        if arg.is_Real:
+            return True
+        if not arg.is_Add:
+            return False
+        re, im = arg.as_real_imag()
+        return re.is_Real or im.is_Real
+
     @cacheit
     def __new__(cls, *args, **options):
         args = map(sympify, args)
-
         # these lines should be refactored
         for opt in ["nargs", "dummy", "comparable", "noncommutative",
                     "commutative"]:
             if opt in options:
                 del options[opt]
-
-        if options.pop('evaluate', True):
-            evaluated = cls.eval(*args)
-            if evaluated is not None:
-                return evaluated
-        return super(Application, cls).__new__(cls, *args, **options)
+        # up to here.
+        if not options.pop('evaluate', True):
+            return super(Application, cls).__new__(cls, *args, **options)
+        evaluated = cls.eval(*args)
+        if evaluated is not None:
+            return evaluated
+        # Just undefined functions have nargs == None
+        if not cls.nargs and hasattr(cls, 'undefined_Function'):
+            r = super(Application, cls).__new__(cls, *args, **options)
+            r.nargs = len(args)
+            return r
+        r = super(Application, cls).__new__(cls, *args, **options)
+        if any([cls._should_evalf(a) for a in args]):
+            return r.evalf()
+        return r
 
     @classmethod
     def eval(cls, *args):
@@ -159,11 +182,16 @@ class Application(Basic):
         return self.__class__
 
     def _eval_subs(self, old, new):
-        if (old.is_Function and new.is_Function and
-            old == self.func and
-            (self.nargs == new.nargs or not new.nargs or
-             isinstance(new.nargs, tuple) and self.nargs in new.nargs)):
-            return new(*self.args)
+        if self == old:
+            return new
+        elif old.is_Function and new.is_Function:
+            if old == self.func:
+                if self.nargs == new.nargs or not new.nargs:
+                    return new(*self.args)
+                # Written down as an elif to avoid a super-long line
+                elif isinstance(new.nargs, tuple) and self.nargs in new.nargs:
+                    return new(*self.args)
+        return self.func(*[s.subs(old, new) for s in self.args])
 
     @deprecated
     def __contains__(self, obj):
