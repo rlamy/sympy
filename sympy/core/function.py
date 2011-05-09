@@ -105,7 +105,6 @@ class Application(Basic):
     Instances of Application represent the result of applying an application of
     any type to any object.
     """
-    __metaclass__ = FunctionClass
     __slots__ = []
 
     is_Function = True
@@ -180,6 +179,7 @@ class Function(Application, Expr):
     Constructor of undefined function classes.
 
     """
+    __metaclass__ = FunctionClass
 
     @property
     def _diff_wrt(self):
