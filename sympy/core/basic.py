@@ -161,31 +161,16 @@ class Basic(PicklableWithSlots):
         # occurs as hash is needed for setting cache dictionary keys
         h = self._mhash
         if h is None:
-            h = (type(self).__name__,) + self._hashable_content()
-
-            if self._assume_type_keys is not None:
-                a = []
-                kv= self._assumptions
-                for k in sorted(self._assume_type_keys):
-                    a.append( (k, kv[k]) )
-
-                h = hash( h + tuple(a) )
-
-            else:
-                h = hash( h )
-
-
+            state = (type(self).__name__,) + self._hashable_content()
+            h = hash(state)
             self._mhash = h
-            return h
-
-        else:
-            return h
+        return h
 
     def _hashable_content(self):
         # If class defines additional attributes, like name in Symbol,
         # then this method should be updated accordingly to return
         # relevant attributes as tuple.
-        return self._args
+        return self._args + super(Basic, self)._hashable_content()
 
     def compare(self, other):
         """

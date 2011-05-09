@@ -235,10 +235,17 @@ class AssumeMixin(object):
             basek = set(self.default_assumptions.keys())
             k2    = set(self._assumptions.keys())
             newk  = k2.difference(basek)
-
             self._assume_type_keys = frozenset(newk)
         else:
             self._assume_type_keys = None
+
+    def _hashable_content(self):
+        keys = self._assume_type_keys
+        if keys is None:
+            return ()
+        else:
+            assump = self._assumptions
+            return tuple((key, assump[key]) for key in sorted(keys))
 
     # XXX better name?
     @property
