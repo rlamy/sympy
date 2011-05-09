@@ -89,8 +89,6 @@ class FunctionClass(WithAssumptions):
     """
     __metaclass__ = BasicMeta
 
-    _new = type.__new__
-
     def __repr__(cls):
         return cls.__name__
 
