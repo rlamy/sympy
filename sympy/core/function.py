@@ -80,7 +80,8 @@ class ArgumentIndexError(ValueError):
         return ("Invalid operation with argument number %s for Function %s" %
                         (self.args[1], self.args[0]))
 
-class FunctionClass(WithAssumptions):
+
+class ApplicationClass(BasicMeta):
     """
     Base class for function classes. FunctionClass is a subclass of type.
 
@@ -170,6 +171,10 @@ class Application(Basic):
             return True
         return super(Application, self).__contains__(obj)
 
+
+
+class FunctionClass(ApplicationClass, type(Expr)):
+    pass
 
 class Function(Application, Expr):
     """
