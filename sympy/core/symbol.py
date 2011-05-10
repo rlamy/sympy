@@ -83,7 +83,7 @@ class Symbol(AtomicExpr, Boolean):
         return (self.name,)
 
     def _hashable_content(self):
-        return (self.name,)
+        return (self.name, self.is_commutative) + Expr._hashable_content(self)
 
     @cacheit
     def sort_key(self, order=None):

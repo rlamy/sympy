@@ -104,7 +104,7 @@ class Piecewise(Function):
             r = None
 
         if r is None:
-            return Basic.__new__(cls, *newargs, **options)
+            return Expr.__new__(cls, *newargs, **options)
         else:
             return r
 

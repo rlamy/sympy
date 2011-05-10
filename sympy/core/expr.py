@@ -1,4 +1,5 @@
 from core import C
+from assumptions import WithAssumptions, AssumeMixin
 from basic import Basic, Atom
 from singleton import S
 from evalf import EvalfMixin, pure_complex
@@ -11,7 +12,16 @@ from collections import defaultdict
 from math import log10, ceil
 
 class Expr(Basic, EvalfMixin):
+    __metaclass__ = WithAssumptions
     __slots__ = []
+
+    def __new__(self, *args, **assumptions):
+        obj = Basic.__new__(self, *args)
+        obj._init_assumptions(assumptions)
+        return obj
+
+    def _hashable_content(self):
+        return Basic._hashable_content(self) + AssumeMixin._hashable_content(self)
 
     @property
     def _diff_wrt(self):
@@ -93,8 +103,10 @@ class Expr(Basic, EvalfMixin):
 
     def __pos__(self):
         return self
+
     def __neg__(self):
         return Mul(S.NegativeOne, self)
+
     def __abs__(self):
         return C.Abs(self)
 

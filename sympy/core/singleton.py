@@ -1,7 +1,6 @@
 """Singleton mechanism"""
 
-from core import Registry
-from assumptions import WithAssumptions
+from core import Registry, BasicMeta
 from sympify import sympify
 
 class SingletonRegistry(Registry):
@@ -19,7 +18,7 @@ class SingletonRegistry(Registry):
 S = SingletonRegistry()
 
 
-class Singleton(WithAssumptions):
+class Singleton(BasicMeta):
     """
     Metaclass for singleton classes.
 
@@ -50,6 +49,15 @@ class Singleton(WithAssumptions):
         and have their own instance.
 
     """
+    def __new__(mcl, name, bases, attrdict):
+        conflicting = [type(base) for base in bases if not issubclass(mcl, type(base))]
+        if conflicting:
+            conflicting = [mcl] + conflicting
+            meta_name = '_'.join([cls.__name__ for cls in conflicting])
+            new_meta = BasicMeta(meta_name, tuple(conflicting), {})
+            print new_meta
+            return new_meta(name, bases, attrdict)
+        return super(Singleton, mcl).__new__(mcl, name, bases, attrdict)
 
     def __init__(cls, name, bases, dict_):
         super(Singleton, cls).__init__(cls, name, bases, dict_)

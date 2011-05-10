@@ -1,8 +1,8 @@
 """Base class for all the objects in SymPy"""
 
-from assumptions import WithAssumptions
+from decorators import _sympifyit
 from cache import cacheit
-from core import BasicType, C
+from core import BasicMeta, BasicType, C
 from sympify import _sympify, sympify, SympifyError
 from compatibility import callable, reduce, cmp, iterable
 from sympy.core.decorators import deprecated
@@ -104,7 +104,7 @@ class Basic(PicklableWithSlots):
         (x,)
 
     """
-    __metaclass__ = WithAssumptions
+    __metaclass__ = BasicMeta
     __slots__ = ['_mhash',              # hash value
                  '_args',               # arguments
                 ]
@@ -142,14 +142,11 @@ class Basic(PicklableWithSlots):
         # from test_pickling.py
         return self.is_Float
 
-    def __new__(cls, *args, **assumptions):
+    def __new__(cls, *args):
         obj = object.__new__(cls)
-        obj._init_assumptions(assumptions)
-
         obj._mhash = None # will be set by __hash__ method.
         obj._args = args  # all items in args must be Basic objects
         return obj
-
 
     def __getnewargs__(self):
         """ Pickling support.
@@ -170,7 +167,7 @@ class Basic(PicklableWithSlots):
         # If class defines additional attributes, like name in Symbol,
         # then this method should be updated accordingly to return
         # relevant attributes as tuple.
-        return self._args + super(Basic, self)._hashable_content()
+        return self._args
 
     def compare(self, other):
         """
@@ -383,7 +380,7 @@ class Basic(PicklableWithSlots):
         st = self._hashable_content()
         ot = other._hashable_content()
 
-        return st == ot and self._assume_type_keys == other._assume_type_keys
+        return st == ot
 
     def __ne__(self, other):
         """a != b  -> Compare two symbolic trees and see whether they are different
@@ -408,7 +405,7 @@ class Basic(PicklableWithSlots):
         st = self._hashable_content()
         ot = other._hashable_content()
 
-        return (st != ot) or self._assume_type_keys != other._assume_type_keys
+        return (st != ot)
 
     def dummy_eq(self, other, symbol=None):
         """

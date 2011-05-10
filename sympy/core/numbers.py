@@ -960,7 +960,6 @@ class Rational(Number):
         obj = Expr.__new__(cls)
         obj.p = p
         obj.q = q
-        #obj._args = (p, q)
         return obj
 
     def limit_denominator(self, max_denominator=1000000):
@@ -1359,8 +1358,7 @@ class Rational(Number):
 # int -> Integer
 _intcache = {}
 
-
-# TODO move this tracing facility to sympy/core/trace.py  ?
+# TODO move this tracing facility to  sympy/core/trace.py  ?
 def _intcache_printinfo():
     ints = sorted(_intcache.keys())
     nhit = _intcache_hits
@@ -1411,8 +1409,6 @@ def int_trace(f):
     atexit.register(_intcache_printinfo)
 
     return Integer_tracer
-
-
 
 
 class Integer(Rational):
@@ -2366,7 +2362,6 @@ class ComplexInfinity(AtomicExpr):
 zoo = S.ComplexInfinity
 
 class NumberSymbol(AtomicExpr):
-    __metaclass__ = Singleton
 
     is_commutative = True
     is_bounded = True
