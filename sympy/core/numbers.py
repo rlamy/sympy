@@ -327,12 +327,23 @@ class Float(Number):
     def __neg__(self):
         return Float._new(mlib.mpf_neg(self._mpf_), self._prec)
 
-    @_sympifyit('other', NotImplemented)
     def __mul__(self, other):
+        if not isinstance(other, Basic):
+            try:
+                return self * sympify(other, strict=True)
+            except SympifyError:
+                return NotImplemented
+        if type(other) is type(self):
+            prec = max(self._prec, other._prec)
+            return Float._new(mlib.mpf_mul(self._mpf_, other._mpf_, prec, rnd), prec)
+        return NotImplemented
+
+    @_sympifyit('other', NotImplemented)
+    def __rmul__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_mul(self._mpf_, rhs, prec, rnd), prec)
-        return Number.__mul__(self, other)
+        return Number.__rmul__(self, other)
 
     @_sympifyit('other', NotImplemented)
     def __mod__(self, other):
@@ -632,15 +643,19 @@ class Rational(Number):
     def __neg__(self):
         return Rational(-self.p, self.q)
 
-    @_sympifyit('other', NotImplemented)
     def __mul__(self, other):
-        if (other is S.NaN) or (self is S.NaN):
-            return S.NaN
         if isinstance(other, Float):
-            return other * self
+            return other.__rmul__(self)
         if isinstance(other, Rational):
             return Rational(self.p * other.p, self.q * other.q)
-        return Number.__mul__(self, other)
+        return super(Rational, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Float):
+            return other.__rmul__(self)
+        if isinstance(other, Rational):
+            return Rational(self.p * other.p, self.q * other.q)
+        return super(Rational, self).__rmul__(other)
 
     @_sympifyit('other', NotImplemented)
     def __mod__(self, other):
@@ -1349,6 +1364,16 @@ class One(IntegerConstant):
     def __neg__():
         return S.NegativeOne
 
+    def __mul__(self, other):
+        if isinstance(other, Expr):
+            return other
+        return super(One, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Expr):
+            return other
+        return super(One, self).__rmul__(other)
+
     def _eval_order(self, *symbols):
         return
 
@@ -1570,6 +1595,16 @@ class NaN(RationalConstant):
     is_positive = None
 
     __slots__ = []
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            return self
+        return super(NaN, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Expr):
+            return self
+        return super(NaN, self).__rmul__(other)
 
     def _as_mpf_val(self, prec):
         return mlib.fnan
