@@ -1052,7 +1052,7 @@ class Integer(Rational):
             return Integer(other * self.p)
         elif isinstance(other, Integer):
             return Integer(other.p * self.p)
-        return Rational.__mul__(self, other)
+        return super(Integer, self).__rmul__(other)
 
     def __eq__(self, other):
         if type(other) is int:

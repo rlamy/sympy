@@ -42,7 +42,9 @@ class Expr(Basic, EvalfMixin):
                 return self * sympify(other, strict=True)
             except SympifyError:
                 return NotImplemented
-        return Mul(self, other)
+        if type(other) is type(self):
+            return Mul(self, other)
+        return NotImplemented
 
     def __rmul__(self, other):
         if not isinstance(other, Basic):
