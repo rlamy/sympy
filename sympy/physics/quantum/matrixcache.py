@@ -79,7 +79,7 @@ class MatrixCache(object):
         self._store_matrix(name, 'scipy.sparse', m)
 
 
-sqrt2_inv = Pow(2, Rational(-1,2), evaluate=False)
+sqrt2_inv = Pow(2, Rational(-1,2))
 
 # Save the common matrices that we will need
 matrix_cache = MatrixCache()
