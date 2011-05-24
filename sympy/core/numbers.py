@@ -3,7 +3,7 @@ from sympify import converter, sympify, _sympify, SympifyError
 from basic import Basic
 from singleton import S, Singleton
 from expr import Expr, AtomicExpr
-from decorators import _sympifyit, deprecated
+from decorators import _sympifyit, deprecated, sympify_other
 from cache import cacheit, clear_cache
 import sympy.mpmath as mpmath
 import sympy.mpmath.libmp as mlib
@@ -352,7 +352,7 @@ class Float(Number):
             return Float._new(mlib.mpf_mod(self._mpf_, rhs, prec, rnd), prec)
         return Number.__mod__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if (other is S.NaN) or (self is NaN):
             return S.NaN
@@ -360,6 +360,16 @@ class Float(Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_add(self._mpf_, rhs, prec, rnd), prec)
         return Number.__add__(self, other)
+
+    @sympify_other
+    def __radd__(self, other):
+        if (other is S.NaN) or (self is NaN):
+            return S.NaN
+        if isinstance(other, Number):
+            rhs, prec = other._as_mpf_op(self._prec)
+            return Float._new(mlib.mpf_add(self._mpf_, rhs, prec, rnd), prec)
+        return Number.__radd__(self, other)
+
 
     def _eval_power(self, expt):
         """
@@ -666,7 +676,6 @@ class Rational(Number):
             return self.evalf() % other
         return Number.__mod__(self, other)
 
-    @_sympifyit('other', NotImplemented)
     def __add__(self, other):
         if (other is S.NaN) or (self is S.NaN):
             return S.NaN
