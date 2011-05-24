@@ -684,6 +684,24 @@ class Rational(Number):
             return Rational(self.p * other.q + self.q * other.p, self.q * other.q)
         return Number.__add__(self, other)
 
+    @_sympifyit('other', NotImplemented)
+    def __radd__(self, other):
+        if (other is S.NaN) or (self is S.NaN):
+            return S.NaN
+        if isinstance(other, Float):
+            return other.__radd__(self)
+        if isinstance(other, Rational):
+            if self.is_unbounded:
+                if other.is_bounded:
+                    return self
+                elif self==other:
+                    return self
+            else:
+                if other.is_unbounded:
+                    return other
+            return Rational(self.p * other.q + self.q * other.p, self.q * other.q)
+        return Number.__radd__(self, other)
+
     def _eval_power(self, expt):
         if (expt is S.NaN):
             return S.NaN
@@ -1024,7 +1042,7 @@ class Integer(Rational):
             return Integer(other + self.p)
         elif isinstance(other, Integer):
             return Integer(other.p + self.p)
-        return Rational.__add__(self, other)
+        return Rational.__radd__(self, other)
 
     def __sub__(self, other):
         if type(other) is int:
