@@ -3,7 +3,7 @@ from sympy.core.sympify import SympifyError
 from basic import Basic, Atom
 from singleton import S
 from evalf import EvalfMixin
-from decorators import _sympifyit
+from decorators import _sympifyit, sympify_other
 from cache import cacheit
 from sympy.core.compatibility import all
 
@@ -20,53 +20,45 @@ class Expr(Basic, EvalfMixin):
     def __abs__(self):
         return C.Abs(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         return Add(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __radd__(self, other):
         return Add(other, self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         return Add(self, -other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rsub__(self, other):
         return Add(other, -self)
 
+    @sympify_other
     def __mul__(self, other):
-        if not isinstance(other, Basic):
-            try:
-                return self * sympify(other, strict=True)
-            except SympifyError:
-                return NotImplemented
         if type(other) is type(self):
             return Mul(self, other)
         return NotImplemented
 
+    @sympify_other
     def __rmul__(self, other):
-        if not isinstance(other, Basic):
-            try:
-                return sympify(other, strict=True) * self
-            except SympifyError:
-                return NotImplemented
         return Mul(other, self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __pow__(self, other):
         return Pow(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rpow__(self, other):
         return Pow(other, self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         return Mul(self, Pow(other, S.NegativeOne))
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rdiv__(self, other):
         return Mul(other, Pow(self, S.NegativeOne))
 
