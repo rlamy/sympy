@@ -412,17 +412,17 @@ class Float(Number):
 
     @sympify_other
     def __add__(self, other):
-        if isinstance(other, Number):
+        if isinstance(other, Float):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_add(self._mpf_, rhs, prec, rnd), prec)
         return Number.__add__(self, other)
 
     @sympify_other
-    def __sub__(self, other):
+    def __radd__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
-            return Float._new(mlib.mpf_sub(self._mpf_, rhs, prec, rnd), prec)
-        return Number.__sub__(self, other)
+            return Float._new(mlib.mpf_add(self._mpf_, rhs, prec, rnd), prec)
+        return Number.__radd__(self, other)
 
     @sympify_other
     def __mul__(self, other):
@@ -737,10 +737,8 @@ class Rational(Number):
 
     @sympify_other
     def __add__(self, other):
-        if (other is S.NaN) or (self is S.NaN):
-            return S.NaN
         if isinstance(other, Float):
-            return other + self
+            return other.__radd__(self)
         if isinstance(other, Rational):
             if self.is_unbounded:
                 if other.is_bounded:
@@ -756,7 +754,17 @@ class Rational(Number):
 
     @sympify_other
     def __radd__(self, other):
+        if isinstance(other, Float):
+            return other.__radd__(self)
         if isinstance(other, Rational):
+            if self.is_unbounded:
+                if other.is_bounded:
+                    return self
+                elif self==other:
+                    return self
+            else:
+                if other.is_unbounded:
+                    return other
             return other.__add__(self)
         return Number.__radd__(self, other)
 
@@ -1939,9 +1947,15 @@ class NaN(Number):
     def __new__(cls):
         return AtomicExpr.__new__(cls)
 
-    @sympify_other
     def __add__(self, other):
-        return self
+        if isinstance(other, Number):
+            return self
+        return super(NaN, self).__add__(other)
+
+    def __radd__(self, other):
+        if isinstance(other, Expr):
+            return self
+        return super(NaN, self).__radd__(other)
 
     @sympify_other
     def __sub__(self, other):
