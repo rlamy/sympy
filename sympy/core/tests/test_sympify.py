@@ -2,7 +2,7 @@ from sympy import Symbol, exp, Integer, Float, sin, cos, log, Poly, Lambda, \
     Function, I, S, sqrt, srepr, Rational, Tuple
 from sympy.abc import x, y
 from sympy.core.sympify import sympify, _sympify, SympifyError
-from sympy.core.decorators import _sympifyit
+from sympy.core.decorators import _sympifyit, sympify_other
 from sympy.utilities.pytest import XFAIL, raises
 from sympy.utilities.decorator import conserve_mpmath_dps
 from sympy.geometry import Point, Line
@@ -239,9 +239,9 @@ def test_sympifyit():
     x = Symbol('x')
     y = Symbol('y')
 
-    @_sympifyit('b', NotImplemented)
-    def add(a, b):
-        return a+b
+    @sympify_other
+    def add(self, other):
+        return self + other
 
     assert add(x, 1) == x + 1
     assert add(x, 0.5) == x + Float('0.5')

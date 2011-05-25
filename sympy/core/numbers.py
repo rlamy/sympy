@@ -3,7 +3,7 @@ from sympify import converter, sympify, _sympify, SympifyError
 from basic import Basic
 from singleton import S, Singleton
 from expr import Expr, AtomicExpr
-from decorators import _sympifyit, deprecated
+from decorators import _sympifyit, deprecated, sympify_other
 from cache import cacheit, clear_cache
 import sympy.mpmath as mpmath
 import sympy.mpmath.libmp as mlib
@@ -178,7 +178,7 @@ class Number(AtomicExpr):
     def sort_key(self, order=None):
         return self.class_key(), (0, ()), (), self
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if isinstance(other, Number):
             if other is S.NaN:
@@ -189,7 +189,7 @@ class Number(AtomicExpr):
                 return S.NegativeInfinity
         return AtomicExpr.__add__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if isinstance(other, Number):
             if other is S.NaN:
@@ -200,7 +200,7 @@ class Number(AtomicExpr):
                 return S.Infinity
         return AtomicExpr.__sub__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Number):
             if other is S.NaN:
@@ -221,7 +221,7 @@ class Number(AtomicExpr):
                     return S.Infinity
         return AtomicExpr.__mul__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         if isinstance(other, Number):
             if other is S.NaN:
@@ -410,28 +410,28 @@ class Float(Number):
     def __neg__(self):
         return Float._new(mlib.mpf_neg(self._mpf_), self._prec)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_add(self._mpf_, rhs, prec, rnd), prec)
         return Number.__add__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_sub(self._mpf_, rhs, prec, rnd), prec)
         return Number.__sub__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_mul(self._mpf_, rhs, prec, rnd), prec)
         return Number.__mul__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
@@ -440,14 +440,14 @@ class Float(Number):
 
     __truediv__ = __div__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mod__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_mod(self._mpf_, rhs, prec, rnd), prec)
-        return Number.__mod__(self, other)
+        return NotImplemented
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rmod__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
@@ -728,7 +728,7 @@ class Rational(Number):
     def __neg__(self):
         return Rational(-self.p, self.q)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if isinstance(other, Rational):
             return Rational(self.p*other.q + self.q*other.p, self.q*other.q)
@@ -737,7 +737,7 @@ class Rational(Number):
         else:
             return Number.__add__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if isinstance(other, Rational):
             return Rational(self.p*other.q - self.q*other.p, self.q*other.q)
@@ -746,7 +746,7 @@ class Rational(Number):
         else:
             return Number.__sub__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Rational):
             return Rational(self.p*other.p, self.q*other.q)
@@ -755,7 +755,7 @@ class Rational(Number):
         else:
             return Number.__mul__(self, other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         if isinstance(other, Rational):
             return Rational(self.p*other.q, self.q*other.p)
@@ -766,22 +766,23 @@ class Rational(Number):
 
     __truediv__ = __div__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mod__(self, other):
         if isinstance(other, Rational):
             n = (self.p*other.q) // (other.p*self.q)
             return Rational(self.p*other.q - n*other.p*self.q, self.q*other.q)
         if isinstance(other, Float):
             return self.evalf() % other
-        return Number.__mod__(self, other)
+        return NotImplemented
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rmod__(self, other):
         if isinstance(other, Rational):
-            return Rational.__mod__(other, self)
+            n = (other.p * self.q) // (self.p * other.q)
+            return Rational(other.p*self.q - n*self.p*other.q, self.q*other.q)
         if isinstance(other, Float):
             return other % self.evalf()
-        return Number.__rmod__(self, other)
+        return NotImplemented
 
     def _eval_power(self, expt):
         if (expt is S.NaN):
@@ -1459,7 +1460,7 @@ class Zero(IntegerConstant):
     def __neg__():
         return S.Zero
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if other is S.NaN or other is S.NegativeInfinity or other is S.Infinity or other is S.ComplexInfinity:
             return S.NaN
@@ -1588,7 +1589,7 @@ class Infinity(Number):
     def __new__(cls):
         return AtomicExpr.__new__(cls)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if isinstance(other, Number):
             if other is S.NegativeInfinity or other is S.NaN:
@@ -1604,7 +1605,7 @@ class Infinity(Number):
         return NotImplemented
     __radd__ = __add__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if isinstance(other, Number):
             if other is S.Infinity or other is S.NaN:
@@ -1619,7 +1620,7 @@ class Infinity(Number):
                 return S.Infinity
         return NotImplemented
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Number):
             if other is S.Zero or other is S.NaN:
@@ -1640,7 +1641,7 @@ class Infinity(Number):
         return NotImplemented
     __rmul__ = __mul__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         if isinstance(other, Number):
             if other is S.Infinity or other is S.NegativeInfinity or other is S.NaN:
@@ -1744,7 +1745,7 @@ class NegativeInfinity(Number):
     def __new__(cls):
         return AtomicExpr.__new__(cls)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if isinstance(other, Number):
             if other is S.Infinity or other is S.NaN:
@@ -1760,7 +1761,7 @@ class NegativeInfinity(Number):
         return NotImplemented
     __radd__ = __add__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if isinstance(other, Number):
             if other is S.NegativeInfinity or other is S.NaN:
@@ -1775,7 +1776,7 @@ class NegativeInfinity(Number):
                 return S.NegativeInfinity
         return NotImplemented
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Number):
             if other is S.Zero or other is S.NaN:
@@ -1796,7 +1797,7 @@ class NegativeInfinity(Number):
         return NotImplemented
     __rmul__ = __mul__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         if isinstance(other, Number):
             if other is S.Infinity or other is S.NegativeInfinity or other is S.NaN:
@@ -1899,19 +1900,19 @@ class NaN(Number):
     def __new__(cls):
         return AtomicExpr.__new__(cls)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         return self
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         return self
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         return self
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         return self
 

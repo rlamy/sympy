@@ -10,9 +10,7 @@ from sympy.core.sympify import (
     sympify, SympifyError,
 )
 
-from sympy.core.decorators import (
-    _sympifyit,
-)
+from sympy.core.decorators import _sympifyit, sympify_other
 
 from sympy.polys.polyclasses import DMP
 
@@ -3484,7 +3482,7 @@ class Poly(Expr):
     def __neg__(self):
         return self.neg()
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __add__(self, other):
         if not other.is_Poly:
             try:
@@ -3494,7 +3492,7 @@ class Poly(Expr):
 
         return self.add(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __radd__(self, other):
         if not other.is_Poly:
             try:
@@ -3504,7 +3502,7 @@ class Poly(Expr):
 
         return other.add(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __sub__(self, other):
         if not other.is_Poly:
             try:
@@ -3514,7 +3512,7 @@ class Poly(Expr):
 
         return self.sub(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rsub__(self, other):
         if not other.is_Poly:
             try:
@@ -3524,7 +3522,7 @@ class Poly(Expr):
 
         return other.sub(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mul__(self, other):
         if not other.is_Poly:
             try:
@@ -3534,7 +3532,7 @@ class Poly(Expr):
 
         return self.mul(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rmul__(self, other):
         if not other.is_Poly:
             try:
@@ -3544,67 +3542,67 @@ class Poly(Expr):
 
         return other.mul(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __pow__(self, other):
         if other.is_Integer and other >= 0:
             return self.pow(other)
         else:
             return self.as_expr() ** other
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __divmod__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return self.div(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rdivmod__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return other.div(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __mod__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return self.rem(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rmod__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return other.rem(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __floordiv__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return self.quo(other)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rfloordiv__(self, other):
         if not other.is_Poly:
             other = self.__class__(other, *self.gens)
 
         return other.quo(self)
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __div__(self, other):
         return self.as_expr()/other.as_expr()
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __rdiv__(self, other):
         return other.as_expr()/self.as_expr()
 
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __eq__(self, other):
         if not other.is_Poly:
             try:
@@ -3626,7 +3624,7 @@ class Poly(Expr):
 
         return self.rep == other.rep
 
-    @_sympifyit('other', NotImplemented)
+    @sympify_other
     def __ne__(self, other):
         return not self.__eq__(other)
 
