@@ -96,7 +96,9 @@ class Expr(Basic, EvalfMixin):
 
     @sympify_other
     def __sub__(self, other):
-        return Add(self, -other)
+        if type(other) is type(self):
+            return Add(self, -other)
+        return NotImplemented
 
     @sympify_other
     def __rsub__(self, other):
@@ -114,7 +116,9 @@ class Expr(Basic, EvalfMixin):
 
     @sympify_other
     def __pow__(self, other):
-        return Pow(self, other)
+        if type(other) is type(self):
+            return Pow(self, other)
+        return NotImplemented
 
     @sympify_other
     def __rpow__(self, other):
@@ -122,7 +126,9 @@ class Expr(Basic, EvalfMixin):
 
     @sympify_other
     def __div__(self, other):
-        return Mul(self, Pow(other, S.NegativeOne))
+        if type(other) is type(self):
+            return Mul(self, Pow(other, S.NegativeOne))
+        return NotImplemented
 
     @sympify_other
     def __rdiv__(self, other):
