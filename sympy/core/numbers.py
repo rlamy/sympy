@@ -1227,6 +1227,18 @@ class Integer(Rational):
             return Integer(other.p % self.p)
         return Rational.__rmod__(self, other)
 
+    @sympify_other
+    def __floordiv__(self, other):
+        if type(other) is type(self):
+            return Integer(self.p // Integer(other).p)
+        return NotImplemented
+
+    @sympify_other
+    def __rfloordiv__(self, other):
+        if isinstance(other, Integer):
+            return Integer(Integer(other).p // self.p)
+        return NotImplemented
+
     def __eq__(self, other):
         if isinstance(other, (int, long)):
             return (self.p == other)
@@ -1396,12 +1408,6 @@ class Integer(Rational):
 
     def as_numer_denom(self):
         return self, S.One
-
-    def __floordiv__(self, other):
-        return Integer(self.p // Integer(other).p)
-
-    def __rfloordiv__(self, other):
-        return Integer(Integer(other).p // self.p)
 
     def factorial(self):
         """Compute factorial of `self`. """
