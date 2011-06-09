@@ -3478,160 +3478,160 @@ class Poly(Expr):
         """
         return f.rep.is_cyclotomic
 
-    def __abs__(f):
-        return f.abs()
+    def __abs__(self):
+        return self.abs()
 
-    def __neg__(f):
-        return f.neg()
+    def __neg__(self):
+        return self.neg()
 
-    @_sympifyit('g', NotImplemented)
-    def __add__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __add__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return f.as_expr() + g
+                return self.as_expr() + other
 
-        return f.add(g)
+        return self.add(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __radd__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __radd__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return g + f.as_expr()
+                return other + self.as_expr()
 
-        return g.add(f)
+        return other.add(self)
 
-    @_sympifyit('g', NotImplemented)
-    def __sub__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __sub__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return f.as_expr() - g
+                return self.as_expr() - other
 
-        return f.sub(g)
+        return self.sub(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __rsub__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __rsub__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return g - f.as_expr()
+                return other - self.as_expr()
 
-        return g.sub(f)
+        return other.sub(self)
 
-    @_sympifyit('g', NotImplemented)
-    def __mul__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __mul__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return f.as_expr()*g
+                return self.as_expr()*other
 
-        return f.mul(g)
+        return self.mul(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __rmul__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __rmul__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, *f.gens)
+                other = self.__class__(other, *self.gens)
             except PolynomialError:
-                return g*f.as_expr()
+                return other*self.as_expr()
 
-        return g.mul(f)
+        return other.mul(self)
 
-    @_sympifyit('n', NotImplemented)
-    def __pow__(f, n):
-        if n.is_Integer and n >= 0:
-            return f.pow(n)
+    @_sympifyit('other', NotImplemented)
+    def __pow__(self, other):
+        if other.is_Integer and other >= 0:
+            return self.pow(other)
         else:
-            return f.as_expr()**n
+            return self.as_expr() ** other
 
-    @_sympifyit('g', NotImplemented)
-    def __divmod__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __divmod__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return f.div(g)
+        return self.div(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __rdivmod__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __rdivmod__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return g.div(f)
+        return other.div(self)
 
-    @_sympifyit('g', NotImplemented)
-    def __mod__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __mod__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return f.rem(g)
+        return self.rem(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __rmod__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __rmod__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return g.rem(f)
+        return other.rem(self)
 
-    @_sympifyit('g', NotImplemented)
-    def __floordiv__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __floordiv__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return f.quo(g)
+        return self.quo(other)
 
-    @_sympifyit('g', NotImplemented)
-    def __rfloordiv__(f, g):
-        if not g.is_Poly:
-            g = f.__class__(g, *f.gens)
+    @_sympifyit('other', NotImplemented)
+    def __rfloordiv__(self, other):
+        if not other.is_Poly:
+            other = self.__class__(other, *self.gens)
 
-        return g.quo(f)
+        return other.quo(self)
 
-    @_sympifyit('g', NotImplemented)
-    def __div__(f, g):
-        return f.as_expr()/g.as_expr()
+    @_sympifyit('other', NotImplemented)
+    def __div__(self, other):
+        return self.as_expr()/other.as_expr()
 
-    @_sympifyit('g', NotImplemented)
-    def __rdiv__(f, g):
-        return g.as_expr()/f.as_expr()
+    @_sympifyit('other', NotImplemented)
+    def __rdiv__(self, other):
+        return other.as_expr()/self.as_expr()
 
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
 
-    @_sympifyit('g', NotImplemented)
-    def __eq__(f, g):
-        if not g.is_Poly:
+    @_sympifyit('other', NotImplemented)
+    def __eq__(self, other):
+        if not other.is_Poly:
             try:
-                g = f.__class__(g, f.gens, domain=f.get_domain())
+                other = self.__class__(other, self.gens, domain=self.get_domain())
             except (PolynomialError, DomainError, CoercionFailed):
                 return False
 
-        if f.gens != g.gens:
+        if self.gens != other.gens:
             return False
 
-        if f.rep.dom != g.rep.dom:
+        if self.rep.dom != other.rep.dom:
             try:
-                dom = f.rep.dom.unify(g.rep.dom, f.gens)
+                dom = self.rep.dom.unify(other.rep.dom, self.gens)
             except UnificationFailed:
                 return False
 
-            f = f.set_domain(dom)
-            g = g.set_domain(dom)
+            self = self.set_domain(dom)
+            other = other.set_domain(dom)
 
-        return f.rep == g.rep
+        return self.rep == other.rep
 
-    @_sympifyit('g', NotImplemented)
-    def __ne__(f, g):
-        return not f.__eq__(g)
+    @_sympifyit('other', NotImplemented)
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
-    def __nonzero__(f):
-        return not f.is_zero
+    def __nonzero__(self):
+        return not self.is_zero
 
     def eq(f, g, strict=False):
         if not strict:
