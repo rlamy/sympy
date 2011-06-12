@@ -9,7 +9,7 @@ the separate 'factorials' module.
 
 from sympy import Function, S, Symbol, Rational, oo, Integer, C, Add
 
-from sympy.mpmath import bernfrac
+from mpmath import bernfrac
 
 def _product(a, b):
     p = 1

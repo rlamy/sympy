@@ -17,7 +17,7 @@ from sympy import (Rational, Symbol, list2numpy, sin, Float, Matrix, lambdify,
         symarray, symbols)
 import sympy
 
-from sympy import mpmath
+import mpmath
 mpmath.mp.dps = 16
 sin02 = mpmath.mpf("0.198669330795061215459412627")
 

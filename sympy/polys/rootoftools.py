@@ -21,7 +21,7 @@ from sympy.polys.polyerrors import (
 
 from sympy.polys.domains import QQ
 
-from sympy.mpmath import (
+from mpmath import (
     mp, mpf, mpc, findroot)
 
 from sympy.utilities import lambdify

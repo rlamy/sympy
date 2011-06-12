@@ -105,14 +105,14 @@ def jn_zeros(n, k, method="sympy"):
 
     Examples:
 
-        >>> from sympy.mpmath import nprint
+        >>> from mpmath import nprint
         >>> from sympy import jn_zeros
         >>> nprint(jn_zeros(2, 4))
         [5.76345919689, 9.09501133048, 12.3229409706, 15.5146030109]
 
     """
     if method == "sympy":
-        from sympy.mpmath import findroot
+        from mpmath import findroot
         f = lambda x: jn(n, x).n()
     elif method == "scipy":
         from scipy.special import sph_jn

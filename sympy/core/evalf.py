@@ -3,18 +3,18 @@ Adaptive numerical evaluation of SymPy expressions, using mpmath
 for mathematical functions.
 """
 
-import sympy.mpmath.libmp as libmp
-from sympy.mpmath import make_mpc, make_mpf, mp, mpc, mpf, nsum, quadts, quadosc
-from sympy.mpmath import inf as mpmath_inf
-from sympy.mpmath.libmp import (bitcount, from_int, from_man_exp, \
+import mpmath.libmp as libmp
+from mpmath import make_mpc, make_mpf, mp, mpc, mpf, nsum, quadts, quadosc
+from mpmath import inf as mpmath_inf
+from mpmath.libmp import (bitcount, from_int, from_man_exp, \
         from_rational, fhalf, fnone, fone, fzero, mpf_abs, mpf_add, mpf_atan, \
         mpf_atan2, mpf_cmp, mpf_cos, mpf_e, mpf_exp, mpf_log, mpf_lt, mpf_mul, \
         mpf_neg, mpf_pi, mpf_pow, mpf_pow_int, mpf_shift, mpf_sin, mpf_sqrt, \
         normalize, round_nearest, to_int, to_str)
-from sympy.mpmath.libmp.backend import MPZ
-from sympy.mpmath.libmp.libmpf import dps_to_prec
+from mpmath.libmp.backend import MPZ
+from mpmath.libmp.libmpf import dps_to_prec
 
-from sympy.mpmath.libmp.gammazeta import mpf_bernoulli
+from mpmath.libmp.gammazeta import mpf_bernoulli
 
 import math
 

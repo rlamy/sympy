@@ -41,7 +41,7 @@ from sympy.core.decorators import deprecated
 from sympy.utilities import all, any
 from sympy.core.compatibility import iterable
 
-from sympy import mpmath
+import mpmath
 
 class PoleError(Exception):
     pass

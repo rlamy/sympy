@@ -17,7 +17,7 @@ from sympy.simplify.cse_main import cse
 from sympy.polys import (Poly, together, reduced, cancel, factor,
     ComputationFailed, terms_gcd)
 
-import sympy.mpmath as mpmath
+import mpmath as mpmath
 
 def fraction(expr, exact=False):
     """Returns a pair with expression's numerator and denominator.

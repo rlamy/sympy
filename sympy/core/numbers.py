@@ -5,9 +5,9 @@ from singleton import S, Singleton
 from expr import Expr, AtomicExpr
 from decorators import _sympifyit, deprecated
 from cache import cacheit, clear_cache
-import sympy.mpmath as mpmath
-import sympy.mpmath.libmp as mlib
-from sympy.mpmath.libmp import mpf_pow, mpf_pi, mpf_e, phi_fixed
+import mpmath as mpmath
+import mpmath.libmp as mlib
+from mpmath.libmp import mpf_pow, mpf_pi, mpf_e, phi_fixed
 
 import decimal
 

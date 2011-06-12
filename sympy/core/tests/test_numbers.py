@@ -5,7 +5,7 @@ from sympy.core.power import integer_nthroot
 
 from sympy.core.numbers import igcd, ilcm, igcdex, seterr, _intcache
 from sympy.utilities.pytest import raises
-from sympy import mpmath
+import mpmath
 
 def test_integers_cache():
     python_int = 2**65 + 3175259

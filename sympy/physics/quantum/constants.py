@@ -2,7 +2,7 @@
 
 from sympy.core.numbers import NumberSymbol
 from sympy.printing.pretty.stringpict import prettyForm
-import sympy.mpmath.libmp as mlib
+import mpmath.libmp as mlib
 
 #-----------------------------------------------------------------------------
 # Constants

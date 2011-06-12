@@ -8,8 +8,8 @@ from conventions import split_super_sub
 from sympy.simplify import fraction
 from sympy import Interval
 
-import sympy.mpmath.libmp as mlib
-from sympy.mpmath.libmp import prec_to_dps
+import mpmath.libmp as mlib
+from mpmath.libmp import prec_to_dps
 
 import re, warnings
 

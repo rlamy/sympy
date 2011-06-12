@@ -1,4 +1,4 @@
-from sympy.mpmath import mnorm, mpf
+from mpmath import mnorm, mpf
 from sympy.solvers import nsolve
 from sympy.utilities.lambdify import lambdify
 from sympy import Symbol, Matrix, sqrt, Eq

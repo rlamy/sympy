@@ -61,7 +61,7 @@ NUMPY_TRANSLATIONS = {
 # Available modules:
 MODULES = {
     "math":(MATH, MATH_TRANSLATIONS, ("from math import *",)),
-    "mpmath":(MPMATH, MPMATH_TRANSLATIONS, ("from sympy.mpmath import *",)),
+    "mpmath":(MPMATH, MPMATH_TRANSLATIONS, ("from mpmath import *",)),
     "numpy":(NUMPY, NUMPY_TRANSLATIONS, ("from numpy import *",)),
     "sympy":(SYMPY, {}, ("from sympy.functions import *",
                          "from sympy.matrices import Matrix",

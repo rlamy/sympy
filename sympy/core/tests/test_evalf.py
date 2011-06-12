@@ -5,7 +5,7 @@ from sympy import pi, I, Symbol, Add, Rational, exp, sqrt, sin, cos, \
     factorial, binomial, Sum, zeta, Catalan, Pow, GoldenRatio, sympify, \
     sstr, Function, Eq, Mul, Pow, Derivative
 
-from sympy.mpmath.libmp.libmpf import from_float
+from mpmath.libmp.libmpf import from_float
 
 from sympy.utilities.pytest import raises
 

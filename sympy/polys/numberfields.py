@@ -28,7 +28,7 @@ from sympy.utilities import (
 )
 
 from sympy.ntheory import sieve
-from sympy.mpmath import pslq, mp
+from mpmath import pslq, mp
 
 def minimal_polynomial(ex, x=None, **args):
     """

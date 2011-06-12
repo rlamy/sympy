@@ -2,7 +2,7 @@ from sympy import (
     Symbol, Set, Union, Interval, oo, S,
     Inequality, Max, Min, And, Or, Eq, Le, Lt, Float,
 )
-from sympy.mpmath import mpi
+from mpmath import mpi
 
 from sympy.utilities.pytest import raises
 

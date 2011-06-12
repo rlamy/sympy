@@ -4,7 +4,7 @@ from sympy.statistics import Normal, Uniform
 from sympy.statistics.distributions import PDF
 from operator import abs
 
-from sympy.mpmath import mp
+from mpmath import mp
 
 def test_normal():
     dps, mp.dps = mp.dps, 20

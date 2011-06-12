@@ -6,8 +6,8 @@ from sympy.core import S, Rational, Pow, Basic
 from printer import Printer
 from sympy.printing.precedence import precedence, PRECEDENCE
 
-import sympy.mpmath.libmp as mlib
-from sympy.mpmath.libmp import prec_to_dps
+import mpmath.libmp as mlib
+from mpmath.libmp import prec_to_dps
 
 from sympy.polys.polyerrors import PolynomialError
 

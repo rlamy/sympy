@@ -3,7 +3,7 @@ from singleton import Singleton, S
 from evalf import EvalfMixin
 from numbers import Float
 from sympify import _sympify
-from sympy.mpmath import mpi, mpf
+from mpmath import mpi, mpf
 
 
 class Set(Basic):

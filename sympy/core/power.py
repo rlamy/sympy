@@ -6,7 +6,7 @@ from core import C
 from singleton import S
 from expr import Expr
 
-from sympy import mpmath
+import mpmath
 from sympy.utilities.iterables import sift
 
 def integer_nthroot(y, n):

@@ -27,7 +27,7 @@ from sympy.functions.elementary.piecewise import piecewise_fold
 from sympy.utilities import any, all
 from sympy.utilities.iterables import iff
 from sympy.utilities.lambdify import lambdify
-from sympy.mpmath import findroot
+from mpmath import findroot
 
 from sympy.solvers.polysys import solve_poly_system
 from sympy.solvers.inequalities import reduce_inequalities
@@ -1024,8 +1024,8 @@ def nsolve(*args, **kwargs):
     Overdetermined systems are supported.
 
     >>> from sympy import Symbol, nsolve
-    >>> import sympy
-    >>> sympy.mpmath.mp.dps = 15
+    >>> import mpmath
+    >>> mpmath.mp.dps = 15
     >>> x1 = Symbol('x1')
     >>> x2 = Symbol('x2')
     >>> f1 = 3 * x1**2 - 2 * x2**2 - 1

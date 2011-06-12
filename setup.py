@@ -27,12 +27,10 @@ Or, if all else fails, feel free to write to the sympy list at
 sympy@googlegroups.com and ask for help.
 """
 
-from distutils.core import setup
+from setuptools import setup
 from distutils.core import Command
 import sys
 
-import sympy
-from sympy.utilities.runtests import test, doctest
 
 # Make sure I have the right Python version.
 if sys.version_info[:2] < (2,4):
@@ -60,12 +58,6 @@ modules = [
     'sympy.logic.algorithms',
     'sympy.logic.utilities',
     'sympy.matrices',
-    'sympy.mpmath',
-    'sympy.mpmath.calculus',
-    'sympy.mpmath.functions',
-    'sympy.mpmath.libmp',
-    'sympy.mpmath.matrices',
-    'sympy.mpmath.tests',
     'sympy.ntheory',
     'sympy.parsing',
     'sympy.physics',
@@ -160,6 +152,7 @@ class test_sympy(Command):
         pass
 
     def run(self):
+        from sympy.utilities.runtests import test, doctest
         if test():
             # all regular tests run successfuly, so let's also run doctests
             # (if some regular test fails, the doctests are not run)
@@ -208,7 +201,6 @@ tests = [
     'sympy.integrals.tests',
     'sympy.logic.tests',
     'sympy.matrices.tests',
-    'sympy.mpmath.tests',
     'sympy.ntheory.tests',
     'sympy.parsing.tests',
     'sympy.physics.quantum.tests',
@@ -254,7 +246,7 @@ pyglet_packages = ["sympy.thirdparty.pyglet." + s for s in pyglet_packages]
 
 setup(
       name = 'sympy',
-      version = sympy.__version__,
+      version = '0.7.1.dev',
       description = 'Computer algebra system (CAS) in Python',
       author = 'SymPy development team',
       author_email = 'sympy@googlegroups.com',
@@ -262,6 +254,7 @@ setup(
       url = 'http://code.google.com/p/sympy',
       packages = ['sympy'] + modules + tests + pyglet_packages,
       scripts = ['bin/isympy'],
+      install_requires = ['mpmath>=0.16'],
       ext_modules = [],
       package_data = { 'sympy.utilities.mathml' : ['data/*.xsl'] },
       data_files = [('share/man/man1', ['doc/man/isympy.1'])],

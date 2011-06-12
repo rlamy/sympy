@@ -56,7 +56,7 @@ from sympy.polys.polycontext import (
     register_context,
 )
 
-from sympy.mpmath import (
+from mpmath import (
     polyroots as npolyroots,
 )
 

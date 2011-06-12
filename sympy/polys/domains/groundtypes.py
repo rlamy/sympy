@@ -67,13 +67,13 @@ else:
     gmpy_lcm         = None
     gmpy_sqrt        = None
 
-from sympy.mpmath import (
+from mpmath import (
     mpf as MPmathRealType,
     mpc as MPmathComplexType,
     mpi as MPmathIntervalType,
 )
 
-from sympy.mpmath.libmp.libmpf import isqrt
+from mpmath.libmp.libmpf import isqrt
 
 def python_sqrt(a):
     return int(isqrt(a))
