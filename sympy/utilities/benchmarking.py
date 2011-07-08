@@ -33,7 +33,7 @@ class Directory(py.test.collect.Directory):
 class Module(py.test.collect.Module):
 
     def funcnamefilter(self, name):
-        return name.startswith('bench_') or name.startswith('timeit_')
+        return name.startswith('bench_')
 
 
 # Function level benchmarking driver
@@ -77,36 +77,7 @@ class Function(py.__.test.item.Function):
 
         # XXX we ignore args
         timer = Timer(src, globals=target.func_globals)
-
-        if self.name.startswith('timeit_'):
-            # from IPython.Magic.magic_timeit
-            repeat = 3
-            number = 1
-            for i in range(1,10):
-                t = timer.timeit(number)
-
-                if t >= 0.2:
-                    number *= (0.2 / t)
-                    number  = int(_ceil(number))
-                    break
-
-                if t <= 0.02:
-                    # we are not close enough to that 0.2s
-                    number *= 10
-
-                else:
-                    # since we are very close to be > 0.2s we'd better adjust number
-                    # so that timing time is not too high
-                    number *= (0.2 / t)
-                    number  = int(_ceil(number))
-                    break
-
-
-            self.benchtime = min(timer.repeat(repeat, number)) / number
-
-        # 'bench_<smth>'
-        else:
-            self.benchtime = timer.timeit(1)
+        self.benchtime = timer.timeit(1)
 
 
 class BenchSession(TerminalSession):
