@@ -11,8 +11,7 @@ sympy_dir  = os.path.join(sympy_top, 'sympy')  # ../sympy/
 if os.path.isdir(sympy_dir):
     sys.path.insert(0, sympy_top)
 
+import pytest
 
 from sympy.utilities import benchmarking
-
-if __name__ == '__main__':
-    benchmarking.main()
+pytest.main(plugins=[benchmarking])

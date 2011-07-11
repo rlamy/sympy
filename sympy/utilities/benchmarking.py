@@ -1,10 +1,7 @@
 """benchmarking through py.test"""
 
-import py
-from py.__.test.item import Item
-from py.__.test.terminal.terminal import TerminalSession
-
-from math import ceil as _ceil, floor as _floor, log10
+from math import ceil, floor, log10
+import time
 import timeit
 
 from inspect import getsource
@@ -19,68 +16,31 @@ unitn = dict((s,i) for i,s in enumerate(units))
 
 precision = 3
 
+def pytest_configure(config):
+    config.inicfg['python_files'] = 'bench_*.py'
+    config.inicfg['python_functions'] = 'bench_'
+    config.benchlog = []
 
-# like py.test Directory but scan for 'bench_<smth>.py'
-class Directory(py.test.collect.Directory):
-
-    def filefilter(self, path):
-        b   = path.purebasename
-        ext = path.ext
-        return b.startswith('bench_') and ext == '.py'
-
-
-# like py.test Module but scane for 'bench_<smth>' and 'timeit_<smth>'
-class Module(py.test.collect.Module):
-
-    def funcnamefilter(self, name):
-        return name.startswith('bench_')
-
-
-# Function level benchmarking driver
-class Timer(timeit.Timer):
-
-    def __init__(self, stmt, setup='pass', timer=timeit.default_timer, globals=globals()):
-        # copy of timeit.Timer.__init__
-        # similarity index 95%
-        self.timer = timer
-        stmt  = timeit.reindent(stmt, 8)
-        setup = timeit.reindent(setup, 4)
-        src   = timeit.template % {'stmt': stmt, 'setup': setup}
-        self.src = src # Save for traceback display
-        code = compile(src, timeit.dummy_src_name, "exec")
-        ns = {}
-        #exec code in globals(), ns      -- original timeit code
-        exec code in globals, ns    #   -- we use caller-provided globals instead
-        self.inner = ns["inner"]
-
-
-
-class Function(py.__.test.item.Function):
-
-    def __init__(self, *args, **kw):
-        super(Function, self).__init__(*args, **kw)
-        self.benchtime  = None
-        self.benchtitle = None
-
-
-    def execute(self, target, *args):
-        # get func source without first 'def func(...):' line
-        src = getsource(target)
-        src = '\n'.join( src.splitlines()[1:] )
+def pytest_runtest_call(item, __multicall__):
+    t0 = time.time()
+    try:
+        __multicall__.execute()
+    finally:
+        item.benchtime = time.time() - t0
 
         # extract benchmark title
-        if target.func_doc is not None:
-            self.benchtitle = target.func_doc
+        if item.obj.func_doc is not None:
+            item.benchtitle = item.obj.func_doc
         else:
-            self.benchtitle = src.splitlines()[0].strip()
+            src = getsource(item.obj)
+            item.benchtitle = src.splitlines()[1].strip()
+        item.config.benchlog.append(item)
+
+def pytest_terminal_summary(terminalreporter):
+    print_bench_results(terminalreporter, terminalreporter.config.benchlog)
 
 
-        # XXX we ignore args
-        timer = Timer(src, globals=target.func_globals)
-        self.benchtime = timer.timeit(1)
-
-
-class BenchSession(TerminalSession):
+class BenchSession:
 
     def header(self, colitems):
         #self.out.sep("-", "benchmarking starts")
@@ -94,96 +54,94 @@ class BenchSession(TerminalSession):
         self.print_bench_results()
 
 
-    def print_bench_results(self):
-        self.out.write('==============================\n')
-        self.out.write(' *** BENCHMARKING RESULTS *** \n')
-        self.out.write('==============================\n')
-        self.out.write('\n')
+def print_bench_results(out, benchlog):
+    out.write('==============================\n')
+    out.write(' *** BENCHMARKING RESULTS *** \n')
+    out.write('==============================\n')
+    out.write('\n')
 
-        # benchname, time, benchtitle
-        results = []
+    # benchname, time, benchtitle
+    results = []
 
-        for item, outcome in self._memo:
-            if isinstance(item, Item):
+    for item in benchlog:
+        best = item.benchtime
 
-                best = item.benchtime
+        if best is None:
+            # skipped or failed benchmarks
+            tstr = '---'
 
-                if best is None:
-                    # skipped or failed benchmarks
-                    tstr = '---'
-
-                else:
-                    # from IPython.Magic.magic_timeit
-                    if best > 0.0:
-                        order = min(-int(_floor(log10(best)) // 3), 3)
-                    else:
-                        order = 3
-
-                    tstr = "%.*g %s" % (precision, best * scaling[order], units[order])
-
-                results.append( [item.name, tstr, item.benchtitle] )
-
-        # dot/unit align second column
-        # FIXME simpler? this is crappy -- shame on me...
-        wm = [0]*len(units)
-        we = [0]*len(units)
-
-        for s in results:
-            tstr = s[1]
-            n,u = tstr.split()
-
-            # unit n
-            un = unitn[u]
-
-            try:
-                m,e = n.split('.')
-            except ValueError:
-                m,e = n,''
-
-            wm[un] = max(len(m), wm[un])
-            we[un] = max(len(e), we[un])
-
-        for s in results:
-            tstr = s[1]
-            n,u = tstr.split()
-
-            un = unitn[u]
-
-            try:
-                m,e = n.split('.')
-            except ValueError:
-                m,e = n,''
-
-            m = m.rjust(wm[un])
-            e = e.ljust(we[un])
-
-            if e.strip():
-                n = '.'.join((m,e))
+        else:
+            # from IPython.Magic.magic_timeit
+            if best > 0.0:
+                order = min(-int(floor(log10(best)) // 3), 3)
             else:
-                n = ' '.join((m,e))
+                order = 3
+
+            tstr = "%.*g %s" % (precision, best * scaling[order], units[order])
+
+        results.append( [item.name, tstr, item.benchtitle] )
+
+    # dot/unit align second column
+    # FIXME simpler? this is crappy -- shame on me...
+    wm = [0]*len(units)
+    we = [0]*len(units)
+
+    for s in results:
+        tstr = s[1]
+        n,u = tstr.split()
+
+        # unit n
+        un = unitn[u]
+
+        try:
+            m,e = n.split('.')
+        except ValueError:
+            m,e = n,''
+
+        wm[un] = max(len(m), wm[un])
+        we[un] = max(len(e), we[un])
+
+    for s in results:
+        tstr = s[1]
+        n,u = tstr.split()
+
+        un = unitn[u]
+
+        try:
+            m,e = n.split('.')
+        except ValueError:
+            m,e = n,''
+
+        m = m.rjust(wm[un])
+        e = e.ljust(we[un])
+
+        if e.strip():
+            n = '.'.join((m,e))
+        else:
+            n = ' '.join((m,e))
 
 
-            # let's put the number into the right place
-            txt = ''
-            for i in range(len(units)):
-                if i == un:
-                    txt += n
-                else:
-                    txt += ' '*(wm[i]+we[i]+1)
+        # let's put the number into the right place
+        txt = ''
+        for i in range(len(units)):
+            if i == un:
+                txt += n
+            else:
+                txt += ' '*(wm[i]+we[i]+1)
 
-            s[1] = '%s %s' % (txt, u)
+        s[1] = '%s %s' % (txt, u)
 
 
-        # align all columns besides the last one
-        for i in range(2):
-            w = max(len(s[i]) for s in results)
+    # align all columns besides the last one
+    for i in range(2):
+        w = max(len(s[i]) for s in results)
 
-            for s in results:
-                s[i] = s[i].ljust(w)
-
-        # show results
         for s in results:
-            self.out.write('%s  |  %s  |  %s\n' % tuple(s))
+            s[i] = s[i].ljust(w)
+
+    # show results
+    for s in results:
+        out.write('%s  |  %s  |  %s\n' % tuple(s))
 
 
 def main(args=None):
