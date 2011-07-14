@@ -17,8 +17,8 @@ unitn = dict((s,i) for i,s in enumerate(units))
 precision = 3
 
 def pytest_configure(config):
-    config.inicfg['python_files'] = 'bench_*.py'
-    config.inicfg['python_functions'] = 'bench_'
+    config.inicfg.config.sections['pytest']['python_files'] = 'bench_*.py'
+    config.inicfg.config.sections['pytest']['python_functions'] = 'bench_'
     config.benchlog = []
 
 def pytest_runtest_call(item, __multicall__):
