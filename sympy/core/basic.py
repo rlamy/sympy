@@ -150,6 +150,14 @@ class Basic(object):
             except:
                 pass
 
+    def __copy__(self):
+        """Support for copy.copy"""
+        return self
+
+    def __deepcopy__(self, memo):
+        """Support for copy.deepcopy"""
+        return self
+
     def compare(self, other):
         """
         Return -1,0,1 if the object is smaller, equal, or greater than other.
