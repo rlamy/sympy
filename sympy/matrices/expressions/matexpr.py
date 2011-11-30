@@ -1,7 +1,7 @@
 from sympy import Expr, Symbol, Mul, Add, Pow, expand, sympify, Tuple
 from sympy.core.basic import Basic
 from sympy.core.singleton import S
-from sympy.core.decorators import _sympifyit, call_highest_priority
+from sympy.core.decorators import _sympifyit
 from sympy.matrices import ShapeError
 
 class MatrixExpr(Expr):
@@ -36,48 +36,38 @@ class MatrixExpr(Expr):
         raise NotImplementedError
 
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__radd__')
     def __add__(self, other):
         return MatAdd(self, other)
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__add__')
     def __radd__(self, other):
         return MatAdd(other, self)
 
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rsub__')
     def __sub__(self, other):
         return MatAdd(self, -other)
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__sub__')
     def __rsub__(self, other):
         return MatAdd(other, -self)
 
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rmul__')
     def __mul__(self, other):
         return MatMul(self, other)
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__mul__')
     def __rmul__(self, other):
         return MatMul(other, self)
 
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rpow__')
     def __pow__(self, other):
         if other == -S.One:
             return Inverse(self)
         return MatPow(self, other)
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__pow__')
     def __rpow__(self, other):
         raise NotImplementedError("Matrix Power not defined")
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rdiv__')
     def __div__(self, other):
         return MatMul(self, other**S.NegativeOne)
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__div__')
     def __rdiv__(self, other):
         raise NotImplementedError()
         #return MatMul(other, Pow(self, S.NegativeOne))
