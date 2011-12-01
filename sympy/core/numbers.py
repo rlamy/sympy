@@ -426,10 +426,17 @@ class Float(Number):
 
     @sympify_other
     def __mul__(self, other):
+        if type(other) is type(self):
+            prec = max(self._prec, other._prec)
+            return Float._new(mlib.mpf_mul(self._mpf_, other._mpf_, prec, rnd), prec)
+        return NotImplemented
+
+    @sympify_other
+    def __rmul__(self, other):
         if isinstance(other, Number):
             rhs, prec = other._as_mpf_op(self._prec)
             return Float._new(mlib.mpf_mul(self._mpf_, rhs, prec, rnd), prec)
-        return Number.__mul__(self, other)
+        return Number.__rmul__(self, other)
 
     @sympify_other
     def __div__(self, other):
@@ -730,10 +737,21 @@ class Rational(Number):
 
     @sympify_other
     def __add__(self, other):
-        if isinstance(other, Rational):
-            return Rational(self.p*other.q + self.q*other.p, self.q*other.q)
-        elif isinstance(other, Float):
+        if (other is S.NaN) or (self is S.NaN):
+            return S.NaN
+        if isinstance(other, Float):
             return other + self
+        if isinstance(other, Rational):
+            if self.is_unbounded:
+                if other.is_bounded:
+                    return self
+                elif self==other:
+                    return self
+            else:
+                if other.is_unbounded:
+                    return other
+            return Rational(self.p * other.q + self.q * other.p, self.q * other.q)
+
         return Number.__add__(self, other)
 
     @sympify_other
@@ -745,38 +763,30 @@ class Rational(Number):
     @sympify_other
     def __sub__(self, other):
         if isinstance(other, Rational):
-            return Rational(self.p*other.q - self.q*other.p, self.q*other.q)
-        elif isinstance(other, Float):
-            return -other + self
-        else:
-            return Number.__sub__(self, other)
+            if self.is_unbounded:
+                if other.is_bounded:
+                    return self
+                elif self==other:
+                    return self
+            else:
+                if other.is_unbounded:
+                    return other
+            return Rational(self.p * other.q + self.q * other.p, self.q * other.q)
+        return Number.__add__(self, other)
 
-    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Rational):
             return Rational(self.p*other.p, self.q*other.q)
-        elif isinstance(other, Float):
-            return other*self
+        if isinstance(other, Float):
+            return other.__rmul__(self)
         return Number.__mul__(self, other)
 
-    @sympify_other
     def __rmul__(self, other):
         if isinstance(other, Rational):
-            return Rational(self.p*other.p, self.q*other.q)
-        elif isinstance(other, Float):
-            return other*self
-        return Number.__rmul__(self, other)
-
-    @sympify_other
-    def __div__(self, other):
-        if isinstance(other, Rational):
-            return Rational(self.p*other.q, self.q*other.p)
-        elif isinstance(other, Float):
-            return other.__rdiv__(self)
-        else:
-            return Number.__div__(self, other)
-
-    __truediv__ = __div__
+            return Rational(self.p * other.p, self.q * other.q)
+        if isinstance(other, Float):
+            return other.__rmul__(self)
+        return super(Rational, self).__rmul__(other)
 
     @sympify_other
     def __mod__(self, other):
@@ -1937,9 +1947,15 @@ class NaN(Number):
     def __sub__(self, other):
         return self
 
-    @sympify_other
     def __mul__(self, other):
-        return self
+        if isinstance(other, Number):
+            return self
+        return super(NaN, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Expr):
+            return self
+        return super(NaN, self).__rmul__(other)
 
     @sympify_other
     def __div__(self, other):
