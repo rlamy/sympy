@@ -58,10 +58,9 @@ class sinh(HyperbolicFunction):
                 return S.Zero
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
-            if arg is S.ComplexInfinity:
+            elif arg is S.ComplexInfinity:
                 return S.NaN
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -202,10 +201,9 @@ class cosh(HyperbolicFunction):
                 return S.One
             elif arg.is_negative:
                 return cls(-arg)
-        else:
-            if arg is S.ComplexInfinity:
+            elif arg is S.ComplexInfinity:
                 return S.NaN
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -339,10 +337,9 @@ class tanh(HyperbolicFunction):
                 return S.Zero
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
-            if arg is S.ComplexInfinity:
+            elif arg is S.ComplexInfinity:
                 return S.NaN
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -474,10 +471,9 @@ class coth(HyperbolicFunction):
                 return S.Zero
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
-            if arg is S.ComplexInfinity:
+            elif arg is S.ComplexInfinity:
                 return S.NaN
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -608,10 +604,9 @@ class asinh(Function):
                 return C.log(sqrt(2) - 1)
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
-            if arg is S.ComplexInfinity:
+            elif arg is S.ComplexInfinity:
                 return S.ComplexInfinity
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -801,10 +796,9 @@ class atanh(Function):
                 return S.ImaginaryUnit * C.atan(-arg)
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
             if arg is S.ComplexInfinity:
                 return S.NaN
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:
@@ -870,10 +864,9 @@ class acoth(Function):
                 return S.NegativeInfinity
             elif arg.is_negative:
                 return -cls(-arg)
-        else:
             if arg is S.ComplexInfinity:
                 return 0
-
+        else:
             i_coeff = arg.as_coefficient(S.ImaginaryUnit)
 
             if i_coeff is not None:

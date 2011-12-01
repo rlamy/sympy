@@ -1,4 +1,4 @@
-from core import C
+from core import C, BasicType
 from sympify import converter, sympify, _sympify, SympifyError
 from basic import Basic
 from singleton import S, Singleton
@@ -603,6 +603,7 @@ class Rational(Number):
     is_real = True
     is_integer = False
     is_rational = True
+    is_infinitesimal = False
 
     __slots__ = ['p', 'q']
 
@@ -878,19 +879,22 @@ class Rational(Number):
             other = _sympify(other)
         except SympifyError:
             return False    # sympy != other  -->  not ==
-        if isinstance(other, NumberSymbol):
-            if other.is_irrational:
-                return False
-            return other.__eq__(self)
-        if isinstance(other, Number):
-            if isinstance(other, Float):
-                return mlib.mpf_eq(self._as_mpf_val(other._prec), other._mpf_)
-            elif isinstance(other, Rational):
-                return self.p == other.p and self.q == other.q
-        return False
+        if isinstance(other, Rational):
+            return self.p == other.p and self.q == other.q
+        if isinstance(other, NumberSymbol) and other.is_irrational:
+            return False
+        if isinstance(other, BasicType):
+            return False
+        if other.is_comparable:
+            other = other.evalf()
+        if isinstance(other, Float):
+            return bool(mlib.mpf_eq(self._as_mpf_val(other._prec), other._mpf_))
+
+        return NotImplemented
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        eq = self.__eq__(other)
+        return not eq if eq is not NotImplemented else NotImplemented
 
     def __lt__(self, other):
         try:
@@ -1482,6 +1486,7 @@ class Zero(IntegerConstant):
     is_positive = False
     is_negative = False
     is_finite = False
+    is_infinitesimal = True
     is_zero = True
     is_prime = False
     is_composite = False
@@ -1937,16 +1942,17 @@ class NaN(Number):
     __metaclass__ = Singleton
 
     is_commutative = True
-    is_real        = None
-    is_rational    = None
-    is_integer     = None
-    is_comparable  = False
-    is_finite      = None
-    is_bounded     = None
-    #is_unbounded  = False
-    is_zero        = None
-    is_prime       = None
-    is_positive    = None
+    is_real = None
+    is_rational = None
+    is_integer = None
+    is_comparable = False
+    is_finite = None
+    is_infinitesimal = None
+    is_bounded = None
+    #is_unbounded = False
+    is_zero = None
+    is_prime = None
+    is_positive = None
 
     __slots__ = []
 
@@ -2019,14 +2025,16 @@ class NaN(Number):
 
 nan = S.NaN
 
-class ComplexInfinity(AtomicExpr):
+class ComplexInfinity(Number):
     __metaclass__ = Singleton
 
     is_commutative = True
-    is_comparable  = None
-    is_bounded     = False
-    is_real        = None
-    is_number      = True
+    is_comparable = None
+    is_finite = False
+    is_bounded = False
+    is_zero = False
+    is_real = None
+    is_number = True
 
     __slots__ = []
 
@@ -2040,6 +2048,65 @@ class ComplexInfinity(AtomicExpr):
     @staticmethod
     def __neg__():
         return S.ComplexInfinity
+
+    def __add__(self, other):
+        if isinstance(other, Add):
+            return sum(other.args, self)
+        if isinstance(other, Number):
+            bounded = other.is_bounded
+            if bounded is True:
+                return self
+            elif bounded is False:
+                return S.NaN
+        return super(ComplexInfinity, self).__add__(other)
+
+    def __radd__(self, other):
+        if isinstance(other, Add):
+            return sum(other.args, self)
+        if isinstance(other, Expr):
+            bounded = other.is_bounded
+            if bounded is True:
+                return self
+            elif bounded is False:
+                return S.NaN
+            else:
+                return Add(self, other, evaluate=False)
+        return super(ComplexInfinity, self).__radd__(other)
+
+    def __sub__(self, other):
+        if isinstance(other, Number):
+            return self + (-other)
+        return super(ComplexInfinity, self).__sub__(other)
+
+    def __rsub__(self, other):
+        if isinstance(other, Expr):
+            return other + self # -self == self
+        return super(ComplexInfinity, self).__rsub__(other)
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            zero = other.is_zero
+            if zero is True:
+                return S.NaN
+            elif zero is False:
+                return self
+        return super(ComplexInfinity, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Expr):
+            zero = other.is_zero
+            if zero is True:
+                return S.NaN
+            elif zero is False:
+                return self
+        return super(ComplexInfinity, self).__rmul__(other)
+
+
+    def __eq__(self, other):
+        return isinstance(other, ComplexInfinity)
+
+    def __ne__(self, other):
+        return not isinstance(other, ComplexInfinity)
 
     def _eval_power(self, expt):
         if expt is S.ComplexInfinity:
@@ -2285,6 +2352,7 @@ class ImaginaryUnit(AtomicExpr):
     is_bounded = True
     is_finite = True
     is_number = True
+    is_infinitesimal = False
 
     __slots__ = []
 

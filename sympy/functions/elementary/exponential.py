@@ -454,6 +454,8 @@ class log(Function):
                 return S.Infinity
             elif arg is S.NaN:
                 return S.NaN
+            elif arg is S.ComplexInfinity:
+                return S.ComplexInfinity
             elif arg.is_negative:
                 return S.Pi * S.ImaginaryUnit + cls(-arg)
             elif arg.is_Rational:
@@ -463,8 +465,6 @@ class log(Function):
                 p = perfect_power(int(arg))
                 if p is not False:
                     return p[1]*cls(p[0])
-        elif arg is S.ComplexInfinity:
-            return S.ComplexInfinity
         elif arg is S.Exp1:
             return S.One
         elif arg.func is exp and arg.args[0].is_real:
