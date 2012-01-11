@@ -38,6 +38,11 @@ def test_seterr():
     seterr(divide = False)
     assert S.Zero / S.Zero == S.NaN
 
+def test_mul():
+    assert Rational(3, 2) * Rational(5, 2) == Rational(15, 4)
+    assert Float(1.5) * Rational(5, 2) == Float(3.75)
+    assert Float(1.5) * Float(2.5) == Float(3.75)
+
 def test_mod():
     x = Rational(1, 2)
     y = Rational(3, 4)
@@ -460,6 +465,11 @@ def test_NaN():
     assert 1/nan  == nan
     assert 1/(-nan)  == nan
     assert 8/nan  == nan
+    assert 2. * nan == nan
+    assert nan * 2. == nan
+    assert Float(2.) * nan == nan
+    assert nan * Float(2.) == nan
+
     assert not nan > 0
     assert not nan < 0
     assert not nan >= 0
@@ -468,6 +478,7 @@ def test_NaN():
     assert not 0 > nan
     assert not 0 <= nan
     assert not 0 >= nan
+
     assert S.One + nan == nan
     assert S.One - nan == nan
     assert S.One*nan == nan
