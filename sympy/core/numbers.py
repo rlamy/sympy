@@ -756,7 +756,7 @@ class Rational(Number):
         if isinstance(other, Rational):
             return Rational(self.p*other.q, self.q*other.p)
         elif isinstance(other, Float):
-            return self*(1/other)
+            return other.__rdiv__(self)
         else:
             return Number.__div__(self, other)
 
