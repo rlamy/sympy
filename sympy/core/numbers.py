@@ -734,8 +734,13 @@ class Rational(Number):
             return Rational(self.p*other.q + self.q*other.p, self.q*other.q)
         elif isinstance(other, Float):
             return other + self
-        else:
-            return Number.__add__(self, other)
+        return Number.__add__(self, other)
+
+    @sympify_other
+    def __radd__(self, other):
+        if isinstance(other, Rational):
+            return other.__add__(self)
+        return Number.__radd__(self, other)
 
     @sympify_other
     def __sub__(self, other):
@@ -752,8 +757,15 @@ class Rational(Number):
             return Rational(self.p*other.p, self.q*other.q)
         elif isinstance(other, Float):
             return other*self
-        else:
-            return Number.__mul__(self, other)
+        return Number.__mul__(self, other)
+
+    @sympify_other
+    def __rmul__(self, other):
+        if isinstance(other, Rational):
+            return Rational(self.p*other.p, self.q*other.q)
+        elif isinstance(other, Float):
+            return other*self
+        return Number.__rmul__(self, other)
 
     @sympify_other
     def __div__(self, other):
@@ -1620,7 +1632,6 @@ class Infinity(Number):
                 return S.Infinity
         return NotImplemented
 
-    @sympify_other
     def __mul__(self, other):
         if isinstance(other, Number):
             if other is S.Zero or other is S.NaN:
@@ -1638,8 +1649,26 @@ class Infinity(Number):
                     return S.Infinity
                 else:
                     return S.NegativeInfinity
-        return NotImplemented
-    __rmul__ = __mul__
+        return super(Infinity, self).__mul__(other)
+
+    def __rmul__(self, other):
+        if isinstance(other, Number):
+            if other is S.Zero or other is S.NaN:
+                return S.NaN
+            elif other.is_Float:
+                if other._mpf_ == fnan or other == 0:
+                    #Used workaround because Float('nan') == Float('nan') return False
+                    return Float('nan')
+                if other > 0:
+                    return Float('inf')
+                else:
+                    return Float('-inf')
+            else:
+                if other > 0:
+                    return S.Infinity
+                else:
+                    return S.NegativeInfinity
+        return super(Infinity, self).__rmul__(other)
 
     @sympify_other
     def __div__(self, other):
