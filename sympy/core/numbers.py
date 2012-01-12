@@ -1153,7 +1153,7 @@ class Integer(Rational):
             return Integer(other + self.p)
         elif isinstance(other, Integer):
             return Integer(other.p + self.p)
-        return Rational.__add__(self, other)
+        return Rational.__radd__(self, other)
 
     def __sub__(self, other):
         if isinstance(other, (int, long)):
@@ -1181,7 +1181,7 @@ class Integer(Rational):
             return Integer(other * self.p)
         elif isinstance(other, Integer):
             return Integer(other.p * self.p)
-        return Rational.__mul__(self, other)
+        return Rational.__rmul__(self, other)
 
     def __mod__(self, other):
         if isinstance(other, (int, long)):
