@@ -40,7 +40,8 @@ class AskPrimeHandler(CommonHandler):
         for arg in expr.args:
             if ask(Q.integer(arg), assumptions):
                 pass
-            else: break
+            else:
+                break
         else:
             # a product of integers can't be a prime
             return False
@@ -93,10 +94,13 @@ class AskCompositeHandler(CommonHandler):
             _integer = ask(Q.integer(expr), assumptions)
             if _integer:
                 _prime = ask(Q.prime(expr), assumptions)
-                if _prime is None: return
+                if _prime is None:
+                    return
                 return not _prime
-            else: return _integer
-        else: return _positive
+            else:
+                return _integer
+        else:
+            return _positive
 
 class AskEvenHandler(CommonHandler):
 
@@ -140,11 +144,15 @@ class AskEvenHandler(CommonHandler):
                 if irrational:
                     break
                 irrational = True
-            else: break
+            else:
+                break
         else:
-            if irrational: return False
-            if even: return True
-            if odd == len(expr.args): return False
+            if irrational:
+                return False
+            if even:
+                return True
+            if odd == len(expr.args):
+                return False
 
     @staticmethod
     def Add(expr, assumptions):
@@ -162,7 +170,8 @@ class AskEvenHandler(CommonHandler):
                 pass
             elif ask(Q.odd(arg), assumptions):
                 _result = not _result
-            else: break
+            else:
+                break
         else:
             return _result
 
@@ -220,6 +229,7 @@ class AskOddHandler(CommonHandler):
         _integer = ask(Q.integer(expr), assumptions)
         if _integer:
             _even = ask(Q.even(expr), assumptions)
-            if _even is None: return None
+            if _even is None:
+                return None
             return not _even
         return _integer
