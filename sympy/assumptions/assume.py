@@ -1,6 +1,7 @@
 import inspect
 from sympy.utilities.source import get_class
 from sympy.logic.boolalg import Boolean
+from sympy.core.sympify import sympify
 
 class AssumptionsContext(set):
     """Set representing assumptions.
@@ -47,7 +48,7 @@ class AppliedPredicate(Boolean):
     __slots__ = []
 
     def __new__(cls, predicate, arg):
-        return Boolean.__new__(cls, predicate, arg)
+        return Boolean.__new__(cls, sympify(predicate), sympify(arg))
 
     is_Atom = True # do not attempt to decompose this
 

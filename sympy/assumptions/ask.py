@@ -79,7 +79,7 @@ def ask(proposition, assumptions=True, context=global_assumptions):
     """
     assumptions = And(assumptions, And(*context))
     if isinstance(proposition, AppliedPredicate):
-        key, expr = proposition.func, sympify(proposition.arg)
+        key, expr = proposition.func, proposition.arg
     else:
         key, expr = Q.is_true, sympify(proposition)
 
