@@ -105,9 +105,6 @@ class Basic(PicklableWithSlots):
 
     """
     __metaclass__ = WithAssumptions
-    __slots__ = ['_mhash',              # hash value
-                 '_args',               # arguments
-                ]
 
     # To be overridden with True in the appropriate subclasses
     is_Atom = False
@@ -146,7 +143,6 @@ class Basic(PicklableWithSlots):
         obj = object.__new__(cls)
         obj._init_assumptions(assumptions)
 
-        obj._mhash = None # will be set by __hash__ method.
         obj._args = args  # all items in args must be Basic objects
         return obj
 
@@ -159,26 +155,20 @@ class Basic(PicklableWithSlots):
     def __hash__(self):
         # hash cannot be cached using cache_it because infinite recurrence
         # occurs as hash is needed for setting cache dictionary keys
-        h = self._mhash
-        if h is None:
+        try:
+            return self._mhash
+        except AttributeError:
             h = (type(self).__name__,) + self._hashable_content()
-
-            if self._assume_type_keys is not None:
-                a = []
-                kv= self._assumptions
-                for k in sorted(self._assume_type_keys):
-                    a.append( (k, kv[k]) )
-
-                h = hash( h + tuple(a) )
-
+            try:
+                atk = self._assume_type_keys
+            except AttributeError:
+                h = hash(h)
             else:
-                h = hash( h )
-
+                kv = self._assumptions
+                a = tuple([(k, kv[k]) for k in sorted(atk)])
+                h = hash(h + a)
 
             self._mhash = h
-            return h
-
-        else:
             return h
 
     def _hashable_content(self):
@@ -397,8 +387,10 @@ class Basic(PicklableWithSlots):
         # type(self) == type(other)
         st = self._hashable_content()
         ot = other._hashable_content()
-
-        return st == ot and self._assume_type_keys == other._assume_type_keys
+        try:
+            return st == ot and self._assume_type_keys == other._assume_type_keys
+        except AttributeError:
+            return st == ot
 
     def __ne__(self, other):
         """a != b  -> Compare two symbolic trees and see whether they are different
@@ -423,7 +415,10 @@ class Basic(PicklableWithSlots):
         st = self._hashable_content()
         ot = other._hashable_content()
 
-        return (st != ot) or self._assume_type_keys != other._assume_type_keys
+        try:
+            return (st != ot) or self._assume_type_keys != other._assume_type_keys
+        except AttributeError:
+            return st != ot
 
     def dummy_eq(self, other, symbol=None):
         """

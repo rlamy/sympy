@@ -78,8 +78,6 @@ class WithAssumptions(BasicMeta):
     def __new__(mcl, name, bases, attrdict):
         if not any(issubclass(base, AssumeMixin) for base in bases):
             bases = (AssumeMixin,) + bases
-            if '__slots__' in attrdict:
-                attrdict['__slots__'] += AssumeMixin._assume_slots
         return super(WithAssumptions, mcl).__new__(mcl, name, bases, attrdict)
 
     def __init__(cls, *args, **kws):
@@ -204,22 +202,9 @@ class AssumeMixin(object):
 
         - None (if you don't know if the property is True or false)
     """
-    _assume_slots = ['_assumptions',    # assumptions
-                 '_a_inprogress',   # already-seen requests (when deducing
-                                    # through prerequisites -- see CycleDetected)
-                 '_assume_type_keys', # assumptions typeinfo keys
-                ]
-    try:
-        # This particular __slots__ definition breaks SymPy in Jython.
-        # See issue 1233.
-        import java
-    except ImportError:
-        __slots__ = []
-
     def  _init_assumptions(self, assumptions):
         # initially assumptions are shared between instances and class
         self._assumptions  = self.default_assumptions
-        self._a_inprogress = []
 
         # NOTE this could be made lazy -- probably not all instances will need
         # fully derived assumptions?
@@ -237,8 +222,6 @@ class AssumeMixin(object):
             newk  = k2.difference(basek)
 
             self._assume_type_keys = frozenset(newk)
-        else:
-            self._assume_type_keys = None
 
     # XXX better name?
     @property
@@ -272,7 +255,7 @@ class AssumeMixin(object):
         A   = self._assumptions
 
         # assumptions shared:
-        if A is cls.default_assumptions or (self._assume_type_keys is None):
+        if A is cls.default_assumptions or not hasattr(self, '_assume_type_keys'):
             assumptions0 = {}
         else:
             assumptions0 = dict( (k, A[k]) for k in self._assume_type_keys )
@@ -323,10 +306,14 @@ class AssumeMixin(object):
         if k not in _assume_defined:
             raise AttributeError('undefined assumption %r' % (k))
 
-        seen = self._a_inprogress
+        try:
+            seen = self._a_inprogress
+        except AttributeError:
+            seen = self._a_inprogress = set()
+
         if k in seen:
             raise CycleDetected
-        seen.append(k)
+        seen.add(k)
 
         try:
             # First try the assumption evaluation function if it exists
@@ -356,7 +343,9 @@ class AssumeMixin(object):
                         except KeyError:
                             pass
         finally:
-            seen.pop()
+            seen.remove(k)
+            if not seen:
+                del self._a_inprogress
 
         # No result -- unknown
         # cache it  (NB ._learn_new_facts(k, None) to learn other properties,
