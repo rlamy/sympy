@@ -1,6 +1,8 @@
-from sympy.logic.boolalg import to_cnf, eliminate_implications, distribute_and_over_or, \
-    compile_rule, conjuncts, disjuncts, to_int_repr, fuzzy_not, Boolean, is_cnf
-from sympy import symbols, And, Or, Xor, Not, Nand, Nor, Implies, Equivalent, ITE
+from sympy.logic.boolalg import (to_cnf, eliminate_implications,
+        distribute_and_over_or, compile_rule, conjuncts, disjuncts,
+        to_int_repr, fuzzy_not, Boolean, is_cnf, TRUE, FALSE, BooleanTrue,
+        BooleanFalse, And, Or, Xor, Not, Nand, Nor, Implies, Equivalent, ITE)
+from sympy import symbols, S
 from sympy.utilities.pytest import raises
 
 def test_overloading():
@@ -14,6 +16,12 @@ def test_overloading():
     assert A << B == Implies(B, A)
     assert ~A == Not(A)
     assert A ^ B == Xor(A, B)
+
+def test_True_False():
+    assert TRUE is S.BooleanTrue is BooleanTrue()
+    assert FALSE is S.BooleanFalse is BooleanFalse()
+    assert isinstance(~TRUE, Boolean)
+    assert isinstance(~FALSE, Boolean)
 
 def test_And():
     A, B, C = map(Boolean, symbols('A,B,C'))

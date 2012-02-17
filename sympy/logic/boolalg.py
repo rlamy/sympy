@@ -1,5 +1,6 @@
 """Boolean algebra module for SymPy"""
-from sympy.core.basic import Basic
+from sympy.core.basic import Basic, Atom
+from sympy.core.singleton import Singleton
 from sympy.core.operations import LatticeOp
 from sympy.core.function import Application, sympify
 
@@ -31,6 +32,19 @@ class Boolean(Basic):
     def __xor__(self, other):
         return Xor(self, other)
 
+class BooleanValue(Boolean, Atom):
+    """Base class for BooleanTrue and BooleanFalse."""
+    pass
+
+class BooleanTrue(BooleanValue):
+    """Logical TRUE"""
+    __metaclass__ = Singleton
+TRUE = BooleanTrue()
+
+class BooleanFalse(BooleanValue):
+    """Logical FALSE"""
+    __metaclass__ = Singleton
+FALSE = BooleanFalse()
 
 class BooleanFunction(Application, Boolean):
     """Boolean function is a function that lives in a boolean space

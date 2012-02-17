@@ -50,6 +50,14 @@ class TautologicalHandler(AskHandler):
         return expr
 
     @staticmethod
+    def BooleanTrue(expr, assumptions):
+        return True
+
+    @staticmethod
+    def BooleanFalse(expr, assumptions):
+        return False
+
+    @staticmethod
     def AppliedPredicate(expr, assumptions):
         return ask(expr, assumptions)
 
@@ -60,7 +68,6 @@ class TautologicalHandler(AskHandler):
             return not value
         else:
             return None
-
 
     @staticmethod
     def Or(expr, assumptions):

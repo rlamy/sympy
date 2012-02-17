@@ -1117,9 +1117,22 @@ def test_sympy__logic__boolalg__And():
     from sympy.logic.boolalg import And
     assert _test_args(And(x, y, 2))
 
+
 @SKIP("abstract class")
 def test_sympy__logic__boolalg__Boolean():
     pass
+
+@SKIP("abstract class")
+def test_sympy__logic__boolalg__BooleanValue():
+    pass
+
+def test_sympy__logic__boolalg__BooleanTrue():
+    from sympy.logic.boolalg import BooleanTrue
+    assert _test_args(BooleanTrue())
+
+def test_sympy__logic__boolalg__BooleanFalse():
+    from sympy.logic.boolalg import BooleanFalse
+    assert _test_args(BooleanFalse())
 
 def test_sympy__logic__boolalg__BooleanFunction():
     from sympy.logic.boolalg import BooleanFunction
