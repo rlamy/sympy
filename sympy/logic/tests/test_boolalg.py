@@ -74,9 +74,6 @@ def test_Xor():
 def test_Not():
     assert Not(True) == False
     assert Not(False) == True
-    assert Not(True, True ) == [False, False]
-    assert Not(True, False) == [False, True ]
-    assert Not(False,False) == [True,  True ]
 
 def test_Nand():
     A, B, C = map(Boolean, symbols('A,B,C'))
