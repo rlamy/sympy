@@ -1021,7 +1021,7 @@ class Expr(Basic, EvalfMixin):
 
         n = int_tested(n)
 
-        if not x:
+        if x is S.Zero:
             return S.Zero
 
         if x == self:
@@ -2407,7 +2407,7 @@ class Expr(Basic, EvalfMixin):
 
         See also lseries().
         """
-        if x and not self.has(x):
+        if x is not None and not self.has(x):
             return self
         if x is None or x0 or dir != '+':#{see XPOS above} or (x.is_positive == x.is_negative == None):
             assert logx == None

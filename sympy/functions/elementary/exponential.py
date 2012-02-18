@@ -250,7 +250,7 @@ class exp(ExpBase):
                 else:
                     return None
 
-            return log_term**Mul(*coeffs) if log_term else None
+            return log_term**Mul(*coeffs) if log_term is not None else None
 
         elif arg.is_Add:
             out = []

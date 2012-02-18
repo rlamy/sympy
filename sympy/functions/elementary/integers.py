@@ -38,12 +38,12 @@ class RoundFunction(Function):
             else:
                 npart += t
 
-        if not (npart or spart):
+        if npart is S.Zero and spart is S.Zero:
             return ipart
 
         # Evaluate npart numerically if independent of spart
-        if npart and (
-            not spart or
+        if npart is not S.Zero and (
+            spart is S.Zero or
             npart.is_real and spart.is_imaginary or
             npart.is_imaginary and spart.is_real):
             try:
@@ -54,7 +54,7 @@ class RoundFunction(Function):
                 pass
 
         spart = npart + spart
-        if not spart:
+        if spart is S.Zero:
             return ipart
         elif spart.is_imaginary:
             return ipart + cls(C.im(spart), evaluate=False)*S.ImaginaryUnit

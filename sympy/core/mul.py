@@ -112,8 +112,8 @@ class Mul(AssocOp):
             a, b = seq
             if b.is_Rational:
                 a, b = b, a
-            assert not a is S.One
-            if a and a.is_Rational:
+            assert a is not S.One
+            if a.is_Rational and a is not S.Zero:
                 r, b = b.as_coeff_Mul()
                 a *= r
                 if b.is_Mul:
@@ -372,7 +372,8 @@ class Mul(AssocOp):
             inv_exp_dict.setdefault(e, []).append(b)
         for e, b in inv_exp_dict.items():
             inv_exp_dict[e] = Mul(*b)
-        c_part.extend([Pow(b, e) for e, b in inv_exp_dict.iteritems() if e])
+        c_part.extend([Pow(b, e) for e, b in inv_exp_dict.iteritems()
+            if e is not S.Zero])
 
         # b, e -> e' = sum(e), b
         # {(1/5, [1/3]), (1/2, [1/12, 1/4]} -> {(1/3, [1/5, 1/2])}

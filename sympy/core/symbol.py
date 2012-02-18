@@ -89,6 +89,10 @@ class Symbol(AtomicExpr, Boolean):
     def sort_key(self, order=None):
         return self.class_key(), (1, (str(self),)), S.One.sort_key(), S.One
 
+    # override Boolean.__nonzero__
+    def __nonzero__(self):
+        return True
+
     def as_dummy(self):
         return Dummy(self.name, **self.assumptions0)
 

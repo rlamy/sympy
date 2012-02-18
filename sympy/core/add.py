@@ -37,7 +37,7 @@ class Add(AssocOp):
             a, b = seq
             if b.is_Rational:
                 a, b = b, a
-            assert a
+            assert a is not S.Zero
             if a.is_Rational:
                 if b.is_Mul:
                     # if it's an unevaluated 2-arg, expand it

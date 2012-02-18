@@ -79,7 +79,7 @@ def _pi_coeff(arg, cycles=1):
     arg = sympify(arg)
     if arg is S.Pi:
         return S.One
-    elif not arg:
+    elif arg is S.Zero:
         return S.Zero
     elif arg.is_Mul:
         cx = arg.coeff(S.Pi)

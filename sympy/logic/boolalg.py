@@ -32,6 +32,9 @@ class Boolean(Basic):
     def __xor__(self, other):
         return Xor(self, other)
 
+    def __nonzero__(self):
+        raise TypeError("Symbolic Boolean")
+
 class BooleanValue(Boolean, Atom):
     """Base class for BooleanTrue and BooleanFalse."""
     pass

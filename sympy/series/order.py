@@ -121,7 +121,7 @@ class Order(Expr):
             if expr.is_Add:
                 lst = expr.extract_leading_order(*symbols)
                 expr = Add(*[f.expr for (e,f) in lst])
-            elif expr:
+            elif expr is not S.Zero:
                 if len(symbols) > 1:
                     # TODO
                     # We cannot use compute_leading_term because that only

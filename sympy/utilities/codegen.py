@@ -598,7 +598,7 @@ class CCodeGen(CodeGen):
 
             for name, value in sorted(constants, key=str):
                 code_lines.append("double const %s = %s;\n" % (name, value))
-            if assign_to:
+            if assign_to is not None:
                 code_lines.append("%s\n" % c_expr)
             else:
                 code_lines.append("   return %s;\n" % c_expr)

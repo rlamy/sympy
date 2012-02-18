@@ -2019,7 +2019,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
                             c_powers[b] -= e
 
             # filter c_powers and convert to a list
-            c_powers = [(b, e) for b, e in c_powers.iteritems() if e]
+            c_powers = [(b, e) for b, e in c_powers.iteritems() if e is not None]
 
             # ==============================================================
             # check for Mul bases of Rational powers that can be combined with

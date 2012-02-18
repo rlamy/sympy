@@ -119,7 +119,7 @@ class KB(object):
     """Base class for all knowledge bases"""
     def __init__(self, sentence=None):
         self.clauses = []
-        if sentence:
+        if sentence is not None:
             self.tell(sentence)
 
     def tell(self, sentence):
