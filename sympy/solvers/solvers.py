@@ -924,22 +924,23 @@ def _solve(f, *symbols, **flags):
         result = set()
         for expr, cond in f.args:
             candidates = _solve(expr, *symbols)
-            if cond is True:
+            assert ask(cond) is not False
+            if ask(cond):
                 # Only include solutions that do not match the condition
                 # of any of the other pieces.
                 for candidate in candidates:
                     matches_other_piece = False
                     for other_expr, other_cond in f.args:
-                        if other_cond is True:
+                        if ask(other_cond):
                             continue
-                        if bool(other_cond.subs(symbol, candidate)):
+                        if ask(other_cond.subs(symbol, candidate)):
                             matches_other_piece = True
                             break
                     if not matches_other_piece:
                         result.add(candidate)
             else:
                 for candidate in candidates:
-                    if bool(cond.subs(symbol, candidate)):
+                    if ask(cond.subs(symbol, candidate)):
                         result.add(candidate)
         check = False
     else:
