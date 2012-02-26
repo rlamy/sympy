@@ -34,7 +34,7 @@ from sympy.core.symbol import Dummy, Wild
 from sympy.simplify import hyperexpand, powdenest
 from sympy.logic.boolalg import And, Or, BooleanFunction, TRUE, FALSE
 from sympy.functions.special.delta_functions import Heaviside
-from sympy.functions.elementary.piecewise import Piecewise
+from sympy.functions.elementary.piecewise import Piecewise, ExprCondPair
 from sympy.functions.special.hyper import meijerg
 from sympy.utilities.misc import debug as _debug
 

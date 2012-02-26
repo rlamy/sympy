@@ -1,8 +1,9 @@
 from sympy.core import Basic, S, Function, diff, Number, sympify, Tuple
 from sympy.core.relational import Equality, Relational
-from sympy.logic.boolalg import Boolean, TRUE, FALSE
 from sympy.core.sets import Set
 from sympy.core.symbol import Dummy
+from sympy.logic.boolalg import Boolean, TRUE, FALSE, And, Or
+from sympy.assumptions import ask
 
 class ExprCondPair(Tuple):
     """Represents an expression, condition pair."""
@@ -24,8 +25,6 @@ class ExprCondPair(Tuple):
         """
         Returns the condition of this pair.
         """
-        if self.args[1] is TRUE:
-            return True
         return self.args[1]
 
     @property
@@ -108,7 +107,6 @@ class Piecewise(Function):
 
     @classmethod
     def eval(cls, *args):
-        from sympy import Or
         # Check for situations where we can evaluate the Piecewise object.
         # 1) Hit an unevaluable cond (e.g. x<1) -> keep object
         # 2) Hit a true condition -> return that expr
@@ -116,24 +114,16 @@ class Piecewise(Function):
         all_conds_evaled = True    # Do all conds eval to a bool?
         piecewise_again = False    # Should we pass args to Piecewise again?
         non_false_ecpairs = []
-        or1 = Or(*[cond for (_, cond) in args if cond is not True])
-        for expr, cond in args:
-            # Check here if expr is a Piecewise and collapse if one of
-            # the conds in expr matches cond. This allows the collapsing
-            # of Piecewise((Piecewise(x,x<0),x<0)) to Piecewise((x,x<0)).
-            # This is important when using piecewise_fold to simplify
-            # multiple Piecewise instances having the same conds.
-            # Eventually, this code should be able to collapse Piecewise's
-            # having different intervals, but this will probably require
-            # using the new assumptions.
-            if isinstance(expr, Piecewise):
-                or2 = Or(*[c for (_, c) in expr.args if c is not True])
-                for e, c in expr.args:
-                    # Don't collapse if cond is "True" as this leads to
-                    # incorrect simplifications with nested Piecewises.
-                    if c == cond and (or1 == or2 or cond is not True):
-                        expr = e
-                        piecewise_again = True
+
+        def flatten_piecewise(args):
+            for expr, cond in args:
+                if isinstance(expr, Piecewise):
+                    for e, c in expr.args:
+                        yield e, And(cond, c)
+                else:
+                    yield expr, cond
+
+        for expr, cond in flatten_piecewise(args):
             cond_eval = cls.__eval_cond(cond)
             if cond_eval is None:
                 all_conds_evaled = False
@@ -142,6 +132,7 @@ class Piecewise(Function):
                 if all_conds_evaled:
                     return expr
                 non_false_ecpairs.append( (expr, cond) )
+
         if len(non_false_ecpairs) != len(args) or piecewise_again:
             return Piecewise(*non_false_ecpairs)
 
@@ -190,9 +181,11 @@ class Piecewise(Function):
         #    -  eg x < 1, x < 3 -> [oo,1],[1,3] instead of [oo,1],[oo,3]
         # 3) Sort the intervals to make it easier to find correct exprs
         for expr, cond in self.args:
-            if cond is True:
+            if cond is TRUE:
                 default = expr
                 break
+            elif cond is FALSE:
+                continue
             elif isinstance(cond, Equality):
                 continue
 
@@ -291,8 +284,8 @@ class Piecewise(Function):
     @classmethod
     def __eval_cond(cls, cond):
         """Return the truth value of the condition."""
-        if cond is True:
-            return True
+        if isinstance(cond, Boolean):
+            return ask(cond)
         return None
 
 def piecewise_fold(expr):

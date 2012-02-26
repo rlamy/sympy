@@ -1,8 +1,6 @@
-from sympy import (
-    Symbol, Set, Union, Interval, oo, S, sympify, nan,
-    GreaterThan, LessThan, Max, Min, Eq, Ge, Le, Gt, Lt, Float,
-    FiniteSet, Intersection
-)
+from sympy import (Symbol, Set, Union, Interval, oo, S, sympify, nan,
+    GreaterThan, LessThan, Max, Min, Eq, Ge, Le, Gt, Lt, Float, FiniteSet, Intersection)
+from sympy.logic.boolalg import And, Or, TRUE, FALSE
 from sympy.mpmath import mpi
 from sympy.logic import TRUE, FALSE, And, Or
 
