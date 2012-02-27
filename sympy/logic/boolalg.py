@@ -1,4 +1,5 @@
 """Boolean algebra module for SymPy"""
+from sympy.core.sympify import converter
 from sympy.core.basic import Basic, Atom
 from sympy.core.singleton import Singleton
 from sympy.core.operations import LatticeOp
@@ -49,6 +50,13 @@ class BooleanFalse(BooleanValue):
     __metaclass__ = Singleton
 FALSE = BooleanFalse()
 
+def _convert_bool(obj):
+    if obj is True:
+        return TRUE
+    else:
+        return FALSE
+converter[bool] = _convert_bool
+
 class BooleanFunction(Application, Boolean):
     """Boolean function is a function that lives in a boolean space
     It is used as base class for And, Or, Not, etc.
@@ -73,8 +81,8 @@ class And(LatticeOp, BooleanFunction):
         >>> x & y
         And(x, y)
     """
-    zero = False
-    identity = True
+    zero = FALSE
+    identity = TRUE
 
 class Or(LatticeOp, BooleanFunction):
     """
@@ -83,8 +91,8 @@ class Or(LatticeOp, BooleanFunction):
     It evaluates its arguments in order, giving True immediately if any of them are
     True, and False if they are all False.
     """
-    zero = True
-    identity = False
+    zero = TRUE
+    identity = FALSE
 
 class Xor(BooleanFunction):
     """
@@ -154,8 +162,10 @@ class Not(BooleanFunction):
         >>> Not(And(And(True, x), Or(x, False)))
         Not(x)
         """
-        if type(arg) is bool:
-            return not arg
+        if arg is TRUE:
+            return FALSE
+        elif arg is FALSE:
+            return TRUE
         # apply De Morgan Rules
         if arg.func is And:
             return Or(*[Not(a) for a in arg.args])
@@ -252,7 +262,7 @@ class Implies(BooleanFunction):
             A, B = args
         except ValueError:
             raise ValueError("%d operand(s) used for an Implies (pairs are required): %s" % (len(args), str(args)))
-        if A is True or A is False or B is True or B is False:
+        if A is TRUE or A is FALSE or B is TRUE or B is FALSE:
             return Or(Not(A), B)
         else:
             return Basic.__new__(cls, *args)
@@ -287,12 +297,12 @@ class Equivalent(BooleanFunction):
 
         argset = set(args)
         if len(argset) <= 1:
-            return True
-        if True in argset:
-            argset.discard(True)
+            return TRUE
+        if TRUE in argset:
+            argset.discard(TRUE)
             return And(*argset)
-        if False in argset:
-            argset.discard(False)
+        if FALSE in argset:
+            argset.discard(FALSE)
             return Nor(*argset)
         return Basic.__new__(cls, *set(args))
 
