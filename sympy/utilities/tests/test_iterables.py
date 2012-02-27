@@ -1,4 +1,4 @@
-from sympy import symbols, Integral, Tuple, Dummy, Basic
+from sympy import symbols, Integral, Tuple, Dummy, Basic, TRUE
 from sympy.utilities.iterables import (postorder_traversal, preorder_traversal,
     flatten, group, take, subsets, variations, cartes, numbered_symbols,
     dict_merge, prefixes, postfixes, sift, topological_sort, rotate_left,
@@ -22,10 +22,8 @@ def test_postorder_traversal():
 
     expr = Piecewise((x,x<1),(x**2,True))
     assert list(postorder_traversal(expr)) == [
-        x, x, 1, x < 1, ExprCondPair(x, x < 1), x, 2, x**2,
-        ExprCondPair.true_sentinel,
-        ExprCondPair(x**2, True), Piecewise((x, x < 1), (x**2, True))
-    ]
+        x, x, 1, x < 1, ExprCondPair(x, x < 1), x, 2, x**2, TRUE,
+        ExprCondPair(x**2, True), Piecewise((x, x < 1), (x**2, True))]
     assert list(preorder_traversal(Integral(x**2, (x, 0, 1)))) == [
         Integral(x**2, (x, 0, 1)), x**2, x, 2, Tuple(x, 0, 1), x, 0, 1
     ]
@@ -44,8 +42,7 @@ def test_preorder_traversal():
     expr = Piecewise((x,x<1),(x**2,True))
     assert list(preorder_traversal(expr)) == [
         Piecewise((x, x < 1), (x**2, True)), ExprCondPair(x, x < 1), x, x < 1,
-        x, 1, ExprCondPair(x**2, True), x**2, x, 2, ExprCondPair.true_sentinel
-    ]
+        x, 1, ExprCondPair(x**2, True), x**2, x, 2, TRUE]
     assert list(postorder_traversal(Integral(x**2, (x, 0, 1)))) == [
         x, 2, x**2, x, 0, 1, Tuple(x, 0, 1),
         Integral(x**2, Tuple(x, 0, 1))

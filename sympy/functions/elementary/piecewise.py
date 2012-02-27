@@ -1,17 +1,15 @@
 from sympy.core import Basic, S, Function, diff, Number, sympify, Tuple
 from sympy.core.relational import Equality, Relational
-from sympy.logic.boolalg import Boolean
+from sympy.logic.boolalg import Boolean, TRUE
 from sympy.core.sets import Set
 from sympy.core.symbol import Dummy
 
 class ExprCondPair(Tuple):
     """Represents an expression, condition pair."""
 
-    true_sentinel = Dummy('True')
-
     def __new__(cls, expr, cond):
         if cond is True:
-            cond = ExprCondPair.true_sentinel
+            cond = TRUE
         return Tuple.__new__(cls, expr, cond)
 
     @property
@@ -26,7 +24,7 @@ class ExprCondPair(Tuple):
         """
         Returns the condition of this pair.
         """
-        if self.args[1] == ExprCondPair.true_sentinel:
+        if self.args[1] is TRUE:
             return True
         return self.args[1]
 
@@ -95,7 +93,7 @@ class Piecewise(Function):
                     "Cond %s is of type %s, but must be a bool," \
                     " Relational, Number or Set" % (cond, type(cond)))
             newargs.append(pair)
-            if cond is ExprCondPair.true_sentinel:
+            if cond is TRUE:
                 break
 
         if options.pop('evaluate', True):
