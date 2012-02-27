@@ -46,10 +46,6 @@ class TautologicalHandler(AskHandler):
     """Wrapper allowing to query the truth value of a boolean expression."""
 
     @staticmethod
-    def bool(expr, assumptions):
-        return expr
-
-    @staticmethod
     def BooleanTrue(expr, assumptions):
         return True
 
