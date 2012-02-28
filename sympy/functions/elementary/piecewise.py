@@ -1,6 +1,6 @@
 from sympy.core import Basic, S, Function, diff, Number, sympify, Tuple
 from sympy.core.relational import Equality, Relational
-from sympy.logic.boolalg import Boolean, TRUE
+from sympy.logic.boolalg import Boolean, TRUE, FALSE
 from sympy.core.sets import Set
 from sympy.core.symbol import Dummy
 
@@ -86,7 +86,7 @@ class Piecewise(Function):
         for ec in args:
             pair = ExprCondPair(*ec)
             cond = pair.cond
-            if cond is False:
+            if cond is FALSE:
                 continue
             if not isinstance(cond, (bool, Relational, Set, Boolean)):
                 raise TypeError(

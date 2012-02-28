@@ -1,6 +1,8 @@
 from sympy import (hyper, meijerg, S, Tuple, pi, I, exp, log,
                    cos, sqrt, symbols, oo, Derivative, gamma)
 from sympy.abc import x, z, k
+from sympy.logic import TRUE, FALSE
+
 from sympy.utilities.pytest import raises
 from sympy.utilities.randtest import (
         random_complex_number as randcplx,
@@ -73,10 +75,10 @@ def test_radius_of_convergence():
     assert hyper([-1, 1, 3], [-2], z).radius_of_convergence == 0
     assert hyper((-1, 2, 3, 4), [], z).radius_of_convergence == oo
 
-    assert hyper([1, 1], [3], 1).convergence_statement is True
-    assert hyper([1, 1], [2], 1).convergence_statement is False
-    assert hyper([1, 1], [2], -1).convergence_statement is True
-    assert hyper([1, 1], [1], -1).convergence_statement is False
+    assert hyper([1, 1], [3], 1).convergence_statement is TRUE
+    assert hyper([1, 1], [2], 1).convergence_statement is FALSE
+    assert hyper([1, 1], [2], -1).convergence_statement is TRUE
+    assert hyper([1, 1], [1], -1).convergence_statement is FALSE
 
 
 def test_meijer():
