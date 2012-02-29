@@ -32,7 +32,7 @@ from sympy.core.mul import Mul
 from sympy.core.cache import cacheit
 from sympy.core.symbol import Dummy, Wild
 from sympy.simplify import hyperexpand, powdenest
-from sympy.logic.boolalg import And, Or
+from sympy.logic.boolalg import And, Or, BooleanFunction, TRUE, FALSE
 from sympy.functions.special.delta_functions import Heaviside
 from sympy.functions.elementary.piecewise import Piecewise
 from sympy.functions.special.hyper import meijerg
@@ -47,16 +47,16 @@ def _create_lookup_table(table):
     p, q, a, b, c = map(wild, 'pqabc')
     n = Wild('n', properties=[lambda x: x.is_Integer and x > 0])
     t = p*z**q
-    def add(formula, an, ap, bm, bq, arg=t, fac=S(1), cond=True, hint=True):
+    def add(formula, an, ap, bm, bq, arg=t, fac=S(1), cond=TRUE, hint=TRUE):
         table.setdefault(_mytype(formula, z), []).append((formula,
                                      [(fac, meijerg(an, ap, bm, bq, arg))], cond, hint))
-    def addi(formula, inst, cond, hint=True):
+    def addi(formula, inst, cond, hint=TRUE):
         table.setdefault(_mytype(formula, z), []).append((formula, inst, cond, hint))
 
     def constant(a):
         return [(a, meijerg([1], [], [], [0], z)),
                 (a, meijerg([], [1], [0], [], z))]
-    table[()] = [(a, constant(a), True, True)]
+    table[()] = [(a, constant(a), TRUE, TRUE)]
 
     # [P], Section 8.
 
@@ -137,17 +137,17 @@ def _create_lookup_table(table):
     # TODO these only hold for positive p, and can be made more general
     #      but who uses log(x)*Heaviside(a-x) anyway ...
     # TODO also it would be nice to derive them recursively ...
-    addi(log(t)**n*Heaviside(1 - t), make_log1, True)
-    addi(log(t)**n*Heaviside(t - 1), make_log2, True)
+    addi(log(t)**n*Heaviside(1 - t), make_log1, TRUE)
+    addi(log(t)**n*Heaviside(t - 1), make_log2, TRUE)
     def make_log3(subs):
         return make_log1(subs) + make_log2(subs)
-    addi(log(t)**n, make_log3, True)
+    addi(log(t)**n, make_log3, TRUE)
     addi(log(t + a),
          constant(log(a)) + [(S(1), meijerg([1, 1], [], [1], [0], t/a))],
-         True)
+         TRUE)
     addi(log(abs(t - a)), constant(log(abs(a))) + \
            [(pi, meijerg([1, 1], [S(1)/2], [1], [0, S(1)/2], t/a))],
-         True)
+         TRUE)
     # TODO log(x)/(x+a) and log(x)/(x-1) can also be done. should they
     #      be derivable?
     # TODO further formulae in this section seem obscure
@@ -159,7 +159,7 @@ def _create_lookup_table(table):
     from sympy import Ei, I, expint, Si, Ci, Shi, Chi
     addi(Ei(t),
          constant(-I*pi) + [(S(-1), meijerg([], [1], [0, 0], [], t*polar_lift(-1)))],
-         True)
+         TRUE)
 
     # Section 8.4.12
     add(Si(t), [1], [], [S(1)/2], [0, 0], t**2/4, sqrt(pi)/2)
@@ -525,7 +525,6 @@ def _condsimp(cond):
     """
     from sympy import (symbols, Wild, Eq, unbranched_argument, exp_polar, pi, I,
                        periodic_argument, oo, polar_lift)
-    from sympy.logic.boolalg import BooleanFunction
     if not isinstance(cond, BooleanFunction):
         return cond
     cond = cond.func(*map(_condsimp, cond.args))
@@ -1178,7 +1177,7 @@ def _rewrite_inversion(fac, po, g, x):
 
 def _check_antecedents_inversion(g, x):
     """ Check antecedents for the laplace inversion integral. """
-    from sympy import re, im, Or, And, Eq, exp, I, Add, nan, Ne
+    from sympy import re, im, Eq, exp, I, Add, nan, Ne
     _debug('Checking antecedents for inversion:')
     z = g.argument
     _, e = _get_coeff_exp(z, x)
@@ -1345,13 +1344,11 @@ def _rewrite_single(f, x, recursive=True):
                     subs_[fro] = unpolarify(polarify(to, lift=True),
                                             exponents_only=True)
                 subs = subs_
-                if not isinstance(hint, bool):
-                    hint = hint.subs(subs)
-                if hint is False:
+                hint = hint.subs(subs)
+                if hint is FALSE:
                     continue
-                if not isinstance(cond, bool):
-                    cond = unpolarify(cond.subs(subs))
-                if _eval_cond(cond) is False:
+                cond = unpolarify(cond.subs(subs))
+                if _eval_cond(cond) is FALSE:
                     continue
                 if not isinstance(terms, list):
                     terms = terms(subs)
