@@ -196,7 +196,7 @@ class Equality(Relational):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs == rhs
+        return _sympify(lhs == rhs)
 
     @classmethod
     def _eval_relation_doit(cls, lhs, rhs):
@@ -213,7 +213,7 @@ class Unequality(Relational):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs != rhs
+        return _sympify(lhs != rhs)
 
     @classmethod
     def _eval_relation_doit(cls, lhs, rhs):
@@ -503,7 +503,7 @@ class GreaterThan(_Greater):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs >= rhs
+        return _sympify(lhs >= rhs)
 
     def __nonzero__(self):
         return self.lhs.compare( self.rhs ) >= 0
@@ -516,7 +516,7 @@ class LessThan(_Less):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs <= rhs
+        return _sympify(lhs <= rhs)
 
     def __nonzero__(self):
         return self.lhs.compare( self.rhs ) <= 0
@@ -529,7 +529,7 @@ class StrictGreaterThan(_Greater):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs > rhs
+        return _sympify(lhs > rhs)
 
     def __nonzero__(self):
         return self.lhs.compare( self.rhs ) > 0
@@ -542,7 +542,7 @@ class StrictLessThan(_Less):
 
     @classmethod
     def _eval_relation(cls, lhs, rhs):
-        return lhs < rhs
+        return _sympify(lhs < rhs)
 
     def __nonzero__(self):
         return self.lhs.compare( self.rhs ) < 0

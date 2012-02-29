@@ -36,19 +36,31 @@ class Boolean(Basic):
     def __nonzero__(self):
         raise TypeError("Symbolic Boolean")
 
+
 class BooleanValue(Boolean, Atom):
     """Base class for BooleanTrue and BooleanFalse."""
     pass
 
+
 class BooleanTrue(BooleanValue):
     """Logical TRUE"""
     __metaclass__ = Singleton
+
+    def __nonzero__(self):
+        return True
+
 TRUE = BooleanTrue()
+
 
 class BooleanFalse(BooleanValue):
     """Logical FALSE"""
     __metaclass__ = Singleton
+
+    def __nonzero__(self):
+        return False
+
 FALSE = BooleanFalse()
+
 
 def _convert_bool(obj):
     if obj is True:
@@ -56,6 +68,7 @@ def _convert_bool(obj):
     else:
         return FALSE
 converter[bool] = _convert_bool
+
 
 class BooleanFunction(Application, Boolean):
     """Boolean function is a function that lives in a boolean space

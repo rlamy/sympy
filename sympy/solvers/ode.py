@@ -215,6 +215,7 @@ from sympy.core.symbol import Symbol, Wild, Dummy
 from sympy.core.sympify import sympify
 
 from sympy.functions import cos, exp, im, log, re, sin, tan, sqrt, sign
+from sympy.logic import TRUE, FALSE
 from sympy.matrices import wronskian
 from sympy.polys import Poly, RootOf, terms_gcd
 from sympy.series import Order
@@ -1257,9 +1258,10 @@ def checkodesol(ode, sol, func=None, order='auto', solve_for_func=True):
                     ode_or_bool = Eq(lhs,rhs)
                     ode_or_bool = simplify(ode_or_bool)
 
-                    if isinstance(ode_or_bool, bool):
-                        if ode_or_bool:
-                            lhs = rhs = S.Zero
+                    if ode_or_bool is TRUE:
+                        lhs = rhs = S.Zero
+                    elif ode_or_bool is FALSE:
+                        pass
                     else:
                         lhs = ode_or_bool.lhs
                         rhs = ode_or_bool.rhs

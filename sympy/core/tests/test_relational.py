@@ -3,6 +3,7 @@ from sympy import Symbol, symbols, oo, I, pi, Float
 from sympy.core.relational import ( Relational, Equality, Unequality,
     GreaterThan, LessThan, StrictGreaterThan, StrictLessThan, Rel, Eq, Lt, Le,
     Gt, Ge, Ne )
+from sympy.logic import TRUE, FALSE
 
 x,y,z = symbols('x,y,z')
 
@@ -48,8 +49,8 @@ def test_rel_subs():
     assert e.rhs == y
 
     e = Eq(x,0)
-    assert e.subs(x,0) == True
-    assert e.subs(x,1) == False
+    assert e.subs(x,0) == TRUE
+    assert e.subs(x,1) == FALSE
 
 
 def test_wrappers():
@@ -106,29 +107,29 @@ def test_rel_Infinity():
     assert (-oo <= 1) is True
 
 def test_bool():
-    assert Eq(0,0) is True
-    assert Eq(1,0) is False
-    assert Ne(0,0) is False
-    assert Ne(1,0) is True
-    assert Lt(0,1) is True
-    assert Lt(1,0) is False
-    assert Le(0,1) is True
-    assert Le(1,0) is False
-    assert Le(0,0) is True
-    assert Gt(1,0) is True
-    assert Gt(0,1) is False
-    assert Ge(1,0) is True
-    assert Ge(0,1) is False
-    assert Ge(1,1) is True
-    assert Eq(I, 2) is False
-    assert Ne(I, 2) is True
-    assert Gt(I, 2) not in [True, False]
-    assert Ge(I, 2) not in [True, False]
-    assert Lt(I, 2) not in [True, False]
-    assert Le(I, 2) not in [True, False]
+    assert Eq(0,0) is TRUE
+    assert Eq(1,0) is FALSE
+    assert Ne(0,0) is FALSE
+    assert Ne(1,0) is TRUE
+    assert Lt(0,1) is TRUE
+    assert Lt(1,0) is FALSE
+    assert Le(0,1) is TRUE
+    assert Le(1,0) is FALSE
+    assert Le(0,0) is TRUE
+    assert Gt(1,0) is TRUE
+    assert Gt(0,1) is FALSE
+    assert Ge(1,0) is TRUE
+    assert Ge(0,1) is FALSE
+    assert Ge(1,1) is TRUE
+    assert Eq(I, 2) is FALSE
+    assert Ne(I, 2) is TRUE
+    assert Gt(I, 2) not in [TRUE, FALSE]
+    assert Ge(I, 2) not in [TRUE, FALSE]
+    assert Lt(I, 2) not in [TRUE, FALSE]
+    assert Le(I, 2) not in [TRUE, FALSE]
     a = Float('.000000000000000000001', '')
     b = Float('.0000000000000000000001', '')
-    assert Eq(pi + a, pi + b) is False
+    assert Eq(pi + a, pi + b) is FALSE
 
 def test_rich_cmp():
     assert (x<y) == Lt(x,y)
@@ -143,14 +144,14 @@ def test_doit():
     np = Symbol('np', nonpositive=True)
     nn = Symbol('nn', nonnegative=True)
 
-    assert Gt(p, 0).doit() is True
+    assert Gt(p, 0).doit() is TRUE
     assert Gt(p, 1).doit() == Gt(p, 1)
-    assert Ge(p, 0).doit() is True
-    assert Le(p, 0).doit() is False
-    assert Lt(n, 0).doit() is True
-    assert Le(np, 0).doit() is True
+    assert Ge(p, 0).doit() is TRUE
+    assert Le(p, 0).doit() is FALSE
+    assert Lt(n, 0).doit() is TRUE
+    assert Le(np, 0).doit() is TRUE
     assert Gt(nn, 0).doit() == Gt(nn, 0)
-    assert Lt(nn, 0).doit() is False
+    assert Lt(nn, 0).doit() is FALSE
 
     assert Eq(x, 0).doit() == Eq(x, 0)
 
