@@ -8,13 +8,14 @@ sympy.stats.rv
 sympy.stats.crv
 """
 
-from sympy import (And, Eq, Basic, S, Expr, Symbol, cacheit, sympify, Mul, Add,
-        And, Or, Tuple)
+from sympy import (Eq, Basic, S, Expr, Symbol, cacheit, sympify, Mul, Add,
+        Tuple, ask)
 from sympy.core.sets import FiniteSet
 from rv import (RandomDomain, ProductDomain, ConditionalDomain, PSpace,
         ProductPSpace, SinglePSpace, random_symbols, sumsets, rv_subs)
 from sympy.core.compatibility import product
 from sympy.core.containers import Dict
+from sympy.logic import TRUE, FALSE, And, Or
 import random
 
 class FiniteDomain(RandomDomain):
@@ -110,7 +111,7 @@ class ConditionalFiniteDomain(ConditionalDomain, ProductFiniteDomain):
 
     def _test(self, elem):
         val = self.condition.subs(dict(elem))
-        if val in [True, False]:
+        if val in [TRUE, FALSE]:
             return val
         elif val.is_Equality:
             return val.lhs == val.rhs
@@ -120,7 +121,7 @@ class ConditionalFiniteDomain(ConditionalDomain, ProductFiniteDomain):
         return other in self.fulldomain and self._test(other)
 
     def __iter__(self):
-        return (elem for elem in self.fulldomain if self._test(elem))
+        return (elem for elem in self.fulldomain if ask(self._test(elem)))
 
     @property
     def set(self):
