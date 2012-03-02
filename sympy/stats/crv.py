@@ -215,14 +215,14 @@ class ContinuousPSpace(PSpace):
 
 
     def where(self, condition):
-        rvs = frozenset(random_symbols(condition))
-        if not (len(rvs)==1 and rvs.issubset(self.values)):
+        rvs = random_symbols(condition)
+        if not (len(rvs)==1 and rvs[0] in self.values):
             raise NotImplementedError(
                     "Multiple continuous random variables not supported")
-        rv = tuple(rvs)[0]
+        rv = rvs[0]
         interval = reduce_poly_inequalities_wrap(condition, rv)
         interval = interval.intersect(self.domain.set)
-        return SingleContinuousDomain(rv.symbol, interval)
+        return SingleContinuousDomain(interval)
 
     def conditional_space(self, condition, normalize=True, **kwargs):
 
