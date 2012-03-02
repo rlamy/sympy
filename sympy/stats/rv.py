@@ -15,6 +15,47 @@ sympy.stats.rv_interface
 from sympy import Basic, S, Expr, Symbol, Tuple, And, Add, Eq, lambdify
 from sympy.core.sets import FiniteSet, ProductSet
 
+class MeasureSpace(Basic):
+    """
+    A measure space
+    """
+    def __new__(cls, *args):
+        return Basic.__new__(cls, *args)
+
+    @property
+    def set(self):
+        return self.args[0]
+
+    def integrate(self, func):
+        raise NotImplementedError()
+
+class SingleMSpace(MeasureSpace):
+    """
+    """
+    def __new__(cls, set):
+        return RandomDomain.__new__(cls, set)
+
+class ConditionalMSpace(MeasureSpace):
+    """
+    A measure space with an attached condition
+    """
+    def __new__(cls, fullspace, condition):
+        condition = condition.subs(dict((rs,rs.symbol)
+            for rs in random_symbols(condition)))
+        return MeasureSpace.__new__(cls, fullspace, condition)
+
+    @property
+    def fullspace(self):
+        return self.args[1]
+
+    @property
+    def condition(self):
+        return self.args[2]
+
+    @property
+    def set(self):
+        raise NotImplementedError("Set of Conditional Domain not Implemented")
+
 class RandomDomain(Basic):
     """
     Represents a set of variables and the values which they can take
@@ -38,14 +79,18 @@ class RandomDomain(Basic):
         return self.args[0]
 
     @property
-    def set(self):
+    def space(self):
         return self.args[1]
+
+    @property
+    def set(self):
+        return self.space.set
 
     def __contains__(self, other):
         raise NotImplementedError()
 
     def integrate(self, expr):
-        raise NotImplementedError()
+        return self.space.integrate(Lambda(self.symbols, expr))
 
 class SingleDomain(RandomDomain):
     """
@@ -56,10 +101,10 @@ class SingleDomain(RandomDomain):
     sympy.stats.crv.SingleContinuousDomain
     sympy.stats.frv.SingleFiniteDomain
     """
-    def __new__(cls, symbol, set):
+    def __new__(cls, symbol, space):
         assert symbol.is_Symbol
         symbols = Tuple(symbol)
-        return RandomDomain.__new__(cls, symbols, set)
+        return RandomDomain.__new__(cls, symbols, space)
 
     @property
     def symbol(self):
@@ -273,6 +318,30 @@ class ProductPSpace(PSpace):
         return dict([(k,v) for space in self.spaces
             for k,v in space.sample().items()])
 
+class ProductMSpace(MeasureSpace):
+
+    def __new__(cls, *spaces):
+        # Flatten any product of products
+        spaces2 = []
+        for space in spaces:
+            if not isinstance(space, ProductMSpace):
+                spaces2.append(space)
+            else:
+                spaces2.extend(space.spaces)
+
+        return MeasureSpace.__new__(cls, *spaces2)
+
+    @property
+    def spaces(self):
+        return self.args
+
+    @property
+    def set(self):
+        return ProductSet(space.set for space in self.spaces)
+
+    def as_boolean(self):
+        return And(*[space.as_boolean() for space in self.spaces])
+
 class ProductDomain(RandomDomain):
     """
     A domain resulting from the merger of two independent domains
@@ -308,13 +377,14 @@ class ProductDomain(RandomDomain):
             from sympy.stats.crv import ProductContinuousDomain
             cls = ProductContinuousDomain
 
-        obj = RandomDomain.__new__(cls, symbols, domains2)
+        obj = RandomDomain.__new__(cls, symbols,
+                ProductMSpace.fromiter(domains2), domains2)
         obj.sym_domain_dict = sym_domain_dict
         return obj
 
     @property
     def domains(self):
-        return self.args[1]
+        return self.args[2]
 
     @property
     def set(self):

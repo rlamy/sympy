@@ -8,7 +8,8 @@ sympy.stats.rv
 sympy.stats.frv
 """
 
-from sympy.stats.rv import (RandomDomain, SingleDomain, ConditionalDomain,
+from sympy.stats.rv import (MeasureSpace, SingleMSpace, ProductMSpace,
+        ConditionalMSpace, RandomDomain, SingleDomain, ConditionalDomain,
         ProductDomain, PSpace, SinglePSpace, random_symbols, ProductPSpace)
 from sympy.functions.special.delta_functions import DiracDelta
 from sympy import (S, Interval, symbols, Dummy, Mul, Tuple,
@@ -16,6 +17,93 @@ from sympy import (S, Interval, symbols, Dummy, Mul, Tuple,
 from sympy.solvers.inequalities import reduce_poly_inequalities
 from sympy.polys.polyerrors import PolynomialError
 import random
+
+class ContinuousMSpace(MeasureSpace):
+    pass
+
+class SingleContinuousMSpace(ContinuousMSpace, SingleMSpace):
+    def __new__(cls, set):
+        return MeasureSpace.__new__(cls, set)
+
+    def integrate(self, func, **kwargs):
+        # assumes only intervals
+        evaluate = kwargs.pop('evaluate', True)
+        if evaluate:
+            return integrate(func.expr, (func.symbols[0], self.set), **kwargs)
+        else:
+            return Integral(func.expr, (func.symbols[0], self.set), **kwargs)
+
+class ProductContinuousMSpace(ProductMSpace, ContinuousMSpace):
+    """
+    A collection of independent domains with continuous support
+    """
+
+    def integrate(self, func, **kwargs):
+        for domain in self.domains:
+            domain_vars = frozenset(variables) & frozenset(domain.symbols)
+            if domain_vars:
+                expr = domain.integrate(expr, domain_vars, **kwargs)
+        return expr
+
+
+class ConditionalContinuousMSpace(ContinuousMSpace, ConditionalMSpace):
+    """
+    A domain with continuous support that has been further restricted by a
+    condition such as x > 3
+    """
+
+    def integrate(self, expr, variables=None, **kwargs):
+        fullintgrl = self.fullspace.integrate(func, evaluate=False)
+        # separate into integrand and limits
+        integrand, limits = fullintgrl.function, list(fullintgrl.limits)
+
+        conditions = [self.condition]
+        while conditions:
+            cond = conditions.pop()
+            if cond.is_Boolean:
+                if isinstance(cond, And):
+                    conditions.extend(cond.args)
+                elif isinstance(cond, Or):
+                    raise NotImplementedError("Or not implemented here")
+            elif cond.is_Relational:
+                if cond.is_Equality:
+                    # Add the appropriate Delta to the integrand
+                    integrand *= DiracDelta(cond.lhs-cond.rhs)
+                else:
+                    symbols = cond.free_symbols & set(self.symbols)
+                    if len(symbols)!=1: # Can't handle x > y
+                        raise NotImplementedError(
+                            "Multivariate Inequalities not yet implemented")
+                    # Can handle x > 0
+                    symbol = symbols.pop()
+                    # Find the limit with x, such as (x, -oo, oo)
+                    for i, limit in enumerate(limits):
+                        if limit[0]==symbol:
+                            # Make condition into an Interval like [0, oo]
+                            cintvl = reduce_poly_inequalities_wrap(cond, symbol)
+                            # Make limit into an Interval like [-oo, oo]
+                            lintvl = Interval(limit[1], limit[2])
+                            # Intersect them to get [0, oo]
+                            intvl = cintvl.intersect(lintvl)
+                            # Put back into limits list
+                            limits[i] = (symbol, intvl.left, intvl.right)
+            else:
+                raise TypeError(
+                        "Condition %s is not a relational or Boolean"%cond)
+
+        evaluate = kwargs.pop('evaluate', True)
+        if evaluate:
+            return integrate(integrand, *limits, **kwargs)
+        return Integral(integrand, *limits, **kwargs)
+
+    @property
+    def set(self):
+        if len(self.symbols) == 1:
+            return (self.fulldomain.set & reduce_poly_inequalities_wrap(
+                self.condition, tuple(self.symbols)[0]))
+        else:
+            raise NotImplementedError(
+                    "Set of Conditional Domain not Implemented")
 
 class ContinuousDomain(RandomDomain):
     """
@@ -222,7 +310,7 @@ class ContinuousPSpace(PSpace):
         rv = tuple(rvs)[0]
         interval = reduce_poly_inequalities_wrap(condition, rv)
         interval = interval.intersect(self.domain.set)
-        return SingleContinuousDomain(rv.symbol, interval)
+        return SingleContinuousDomain(rv.symbol, SingleContinuousMSpace(interval))
 
     def conditional_space(self, condition, normalize=True, **kwargs):
 
@@ -246,7 +334,7 @@ class SingleContinuousPSpace(ContinuousPSpace, SinglePSpace):
     _name = 'x'
     def __new__(cls, symbol, density, set=Interval(-oo, oo)):
         assert symbol.is_Symbol
-        domain = SingleContinuousDomain(symbol, set)
+        domain = SingleContinuousDomain(symbol, SingleContinuousMSpace(set))
         obj = ContinuousPSpace.__new__(cls, domain, density)
         obj._cdf = None
         return obj

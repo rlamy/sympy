@@ -11,11 +11,87 @@ sympy.stats.crv
 from sympy import (And, Eq, Basic, S, Expr, Symbol, cacheit, sympify, Mul, Add,
         And, Or, Tuple)
 from sympy.core.sets import FiniteSet
-from rv import (RandomDomain, ProductDomain, ConditionalDomain, PSpace,
+from rv import (MeasureSpace, ProductMSpace, ConditionalMSpace,
+        RandomDomain, ProductDomain, ConditionalDomain, PSpace,
         ProductPSpace, SinglePSpace, random_symbols, sumsets, rv_subs)
 from sympy.core.compatibility import product
 from sympy.core.containers import Dict
 import random
+
+class FiniteMSpace(MeasureSpace):
+    """
+    A domain with discrete finite support
+
+    Represented using a FiniteSet.
+    """
+    def __new__(cls, set):
+        return MeasureSpace.__new__(cls, set)
+
+    def __iter__(self):
+        return self.set.__iter__()
+
+class SingleFiniteMSpace(FiniteMSpace):
+    """
+    A FiniteMSpace over a single symbol/set
+
+    Example: The possibilities of a *single* die roll.
+    """
+    pass
+
+class ProductFiniteMSpace(ProductMSpace, FiniteMSpace):
+    """
+    A Finite domain consisting of several other FiniteMSpaces
+
+    Example: The possibilities of the rolls of three independent dice
+    """
+
+    def __iter__(self):
+        proditer = product(*self.domains)
+        return (sumsets(items) for items in proditer)
+
+class ConditionalFiniteMSpace(ConditionalMSpace, ProductFiniteMSpace):
+    """
+    A FiniteMSpace that has been restricted by a condition
+
+    Example: The possibilities of a die roll under the condition that the
+    roll is even.
+    """
+
+    def __new__(cls, space, condition):
+        cond = rv_subs(condition)
+        # Check that we aren't passed a condition like die1 == z
+        # where 'z' is a symbol that we don't know about
+        # We will never be able to test this equality through iteration
+        if not cond.free_symbols.issubset(domain.free_symbols):
+            raise ValueError('Condition "%s" contains foreign symbols \n%s.\n'%(
+                condition, tuple(cond.free_symbols-domain.free_symbols))+
+                "Will be unable to iterate using this condition")
+
+        return ConditionalMSpace.__new__(cls, domain, condition)
+
+    def _test(self, elem):
+        val = self.condition.subs(dict(elem))
+        if val in [True, False]:
+            return val
+        elif val.is_Equality:
+            return val.lhs == val.rhs
+        raise ValueError("Undeciable if %s"%str(val))
+
+    def __contains__(self, other):
+        return other in self.fulldomain and self._test(other)
+
+    def __iter__(self):
+        return (elem for elem in self.fulldomain if self._test(elem))
+
+    @property
+    def set(self):
+        if self.fulldomain.__class__ is SingleFiniteMSpace:
+            return FiniteSet(elem for elem in self.fulldomain.set
+                    if frozenset(((self.fulldomain.symbol, elem),)) in self)
+        else:
+            raise NotImplementedError(
+                    "Not implemented on multi-dimensional conditional domain")
+        #return FiniteSet(elem for elem in self.fulldomain if elem in self)
 
 class FiniteDomain(RandomDomain):
     """
@@ -27,11 +103,12 @@ class FiniteDomain(RandomDomain):
     def __new__(cls, elements):
         elements = FiniteSet(*elements)
         symbols = Tuple(sym for sym, val in elements)
-        return RandomDomain.__new__(cls, symbols, elements)
+        space = FiniteMSpace.fromiter(val for sym, val in elements)
+        return RandomDomain.__new__(cls, symbols, space, elements)
 
     @property
     def elements(self):
-        return self.args[1]
+        return self.args[2]
 
     @property
     def dict(self):
@@ -54,7 +131,8 @@ class SingleFiniteDomain(FiniteDomain):
     """
 
     def __new__(cls, symbol, set):
-        return RandomDomain.__new__(cls, Tuple(symbol), FiniteSet(*set))
+        set = FiniteSet.fromiter(set)
+        return RandomDomain.__new__(cls, Tuple(symbol), FiniteMSpace(set))
 
     @property
     def symbol(self):
