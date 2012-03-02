@@ -11,7 +11,7 @@ sympy.stats.frv
 from sympy.stats.rv import (RandomDomain, SingleDomain, ConditionalDomain,
         ProductDomain, PSpace, SinglePSpace, random_symbols, ProductPSpace)
 from sympy.functions.special.delta_functions import DiracDelta
-from sympy import (S, Interval, symbols, Dummy, FiniteSet, Mul, Tuple,
+from sympy import (S, Interval, symbols, Dummy, Mul, Tuple,
         Integral, And, Or, Piecewise, solve, cacheit, integrate, oo, Lambda)
 from sympy.solvers.inequalities import reduce_poly_inequalities
 from sympy.polys.polyerrors import PolynomialError
@@ -36,7 +36,7 @@ class SingleContinuousDomain(ContinuousDomain, SingleDomain):
     """
     def __new__(cls, symbol, set):
         assert symbol.is_Symbol
-        symbols = FiniteSet(symbol)
+        symbols = Tuple(symbol)
         return RandomDomain.__new__(cls, symbols, set)
 
     def integrate(self, expr, variables=None, **kwargs):
