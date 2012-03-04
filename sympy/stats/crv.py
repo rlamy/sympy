@@ -29,9 +29,9 @@ class SingleContinuousMSpace(ContinuousMSpace, SingleMSpace):
         # assumes only intervals
         evaluate = kwargs.pop('evaluate', True)
         if evaluate:
-            return integrate(func.expr, (func.symbols[0], self.set), **kwargs)
+            return integrate(func.expr, (func.variables[0], self.set), **kwargs)
         else:
-            return Integral(func.expr, (func.symbols[0], self.set), **kwargs)
+            return Integral(func.expr, (func.variables[0], self.set), **kwargs)
 
 class ProductContinuousMSpace(ProductMSpace, ContinuousMSpace):
     """
@@ -133,12 +133,7 @@ class SingleContinuousDomain(ContinuousDomain, SingleDomain):
         if not variables:
             return expr
         assert frozenset(variables) == frozenset(self.symbols)
-        # assumes only intervals
-        evaluate = kwargs.pop('evaluate', True)
-        if evaluate:
-            return integrate(expr, (self.symbol, self.set), **kwargs)
-        else:
-            return Integral(expr, (self.symbol, self.set), **kwargs)
+        return self.space.integrate(Lambda(self.symbol, expr), **kwargs)
 
     def as_boolean(self):
         return self.set.as_relational(self.symbol)
