@@ -114,10 +114,10 @@ class Predicate(Boolean):
 
     is_Atom = True
 
-    def __new__(cls, name, handlers=None):
+    def __new__(cls, name, handler=None):
         obj = Boolean.__new__(cls)
         obj.name = name
-        obj.handlers = handlers or []
+        obj.handler = handler
         return obj
 
     def _hashable_content(self):
@@ -130,10 +130,10 @@ class Predicate(Boolean):
         return AppliedPredicate(self, expr)
 
     def add_handler(self, handler):
-        self.handlers.append(handler)
-
-    def remove_handler(self, handler):
-        self.handlers.remove(handler)
+        if self.handler is None:
+            self.handler = handler
+        else:
+            raise ValueError("Handler is already set")
 
     def eval(self, expr, assumptions=True):
         """
@@ -141,24 +141,16 @@ class Predicate(Boolean):
 
         This uses only direct resolution methods, not logical inference.
         """
-        res, _res = None, None
         mro = inspect.getmro(type(expr))
-        for handler in self.handlers:
-            cls = get_class(handler)
-            for subclass in mro:
-                try:
-                    eval = getattr(cls, subclass.__name__)
-                except AttributeError:
-                    continue
-                res = eval(expr, assumptions)
-                if _res is None:
-                    _res = res
-                elif res is None:
-                    # since first resolutor was conclusive, we keep that value
-                    res = _res
-                else:
-                    # only check consistency if both resolutors have concluded
-                    if _res != res:
-                        raise ValueError('incompatible resolutors')
-                break
-        return res
+        if self.handler is None:
+            return None
+        cls = get_class(self.handler)
+        for subclass in mro:
+            try:
+                eval = getattr(cls, subclass.__name__)
+            except AttributeError:
+                continue
+            else:
+                return eval(expr, assumptions)
+        else:
+            return None

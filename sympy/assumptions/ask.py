@@ -137,7 +137,6 @@ def ask_full_inference(proposition, assumptions):
     return None
 
 
-
 def register_handler(key, handler):
     """
     Register a handler in the ask system. key must be a string and handler a
@@ -161,13 +160,7 @@ def register_handler(key, handler):
     try:
         getattr(Q, key).add_handler(handler)
     except AttributeError:
-        setattr(Q, key, Predicate(key, handlers=[handler]))
-
-def remove_handler(key, handler):
-    """Removes a handler from the ask system. Same syntax as register_handler"""
-    if type(key) is Predicate:
-        key = key.name
-    getattr(Q, key).remove_handler(handler)
+        setattr(Q, key, Predicate(key, handler))
 
 def compute_known_facts():
     """Compute the various forms of knowledge compilation used by the
