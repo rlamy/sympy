@@ -251,3 +251,28 @@ class ManagedProperties(BasicMeta):
             pname = as_property(fact)
             if not hasattr(cls, pname):
                 setattr(cls, pname, make_property(fact))
+
+class HasAssumptions(ManagedProperties):
+    """Metaclass for classes with instance-level assumptions (e.g. Symbol)."""
+
+    def __init__(cls, *args, **kws):
+        BasicMeta.__init__(cls, *args, **kws)
+
+        pmanager = PropertyManager(cls)
+        cls.default_assumptions = pmanager
+        if pmanager.definitions:
+            raise RuntimeError("%s: class-level assumptions %s are "
+                    "incompatible with settable instance assumptions"
+                    % (cls, pmanager.definitions))
+
+        for fact in _assume_defined:
+            pname = as_property(fact)
+            if not hasattr(cls, pname):
+                setattr(cls, pname, cls.make_property(fact))
+
+    def make_property(cls, fact):
+        """Create the automagic property corresponding to a fact."""
+        def getit(self):
+            return self._assumptions.get(fact)
+        getit.func_name = as_property(fact)
+        return property(getit)
