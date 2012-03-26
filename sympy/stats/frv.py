@@ -33,10 +33,6 @@ class FiniteDomain(RandomDomain):
     def elements(self):
         return self.args[1]
 
-    @property
-    def dict(self):
-        return FiniteSet(Dict(dict(el)) for el in self.elements)
-
     def __contains__(self, other):
         return other in self.elements
 
@@ -59,9 +55,11 @@ class SingleFiniteDomain(FiniteDomain):
     @property
     def symbol(self):
         return tuple(self.symbols)[0]
+
     @property
     def elements(self):
         return FiniteSet(frozenset(((self.symbol, elem), )) for elem in self.set)
+
     @property
     def set(self):
         return self.args[1]

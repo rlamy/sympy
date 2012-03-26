@@ -97,11 +97,6 @@ def test_domains():
     pspace(X+Y).domain.set == FiniteSet(1,2,3,4,5,6)**2
 
     assert where(X>3).set == FiniteSet(4,5,6)
-    assert X.pspace.domain.dict == FiniteSet(
-            Dict({X.symbol:i}) for i in range(1,7))
-
-    assert where(X>Y).dict == FiniteSet(Dict({X.symbol:i, Y.symbol:j})
-            for i in range(1,7) for j in range(1,7) if i>j)
 
 def test_dice_bayes():
     X, Y, Z = Die(6), Die(6), Die(6)
