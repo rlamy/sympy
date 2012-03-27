@@ -9,10 +9,13 @@ sympy.stats.frv
 """
 
 from sympy.stats.rv import (RandomDomain, SingleDomain, ConditionalDomain,
-        ProductDomain, PSpace, SinglePSpace, random_symbols, ProductPSpace)
+        ProductDomain, PSpace, SinglePSpace, random_symbols, ProductPSpace,
+        RandomSymbol)
 from sympy.functions.special.delta_functions import DiracDelta
 from sympy import (S, Interval, symbols, Dummy, FiniteSet, Mul, Tuple,
         Integral, And, Or, Piecewise, solve, cacheit, integrate, oo, Lambda)
+from sympy.core.relational import Relational
+from sympy.logic.boolalg import Boolean
 from sympy.solvers.inequalities import reduce_poly_inequalities
 from sympy.polys.polyerrors import PolynomialError
 import random
@@ -190,23 +193,19 @@ class ContinuousPSpace(PSpace):
         return Lambda(z, cdf)
 
     def probability(self, condition, **kwargs):
-        evaluate = kwargs.get("evaluate", True)
         z = Dummy('z', real=True, bounded=True)
-        # Univariate case can be handled by where
-        try:
-            domain = self.where(condition)
+        domain = self.where(condition)
+        # Univariate case
+        if isinstance(domain, SingleDomain):
             rv = [rv for rv in self.values if rv.symbol == domain.symbol][0]
             # Integrate out all other random variables
             pdf = self.compute_density(rv, **kwargs)
             # Integrate out the last variable over the special domain
-            if evaluate:
-                return integrate(pdf(z), (z, domain.set), **kwargs)
-            else:
-                return Integral(pdf(z), (z, domain.set), **kwargs)
+            return domain.integrate(pdf(rv.symbol), [rv.symbol], **kwargs)
 
         # Other cases can be turned into univariate case
         # by computing a density handled by density computation
-        except NotImplementedError:
+        else:
             expr = condition.lhs - condition.rhs
             density = self.compute_density(expr, **kwargs)
             # Turn problem into univariate case
@@ -215,20 +214,23 @@ class ContinuousPSpace(PSpace):
 
 
     def where(self, condition):
-        rvs = frozenset(random_symbols(condition))
-        if not (len(rvs)==1 and rvs.issubset(self.values)):
-            raise NotImplementedError(
-                    "Multiple continuous random variables not supported")
-        rv = tuple(rvs)[0]
-        interval = reduce_poly_inequalities_wrap(condition, rv)
-        interval = interval.intersect(self.domain.set)
-        return SingleContinuousDomain(rv.symbol, interval)
+        if not isinstance(condition, (Boolean, Relational)):
+            raise TypeError
+        rvs = condition.atoms(RandomSymbol)
+        if len(rvs)==1 and rvs.issubset(self.values):
+            rv = rvs.pop()
+            try:
+                interval = reduce_poly_inequalities_wrap(condition, rv)
+            except NotImplementedError:
+                pass
+            else:
+                interval = interval.intersect(self.domain.set)
+                return SingleContinuousDomain(rv.symbol, interval)
+        condition = condition.xreplace(dict((rv, rv.symbol) for rv in self.values))
+        return ConditionalContinuousDomain(self.domain, condition)
 
     def conditional_space(self, condition, normalize=True, **kwargs):
-
-        condition = condition.subs(dict((rv,rv.symbol) for rv in self.values))
-
-        domain = ConditionalContinuousDomain(self.domain, condition)
+        domain = self.where(condition)
         density = self.density
         if normalize:
             density = density / domain.integrate(density, **kwargs)

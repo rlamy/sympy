@@ -22,7 +22,7 @@ def test_where():
     assert where(And(X**2 <= 1, X >= 0)).set == Interval(0, 1)
     XX = given(X, And(X**2 <= 1, X >= 0))
     assert XX.pspace.domain.set == Interval(0, 1)
-    assert XX.pspace.domain.as_boolean() == And(0 <= X.symbol, X.symbol**2 <= 1)
+    assert XX.pspace.domain.as_boolean() == Interval(0, 1).as_relational(X.symbol)
 
     raises(TypeError, "XX = given(X, X+3)")
 
