@@ -160,7 +160,7 @@ class ContinuousPSpace(PSpace):
         else:
             rvs = frozenset(rvs)
 
-        expr = expr.subs(dict((rv, rv.symbol) for rv in rvs))
+        expr = expr.xreplace(dict((rv, rv.symbol) for rv in rvs))
 
         domain_symbols = frozenset(rv.symbol for rv in rvs)
 

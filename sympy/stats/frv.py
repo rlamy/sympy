@@ -107,7 +107,7 @@ class ConditionalFiniteDomain(ConditionalDomain, ProductFiniteDomain):
         return ConditionalDomain.__new__(cls, domain, condition)
 
     def _test(self, elem):
-        val = self.condition.subs(dict(elem))
+        val = self.condition.xreplace(dict(elem))
         if val in [True, False]:
             return val
         elif val.is_Equality:
@@ -162,10 +162,10 @@ class FinitePSpace(PSpace):
         return ConditionalFiniteDomain(self.domain, condition)
 
     def compute_density(self, expr):
-        expr = expr.subs(dict(((rs, rs.symbol) for rs in self.values)))
+        expr = expr.xreplace(dict(((rs, rs.symbol) for rs in self.values)))
         d = {}
         for elem in self.domain:
-            val = expr.subs(dict(elem))
+            val = expr.xreplace(dict(elem))
             prob = self.prob_of(elem)
             d[val] = d.get(val, 0) + prob
         return d
@@ -194,8 +194,8 @@ class FinitePSpace(PSpace):
 
     def integrate(self, expr, rvs=None):
         rvs = rvs or self.values
-        expr = expr.subs(dict((rs, rs.symbol) for rs in rvs))
-        return sum(expr.subs(dict(elem)) * self.prob_of(elem)
+        expr = expr.xreplace(dict((rs, rs.symbol) for rs in rvs))
+        return sum(expr.xreplace(dict(elem)) * self.prob_of(elem)
                 for elem in self.domain)
 
     def probability(self, condition):
