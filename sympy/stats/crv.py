@@ -221,12 +221,10 @@ class ContinuousPSpace(PSpace):
         condition = condition.xreplace(dict((rv, rv.symbol) for rv in self.values))
         return ConditionalContinuousDomain(self.domain, condition)
 
-    def conditional_space(self, condition, normalize=True, **kwargs):
+    def conditional_space(self, condition, **kwargs):
         domain = self.where(condition)
         density = self.density
-        if normalize:
-            density = density / domain.integrate(density, **kwargs)
-
+        density /= domain.integrate(density, **kwargs)
         return ContinuousPSpace(domain, density)
 
 class SingleContinuousPSpace(ContinuousPSpace, SinglePSpace):
