@@ -47,6 +47,9 @@ class RandomDomain(Basic):
     def integrate(self, expr):
         raise NotImplementedError()
 
+    def as_boolean(self):
+        raise NotImplementedError("Not Implemented for generic Domains")
+
 class SingleDomain(RandomDomain):
     """
     A single variable and its domain

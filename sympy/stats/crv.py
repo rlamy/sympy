@@ -28,20 +28,12 @@ class ContinuousDomain(RandomDomain):
     """
     is_Continuous = True
 
-    def as_boolean(self):
-        raise NotImplementedError("Not Implemented for generic Domains")
-
 class SingleContinuousDomain(ContinuousDomain, SingleDomain):
     """
     A univariate domain with continuous support
 
     Represented using a single symbol and interval.
     """
-    def __new__(cls, symbol, set):
-        assert symbol.is_Symbol
-        symbols = FiniteSet(symbol)
-        return RandomDomain.__new__(cls, symbols, set)
-
     def integrate(self, expr, variables=None, **kwargs):
         if variables is None:
             variables = self.symbols
