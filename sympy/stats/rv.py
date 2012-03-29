@@ -30,7 +30,7 @@ class RandomDomain(Basic):
     is_Continuous = False
 
     def __new__(cls, symbols, *args):
-        symbols = FiniteSet(*symbols)
+        symbols = Tuple.fromiter(symbols)
         return Basic.__new__(cls, symbols, *args)
 
     @property
@@ -61,12 +61,11 @@ class SingleDomain(RandomDomain):
     """
     def __new__(cls, symbol, set):
         assert symbol.is_Symbol
-        symbols = FiniteSet(symbol)
-        return RandomDomain.__new__(cls, symbols, set)
+        return RandomDomain.__new__(cls,  Tuple(symbol), set)
 
     @property
     def symbol(self):
-        return tuple(self.symbols)[0]
+        return self.symbols[0]
 
     def __contains__(self, other):
         if len(other)!=1:
@@ -231,7 +230,7 @@ class ProductPSpace(PSpace):
             for value in space.values:
                 rs_space_dict[value] = space
 
-        symbols = FiniteSet(val.symbol for val in rs_space_dict.keys())
+        symbols = Tuple.fromiter(set(val.symbol for val in rs_space_dict.keys()))
 
         # Overlapping symbols
         if len(symbols) < sum(len(space.symbols) for space in spaces):
@@ -857,11 +856,12 @@ def pspace_independent(a,b):
     pspace_independent(a,b) implies independent(a,b)
     independent(a,b) does not imply pspace_independent(a,b)
     """
-    a_symbols = pspace(b).symbols
-    b_symbols = pspace(a).symbols
-    if len(a_symbols.intersect(b_symbols)) == 0:
+    a_symbols = set(pspace(b).symbols)
+    b_symbols = set(pspace(a).symbols)
+    if a_symbols & b_symbols:
+        return None
+    else:
         return True
-    return None
 
 def rv_subs(expr, symbols=None):
     """

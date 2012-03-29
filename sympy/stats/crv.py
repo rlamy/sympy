@@ -12,7 +12,7 @@ from sympy.stats.rv import (RandomDomain, SingleDomain, ConditionalDomain,
         ProductDomain, PSpace, SinglePSpace, random_symbols, ProductPSpace,
         RandomSymbol)
 from sympy.functions.special.delta_functions import DiracDelta
-from sympy import (S, Interval, symbols, Dummy, FiniteSet, Mul, Tuple,
+from sympy import (S, Interval, symbols, Dummy, Mul, Tuple,
         Integral, And, Or, Piecewise, solve, cacheit, integrate, oo, Lambda)
 from sympy.core.relational import Relational
 from sympy.logic.boolalg import Boolean

@@ -26,7 +26,7 @@ class FiniteDomain(RandomDomain):
     is_Finite = True
     def __new__(cls, elements):
         elements = FiniteSet(*elements)
-        symbols = FiniteSet(sym for sym, val in elements)
+        symbols = Tuple(sym for sym, val in elements)
         return RandomDomain.__new__(cls, symbols, elements)
 
     @property
@@ -50,11 +50,11 @@ class SingleFiniteDomain(FiniteDomain):
     """
 
     def __new__(cls, symbol, set):
-        return RandomDomain.__new__(cls, (symbol, ), FiniteSet(*set))
+        return RandomDomain.__new__(cls, Tuple(symbol), FiniteSet(*set))
 
     @property
     def symbol(self):
-        return tuple(self.symbols)[0]
+        return self.symbols[0]
 
     @property
     def elements(self):
