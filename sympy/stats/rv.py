@@ -225,42 +225,41 @@ class ProductPSpace(PSpace):
     """
 
     def __new__(cls, *spaces):
-        rs_space_dict = {}
-        for space in spaces:
-            for value in space.values:
-                rs_space_dict[value] = space
+        values = reduce(set.union, [space.values for space in spaces], set())
 
-        symbols = Tuple.fromiter(set(val.symbol for val in rs_space_dict.keys()))
+        symbols = Tuple.fromiter(val.symbol for val in values)
 
         # Overlapping symbols
-        if len(symbols) < sum(len(space.symbols) for space in spaces):
+        if len(set(symbols)) < len(symbols):
             raise ValueError("Overlapping Random Variables")
 
-        if all(space.is_Finite for space in spaces):
+        if all(value.pspace.is_Finite for value in values):
             from sympy.stats.frv import ProductFinitePSpace
             cls = ProductFinitePSpace
-        if all(space.is_Continuous for space in spaces):
+        if all(value.pspace.is_Continuous for value in values):
             from sympy.stats.crv import ProductContinuousPSpace
             cls = ProductContinuousPSpace
 
-        obj = Basic.__new__(cls, symbols, FiniteSet(*spaces))
-        obj.rs_space_dict = rs_space_dict
+        obj = Basic.__new__(cls, FiniteSet.fromiter(values))
 
         return obj
 
     @property
+    def symbols(self):
+        return FiniteSet.fromiter(value.symbol for value in self.values)
+
+    @property
     def spaces(self):
-        return self.args[1]
+        return FiniteSet.fromiter(value.pspace for value in self.values)
 
     @property
     def values(self):
-        return sumsets(space.values for space in self.spaces)
+        return self.args[0]
 
     def integrate(self, expr, rvs=None, **kwargs):
         rvs = rvs or self.values
-        rvs = frozenset(rvs)
-        for space in self.spaces:
-            expr = space.integrate(expr, rvs & space.values, **kwargs)
+        for value in rvs:
+            expr = value.pspace.integrate(expr, [value], **kwargs)
         return expr
 
     @property
