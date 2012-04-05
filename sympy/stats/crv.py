@@ -218,7 +218,6 @@ class ContinuousPSpace(PSpace):
             else:
                 interval = interval.intersect(self.domain.set)
                 return SingleContinuousDomain(rv.symbol, interval)
-        condition = condition.xreplace(dict((rv, rv.symbol) for rv in self.values))
         return ConditionalContinuousDomain(self.domain, condition)
 
     def conditional_space(self, condition, **kwargs):
