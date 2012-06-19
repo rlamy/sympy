@@ -2457,13 +2457,7 @@ class Expr(Basic, EvalfMixin):
         never call this method directly (use .nseries() instead), so you don't
         have to write docstrings for _eval_nseries().
         """
-        from sympy.utilities.misc import filldedent
-        raise NotImplementedError(filldedent("""
-                     The _eval_nseries method should be added to
-                     %s to give terms up to O(x**n) at x=0
-                     from the positive direction so it is available when
-                     nseries calls it.""" % self.func)
-                     )
+        raise NotImplementedError
 
     def limit(self, x, xlim, dir='+'):
         """ Compute limit x->xlim.
@@ -2562,11 +2556,6 @@ class Expr(Basic, EvalfMixin):
 
         """
         c, e = self.as_leading_term(x).as_coeff_exponent(x)
-        if x in c.free_symbols:
-            from sympy.utilities.misc import filldedent
-            raise ValueError(filldedent("""
-                cannot compute leadterm(%s, %s). The coefficient
-                should have been free of x but got %s""" % (self, x, c)))
         return c, e
 
     def as_coeff_Mul(self, rational=False):

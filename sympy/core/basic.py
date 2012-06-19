@@ -783,11 +783,8 @@ class Basic(object):
                 unordered = True
                 sequence = sequence.items()
             elif not iterable(sequence):
-                from sympy.utilities.misc import filldedent
-                raise ValueError(filldedent("""
-                   When a single argument is passed to subs
-                   it should be a dictionary of old: new pairs or an iterable
-                   of (old, new) tuples."""))
+                raise ValueError("When a single argument is passed to subs "
+                   "it should be an iterable of (old, new) tuples.")
         elif len(args) == 2:
             sequence = [args]
         else:
@@ -1515,12 +1512,8 @@ class preorder_traversal(object):
     >>> from sympy import symbols
     >>> from sympy.core.basic import preorder_traversal
     >>> x, y, z = symbols('x y z')
-    >>> list(preorder_traversal(z*(x+y))) in ( # any of these are possible
-    ... [z*(x + y), z, x + y, x, y], [z*(x + y), z, x + y, y, x],
-    ... [z*(x + y), x + y, x, y, z], [z*(x + y), x + y, y, x, z])
+    >>> set(preorder_traversal((x+y)*z)) == set([z, x + y, z*(x + y), x, y])
     True
-    >>> list(preorder_traversal((x, (y, z))))
-    [(x, (y, z)), x, (y, z), y, z]
 
     """
     def __init__(self, node):
