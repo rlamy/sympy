@@ -162,10 +162,10 @@ class Application(Basic):
         return self.__class__
 
     def _eval_subs(self, old, new):
-        if (old.is_Function and new.is_Function and
-            old == self.func and
-            (self.nargs == new.nargs or not new.nargs or
-             isinstance(new.nargs, tuple) and self.nargs in new.nargs)):
+        if (isinstance(old, FunctionClass) and isinstance(new, (FunctionClass, Lambda)) and
+                old == self.func and
+                (self.nargs == new.nargs or not new.nargs or
+                    isinstance(new.nargs, tuple) and self.nargs in new.nargs)):
             return new(*self.args)
 
     @deprecated
@@ -892,7 +892,7 @@ class Derivative(Expr):
             >>> Derivative(x**2,x)._diff_wrt
             False
         """
-        return self.expr.is_Function
+        return isinstance(self.expr, Function)
 
     def __new__(cls, expr, *variables, **assumptions):
         expr = sympify(expr)
@@ -1919,12 +1919,8 @@ def count_ops(expr, visual=False):
                 ops.append(DIV)
                 args.append(a.base) # won't be -Mul but could be Add
                 continue
-            if (a.is_Mul or
-                a.is_Pow or
-                a.is_Function or
-                isinstance(a, Derivative) or
-                isinstance(a, C.Integral)):
-
+            if (a.is_Mul or a.is_Pow or
+                    isinstance(a, (Application, Derivative, C.Integral))):
                 o = C.Symbol(a.func.__name__.upper())
                 # count the args
                 if (a.is_Mul or isinstance(a, C.LatticeOp)):

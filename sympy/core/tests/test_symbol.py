@@ -209,7 +209,8 @@ def test_symbols_each_char():
     # now test the actual output
     warnings.filterwarnings("ignore")
     assert symbols(['wx', 'yz'], each_char=True) == [(w, x), (y, z)]
-    assert all(w.is_Function for w in flatten(symbols(['wx', 'yz'], each_char=True, cls=Function)))
+    assert all(isinstance(w, FunctionClass) for w in
+            flatten(symbols(['wx', 'yz'], each_char=True, cls=Function)))
     assert symbols('xyz', each_char=True) == (x, y, z)
     assert symbols('x,', each_char=True) == (x,)
     assert symbols('x y z', each_char=True) == symbols('x,y,z', each_char=True) == (x, y, z)

@@ -1,6 +1,8 @@
-from sympy import (Add, ceiling, cos, E, Eq, exp, factorial, fibonacci, floor,
-                   Function, GoldenRatio, I, log, Mul, oo, pi, Pow, Rational,
-                   sin, sqrt, sstr, Sum, sympify, S, integrate, atan, product)
+from sympy import (ceiling, cos, Eq, exp, factorial, fibonacci, floor, log,
+        sin, sqrt, sstr, Sum, integrate, atan, product, polar_lift, re,
+        besseli)
+from sympy.core import (I, Expr, Add, Function, GoldenRatio, oo, pi,
+        Mul, Pow, Rational, E, sympify, S)
 from sympy.core.evalf import complex_accuracy, PrecisionExhausted, scaled_zero
 from sympy.mpmath import inf, ninf, nan
 from sympy.abc import n, x, y
@@ -237,22 +239,18 @@ def test_evalf_relational():
     assert Eq(x/5, y/10).evalf() == Eq(0.2*x, 0.1*y)
 
 def test_issue_2387():
-    assert not cos(sqrt(0.5 + I)).n().is_Function
+    assert not isinstance(cos(sqrt(0.5 + I)).n(), Function)
 
 def test_issue_2387_bug():
-    from sympy import I, Expr
     assert abs(Expr._from_mpmath(I._to_mpmath(15), 15) - I) < 1.0e-15
 
 def test_bugs():
-    from sympy import polar_lift, re
-
     assert abs(re((1+I)**2)) < 1e-15
 
     # anything that evalf's to 0 will do in place of polar_lift
     assert abs(polar_lift(0)).n() == 0
 
 def test_subs_bugs():
-    from sympy import besseli
     assert NS('besseli(-x, y) - besseli(x, y)', subs={x:3.5, y:20.0}) == \
            '-4.92535585957223e-10'
     assert NS('Piecewise((x, x>0)) + Piecewise((1-x, x>0))', subs={x:0.1}) == \

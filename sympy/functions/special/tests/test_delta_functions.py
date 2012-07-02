@@ -1,10 +1,8 @@
-from sympy import symbols, DiracDelta, Heaviside, nan, oo, sqrt, pi, conjugate
-
-from sympy.utilities.pytest import raises
-
+from sympy.functions import DiracDelta, Heaviside, sqrt, conjugate
+from sympy.core import I, oo, pi, symbols, Function, nan
 from sympy.core.function import ArgumentIndexError
 
-from sympy.core import I
+from sympy.utilities.pytest import raises
 
 x,y = symbols('x y')
 
@@ -44,8 +42,8 @@ def test_heaviside():
     assert Heaviside(nan) == nan
 
     assert Heaviside(x).diff(x) == DiracDelta(x)
-    assert Heaviside(x+I).is_Function
-    assert Heaviside(I*x).is_Function
+    assert isinstance(Heaviside(x+I), Function)
+    assert isinstance(Heaviside(I*x), Function)
 
     raises(ArgumentIndexError, lambda: Heaviside(x).fdiff(2))
     raises(ValueError, lambda: Heaviside(I))

@@ -6,6 +6,7 @@ from sympy.core.mul import Mul, _keep_coeff
 from sympy.core.power import Pow
 from sympy.core.basic import Basic, preorder_traversal
 from sympy.core.expr import Expr
+from sympy.core.function import Function
 from sympy.core.sympify import sympify
 from sympy.core.numbers import Rational, Integer
 from sympy.core.singleton import S
@@ -568,7 +569,8 @@ def factor_terms(expr, radical=False, clear=False, fraction=False):
                 fraction=fraction) for i in expr])
         return expr
 
-    if expr.is_Pow or expr.is_Function or is_iterable or not hasattr(expr, 'args_cnc'):
+    if (isinstance(expr, (Pow, Function)) or is_iterable or
+            not hasattr(expr, 'args_cnc')):
         args = expr.args
         newargs = tuple([factor_terms(i,
             radical=radical,

@@ -49,7 +49,7 @@ class re(Function):
             return arg
         elif arg.is_imaginary:
             return S.Zero
-        elif arg.is_Function and arg.func == conjugate:
+        elif isinstance(arg, conjugate):
             return re(arg.args[0])
         else:
 
@@ -144,7 +144,7 @@ class im(Function):
             return S.Zero
         elif arg.is_imaginary:
             return -S.ImaginaryUnit * arg
-        elif arg.is_Function and arg.func == conjugate:
+        elif isinstance(arg, conjugate):
             return -im(arg.args[0])
         else:
             included, reverted, excluded = [], [], []
@@ -226,8 +226,8 @@ class sign(Function):
 
     Abs, conjugate
     """
-
     nargs = 1
+    is_bounded = True
 
     def doit(self):
         if self.args[0].is_nonzero:
@@ -244,9 +244,8 @@ class sign(Function):
             return S.One
         if arg.is_negative:
             return S.NegativeOne
-        if arg.is_Function:
-            if arg.func is sign:
-                return arg
+        if isinstance(arg, sign):
+            return arg
         if arg.is_imaginary:
             arg2 = -S.ImaginaryUnit * arg
             if arg2.is_positive:
@@ -272,8 +271,6 @@ class sign(Function):
             return (S.NegativeOne if is_neg else S.One) \
                 * (S.ImaginaryUnit if is_imag else S.One) \
                 * cls(arg._new_rawargs(*unk))
-
-    is_bounded = True
 
     def _eval_Abs(self):
         if self.args[0].is_nonzero:
