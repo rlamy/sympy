@@ -5,7 +5,6 @@ from sympify import sympify
 from singleton import S
 from expr import Expr, AtomicExpr
 from cache import cacheit
-from function import FunctionClass
 from sympy.core.logic import fuzzy_bool
 from sympy.logic.boolalg import Boolean
 from sympy.utilities.exceptions import SymPyDeprecationWarning
@@ -399,6 +398,7 @@ def var(names, **args):
     arguments can be passed to :func:`var`.
 
     """
+    from sympy.core.function import FunctionClass
     def traverse(symbols, frame):
         """Recursively inject symbols to the global namespace. """
         for symbol in symbols:

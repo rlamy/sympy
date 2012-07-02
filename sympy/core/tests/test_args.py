@@ -149,8 +149,8 @@ def test_sympy__core__expr__Expr():
     from sympy.core.expr import Expr
     assert _test_args(Expr())
 
-def test_sympy__core__function__Application():
-    from sympy.core.function import Application
+def test_sympy__core__callable__Application():
+    from sympy.core.callable import Application
     assert _test_args(Application(1, 2, 3))
 
 def test_sympy__core__function__AppliedUndef():

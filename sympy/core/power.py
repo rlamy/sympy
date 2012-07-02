@@ -3,7 +3,6 @@ from math import log as _log
 from sympify import _sympify
 from cache import cacheit
 from core import C
-from sympy.core.function import _coeff_isneg, expand_complex
 from singleton import S
 from expr import Expr
 
@@ -267,16 +266,17 @@ class Pow(Expr):
         return b, e
 
     def _eval_conjugate(self):
-        from sympy.functions.elementary.complexes import conjugate as c
-        i, p = self.exp.is_integer, self.base.is_positive
-        if i:
-            return c(self.base)**self.exp
-        if p:
-            return self.base**c(self.exp)
-        if i is False and p is False:
+        from sympy.functions.elementary.complexes import conjugate
+        from sympy.core.function import expand_complex
+        integer, positive = self.exp.is_integer, self.base.is_positive
+        if integer:
+            return conjugate(self.base)**self.exp
+        if positive:
+            return self.base**conjugate(self.exp)
+        if integer is False and positive is False:
             expanded = expand_complex(self)
             if expanded != self:
-                return c(expanded)
+                return conjugate(expanded)
 
     def _eval_expand_basic(self, deep=True, **hints):
         sargs, terms = self.args, []
@@ -677,6 +677,8 @@ class Pow(Expr):
             return True
 
     def as_numer_denom(self):
+        from sympy.core.function import _coeff_isneg
+
         if not self.is_commutative:
             return self, S.One
         base, exp = self.as_base_exp()
