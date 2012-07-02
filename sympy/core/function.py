@@ -239,22 +239,7 @@ class Function(Application, Expr):
     implemented functions for more complete examples.
 
     """
-
-    @property
-    def _diff_wrt(self):
-        """Allow derivatives wrt functions.
-
-        Examples
-        ========
-
-        >>> from sympy import Function, Symbol
-        >>> f = Function('f')
-        >>> x = Symbol('x')
-        >>> f(x)._diff_wrt
-        True
-
-        """
-        return True
+    _diff_wrt = True
 
     @cacheit
     def __new__(cls, *args, **options):
@@ -862,9 +847,6 @@ class Derivative(Expr):
         >>> diff(f(x), x, 1).diff(diff(f(x), x, 2))
         0
 
-    Note, any class can allow derivatives to be taken with respect to itself.
-    See the docstring of Expr._diff_wrt.
-
     Examples
     ========
 
@@ -910,10 +892,7 @@ class Derivative(Expr):
             >>> Derivative(x**2,x)._diff_wrt
             False
         """
-        if self.expr.is_Function:
-            return True
-        else:
-            return False
+        return self.expr.is_Function
 
     def __new__(cls, expr, *variables, **assumptions):
         expr = sympify(expr)

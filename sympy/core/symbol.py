@@ -27,26 +27,11 @@ class Symbol(AtomicExpr, Boolean):
     True
 
     """
-
-    is_comparable = False
-
     __slots__ = ['name']
 
+    is_comparable = False
     is_Symbol = True
-
-    @property
-    def _diff_wrt(self):
-        """Allow derivatives wrt Symbols.
-
-        Examples
-        ========
-
-            >>> from sympy import Symbol
-            >>> x = Symbol('x')
-            >>> x._diff_wrt
-            True
-        """
-        return True
+    _diff_wrt = True
 
     def __new__(cls, name, **assumptions):
         """Symbols are identified by name and assumptions::
