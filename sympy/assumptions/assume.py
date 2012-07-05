@@ -44,13 +44,6 @@ class AppliedPredicate(Boolean):
     <class 'sympy.assumptions.assume.AppliedPredicate'>
 
     """
-    __slots__ = []
-
-    def __new__(cls, predicate, arg):
-        return Boolean.__new__(cls, predicate, arg)
-
-    is_Atom = True # do not attempt to decompose this
-
     @property
     def arg(self):
         """
@@ -75,14 +68,6 @@ class AppliedPredicate(Boolean):
     @property
     def func(self):
         return self._args[0]
-
-    def __eq__(self, other):
-        if type(other) is AppliedPredicate:
-            return self._args == other._args
-        return False
-
-    def __hash__(self):
-        return super(AppliedPredicate, self).__hash__()
 
     def _eval_ask(self, assumptions):
         return self.func.eval(self.arg, assumptions)
