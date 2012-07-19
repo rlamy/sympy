@@ -42,3 +42,7 @@ def test_composite_predicates():
     pred = Q.integer | ~Q.positive
     assert type(pred(x)) is Or
     assert pred(x) == Q.integer(x) | ~Q.positive(x)
+
+def test_subs():
+    assert Q.integer(x).subs(Q.integer, Q.real) == Q.real(x)
+    assert Q.integer(x).subs(x, x + 1) == Q.integer(x + 1)
