@@ -6,8 +6,8 @@ class ConflictingDefinitions(TypeError):
     pass
 
 class binary_operation(object):
-    def __init__(self):
-        self.default = None
+    def __init__(self, default=None):
+        self.default = default
         self.dispatcher = {}
 
     def __call__(self, x, y):
