@@ -28,13 +28,6 @@ class Higher(Expr):
     def __rsub__(self, other):
         return self.result
 
-    @call_highest_priority('__rpow__')
-    def __pow__(self, other):
-        return self.result
-    @call_highest_priority('__pow__')
-    def __rpow__(self, other):
-        return self.result
-
     @call_highest_priority('__rdiv__')
     def __div__(self, other):
         return self.result
@@ -73,15 +66,6 @@ def test_sub():
     assert l-h == h-l == 'high'
     assert x-h == h-x == 'high'
     assert l-x == -(x-l) != 'low'
-
-def test_pow():
-    x = Symbol('x')
-    h = Higher()
-    l = Lower()
-    assert l**h == h**l == 'high'
-    assert x**h == h**x == 'high'
-    assert l**x != 'low'
-    assert x**l != 'low'
 
 def test_div():
     x = Symbol('x')

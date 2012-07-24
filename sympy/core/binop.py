@@ -45,3 +45,7 @@ class binary_operation(object):
             self[left_type, right_type] = func
             return func
         return decorate
+
+@binary_operation
+def power(x, y):
+    raise TypeError

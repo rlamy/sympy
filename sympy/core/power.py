@@ -6,6 +6,7 @@ from core import C
 from sympy.core.function import _coeff_isneg, expand_complex
 from singleton import S
 from expr import Expr
+from sympy.core.binop import power
 
 from sympy import mpmath
 from sympy.utilities.iterables import sift
@@ -1013,6 +1014,10 @@ class Pow(Expr):
             return None
 
         return e.equals(0)
+
+@power.define(Expr, Expr)
+def _power_basecase(x, y):
+    return Pow(x, y)
 
 from add import Add
 from numbers import Integer

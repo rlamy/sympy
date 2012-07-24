@@ -6,6 +6,7 @@ from evalf import EvalfMixin, pure_complex
 from decorators import _sympifyit, call_highest_priority
 from cache import cacheit
 from compatibility import reduce
+from sympy.core.binop import power
 from sympy.mpmath.libmp import mpf_log, prec_to_dps
 
 from collections import defaultdict
@@ -150,13 +151,12 @@ class Expr(Basic, EvalfMixin):
         return Mul(other, self)
 
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rpow__')
     def __pow__(self, other):
-        return Pow(self, other)
+        return power(self, other)
+
     @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__pow__')
     def __rpow__(self, other):
-        return Pow(other, self)
+        return power(other, self)
 
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__rdiv__')
