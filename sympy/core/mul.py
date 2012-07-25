@@ -9,6 +9,16 @@ from cache import cacheit
 from logic import fuzzy_not
 from compatibility import cmp_to_key
 
+def _canonicalize_rat_power(base, exp):
+    """Return int_pow, e_frac so that base**exp == int_pow * base**e_frac"""
+    if exp.q == 1:
+        return Pow(base, exp), S.Zero
+    elif exp.p > exp.q:
+        e_int, e_rest = divmod(exp.p, exp.q)
+        return Pow(base, e_int), Rational(e_rest, exp.q)
+    else:
+        return S.One, exp
+
 # internal marker to indicate:
 #   "there are still non-commutative objects -- don't forget to process them"
 class NC_Marker:
@@ -386,14 +396,10 @@ class Mul(AssocOp):
         num_rat = []
         for e, b in comb_e.iteritems():
             b = Mul(*b)
-            if e.q == 1:
-                coeff *= Pow(b, e)
-                continue
-            if e.p > e.q:
-                e_i, ep = divmod(e.p, e.q)
-                coeff *= Pow(b, e_i)
-                e = Rational(ep, e.q)
-            num_rat.append((b, e))
+            i_part, e = _canonicalize_rat_power(b, e)
+            coeff *= i_part
+            if e is not S.Zero:
+                num_rat.append((b, e))
         del comb_e
 
         # extract gcd of bases in num_rat
@@ -409,14 +415,9 @@ class Mul(AssocOp):
                 if g != 1:
                     # 4**r1*6**r2 -> 2**(r1+r2)  *  2**r1 *  3**r2
                     # this might have a gcd with something else
-                    e = ei + ej
-                    if e.q == 1:
-                        coeff *= Pow(g, e)
-                    else:
-                        if e.p > e.q:
-                            e_i, ep = divmod(e.p, e.q) # change e in place
-                            coeff *= Pow(g, e_i)
-                            e = Rational(ep, e.q)
+                    i_part, e = _canonicalize_rat_power(g, ei + ej)
+                    coeff *= i_part
+                    if e is not S.Zero:
                         grow.append((g, e))
                     # update the jth item
                     num_rat[j] = (bj//g, ej)
