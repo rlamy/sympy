@@ -38,3 +38,10 @@ class binary_operation(object):
             return self.default
         else:
             raise ConflictingDefinitions(candidates)
+
+    def define(self, left_type, right_type):
+        """ Help defining implementations of the operation."""
+        def decorate(func):
+            self[left_type, right_type] = func
+            return func
+        return decorate
