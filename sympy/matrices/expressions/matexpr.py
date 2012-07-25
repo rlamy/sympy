@@ -2,6 +2,8 @@ from sympy import Expr, Symbol, Mul, Add, Pow, expand, sympify, Tuple, Integer
 from sympy.core.basic import Basic
 from sympy.core.singleton import S
 from sympy.core.decorators import _sympifyit, call_highest_priority
+from sympy.core.binop import power
+from sympy.core.numbers import NegativeOne
 from sympy.matrices import ShapeError, Matrix
 
 class MatrixExpr(Expr):
@@ -63,16 +65,6 @@ class MatrixExpr(Expr):
     def __rmul__(self, other):
         return MatMul(other, self)
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rpow__')
-    def __pow__(self, other):
-        if other == -S.One:
-            return Inverse(self)
-        return MatPow(self, other)
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__pow__')
-    def __rpow__(self, other):
-        raise NotImplementedError("Matrix Power not defined")
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__rdiv__')
     def __div__(self, other):
@@ -196,6 +188,18 @@ class MatrixExpr(Expr):
         True
         """
         return self.as_explicit().equals(other)
+
+@power.define(MatrixExpr, Expr)
+def _pow_MatrixExpr(mat, n):
+    return MatPow(mat, n)
+
+@power.define(MatrixExpr, NegativeOne)
+def _inverse_MatrixExpr(mat, n):
+    return Inverse(mat)
+
+@power.define(Expr, MatrixExpr)
+def _pow_Expr_MatrixExpr(n, mat):
+    raise NotImplementedError("Matrix Power not defined")
 
 class MatrixSymbol(MatrixExpr, Symbol):
     """Symbolic representation of a Matrix object
