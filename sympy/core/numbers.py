@@ -5,6 +5,7 @@ from singleton import S, Singleton
 from expr import Expr, AtomicExpr
 from decorators import _sympifyit, deprecated
 from cache import cacheit, clear_cache
+from sympy.core.binop import power
 import sympy.mpmath as mpmath
 import sympy.mpmath.libmp as mlib
 from sympy.mpmath.libmp import mpf_pow, mpf_pi, mpf_e, phi_fixed
@@ -1824,6 +1825,10 @@ class Zero(IntegerConstant):
 
     def __nonzero__(self):
         return False
+
+@power.define(Expr, Zero)
+def _pow_Expr_Zero(x, zero):
+    return S.One
 
 class One(IntegerConstant):
     __metaclass__ = Singleton
