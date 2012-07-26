@@ -161,11 +161,11 @@ class Expr(Basic, EvalfMixin):
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__rdiv__')
     def __div__(self, other):
-        return Mul(self, Pow(other, S.NegativeOne))
+        return Mul(self, other**S.NegativeOne)
     @_sympifyit('other', NotImplemented)
     @call_highest_priority('__div__')
     def __rdiv__(self, other):
-        return Mul(other, Pow(self, S.NegativeOne))
+        return Mul(other, self**S.NegativeOne)
 
     __truediv__ = __div__
     __rtruediv__ = __rdiv__

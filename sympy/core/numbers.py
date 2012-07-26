@@ -2328,11 +2328,6 @@ class NaN(Number):
 
 nan = S.NaN
 
-@power.define(NaN, Expr)
-@power.define(Expr, NaN)
-def _pow_nan(x, y):
-    return nan
-
 class ComplexInfinity(AtomicExpr):
     __metaclass__ = Singleton
 
@@ -2381,6 +2376,14 @@ def _pow_Expr_One(x, one):
 def _pow_One_Expr(one, x):
     return one
 
+@power.define(NaN, Expr)
+@power.define(Expr, NaN)
+def _pow_nan(x, y):
+    return nan
+
+@power.define(NaN, Zero)
+def _pow_nan_zero(x, y):
+    return One()
 
 class NumberSymbol(AtomicExpr):
     __metaclass__ = Singleton
