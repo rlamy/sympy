@@ -12,10 +12,10 @@ from compatibility import cmp_to_key
 def _canonicalize_rat_power(base, exp):
     """Return int_pow, e_frac so that base**exp == int_pow * base**e_frac"""
     if exp.q == 1:
-        return Pow(base, exp), S.Zero
+        return base**exp, S.Zero
     elif exp.p > exp.q:
         e_int, e_rest = divmod(exp.p, exp.q)
-        return Pow(base, e_int), Rational(e_rest, exp.q)
+        return base**e_int, Rational(e_rest, exp.q)
     else:
         return S.One, exp
 
@@ -366,13 +366,11 @@ class Mul(AssocOp):
         #  0             1
         # x  -> 1       x  -> x
         for b, e in c_powers:
-            if e is S.One:
-                if b.is_Number:
-                    coeff *= b
-                else:
-                    c_part.append(b)
-            elif e is not S.Zero:
-                c_part.append(Pow(b, e))
+            term = b**e
+            if term.is_Number:
+                coeff *= term
+            else:
+                c_part.append(term)
 
         #  x    x     x
         # 2  * 3  -> 6
@@ -382,7 +380,8 @@ class Mul(AssocOp):
             inv_exp_dict.setdefault(e, []).append(b)
         for e, b in inv_exp_dict.items():
             inv_exp_dict[e] = Mul(*b)
-        c_part.extend([Pow(b, e) for e, b in inv_exp_dict.iteritems() if e])
+        c_part.extend([b**e for e, b in inv_exp_dict.iteritems()
+                if e is not S.Zero])
 
         # b, e -> e' = sum(e), b
         # {(1/5, [1/3]), (1/2, [1/12, 1/4]} -> {(1/3, [1/5, 1/2])}
@@ -426,7 +425,7 @@ class Mul(AssocOp):
                     if bi is S.One:
                         break
             if bi is not S.One:
-                obj = Pow(bi, ei)
+                obj = bi**ei
                 if obj.is_Number:
                     coeff *= obj
                 else:
@@ -446,8 +445,8 @@ class Mul(AssocOp):
 
         # see if there is a base with matching coefficient
         # that the -1 can be joined with
-        if neg1e:
-            p = Pow(S.NegativeOne, neg1e)
+        if neg1e is not S.Zero:
+            p = S.NegativeOne**neg1e
             if p.is_Number:
                 coeff *= p
             else:
@@ -463,7 +462,7 @@ class Mul(AssocOp):
                     c_part.append(p)
 
         # add all the pnew powers
-        c_part.extend([Pow(b, e) for e, b in pnew.iteritems()])
+        c_part.extend([b**e for e, b in pnew.iteritems()])
 
         # oo, -oo
         if (coeff is S.Infinity) or (coeff is S.NegativeInfinity):
@@ -560,7 +559,7 @@ class Mul(AssocOp):
                             if coeff.is_negative and e.is_Rational:
                                 coeff = -coeff
                                 ie = Rational(4*e.q - e.p, 2*e.q)
-                                done.append(Pow(-1, ie))
+                                done.append((-1)**ie)
                             else:
                                 done.append(i**e)
 
@@ -574,7 +573,7 @@ class Mul(AssocOp):
                         bc[0] = -bc[0]
                     if coeff is S.One:
                         return None
-                    return Mul(*([Pow(coeff, e), Pow(Mul(*bc), e)] + done))
+                    return Mul(*([coeff**e, Mul(*bc)**e] + done))
 
                 # otherwise return the new expression expanding out the
                 # known terms; those that are not known can be expanded
@@ -592,11 +591,11 @@ class Mul(AssocOp):
                     if len(neg) % 2:
                         unk.append(S.NegativeOne)
 
-                done.extend([Pow(s, e) for s in nonneg + neg + [coeff, Mul(*unk)]])
+                done.extend([s**e for s in nonneg + neg + [coeff, Mul(*unk)]])
                 return Mul(*done)
 
         if e.is_even and coeff.is_negative:
-            return Pow(-coeff, e)*Pow(b, e)
+            return (-coeff)**e * b**e
 
     @classmethod
     def class_key(cls):
@@ -1187,7 +1186,7 @@ class Mul(AssocOp):
                 (b, e) = base_exp(a)
                 if e is not S.One:
                     (co, _) = e.as_coeff_mul()
-                    b = Pow(b, e/co)
+                    b = b**(e/co)
                     e = co
                 if a.is_commutative:
                     c[b] += e
@@ -1203,7 +1202,7 @@ class Mul(AssocOp):
             """
 
             (b, e) = base_exp(b)
-            return Pow(b, e*co)
+            return b**(e*co)
 
         def ndiv(a, b):
             """if b divides a in an extractive way (like 1/4 divides 1/2
@@ -1335,8 +1334,8 @@ class Mul(AssocOp):
                         if take == 1:
                             if cdid:
                                 ndo = min(cdid, ndo)
-                            nc[i] = Pow(new, ndo)*rejoin(nc[i][0],
-                                    nc[i][1] - ndo*old_nc[0][1])
+                            nc[i] = (new**ndo *
+                                rejoin(nc[i][0], nc[i][1] - ndo*old_nc[0][1]))
                         else:
                             ndo = 1
 
@@ -1413,7 +1412,7 @@ class Mul(AssocOp):
             # we want the new term to come at the front just like the
             # rest of this routine
 
-            margs = [Pow(new, cdid)] + margs
+            margs = [new**cdid] + margs
         return Mul(*margs)*Mul(*nc)
 
     def _eval_nseries(self, x, n, logx):

@@ -404,7 +404,7 @@ class Pow(Expr):
             exp = e
 
         if e is not None or b is not None:
-            result = Pow(base, exp)
+            result = base**exp
 
             if result.is_Pow:
                 base, exp = result.base, result.exp
@@ -418,11 +418,11 @@ class Pow(Expr):
                 n = Integer(exp.p // exp.q)
 
                 if not n:
-                    return Pow(base, exp)
+                    return base**exp
                 else:
-                    radical, result = Pow(base, exp - n), []
+                    radical, result = base**(exp - n), []
 
-                    for term in Add.make_args(Pow(base, n)._eval_expand_multinomial(deep=False)):
+                    for term in Add.make_args((base**n)._eval_expand_multinomial(deep=False)):
                         result.append(term*radical)
 
                     return Add(*result)
@@ -453,13 +453,13 @@ class Pow(Expr):
                     if a.is_Rational and b.is_Rational:
                         if not a.is_Integer:
                             if not b.is_Integer:
-                                k = Pow(a.q * b.q, n)
+                                k = (a.q * b.q)**n
                                 a, b = a.p*b.q, a.q*b.p
                             else:
-                                k = Pow(a.q, n)
+                                k = a.q**n
                                 a, b = a.p, a.q*b
                         elif not b.is_Integer:
-                            k = Pow(b.q, n)
+                            k = b.q**n
                             a, b = a*b.q, b.p
                         else:
                             k = 1
@@ -520,11 +520,11 @@ class Pow(Expr):
 
             for term in exp.args:
                 if term.is_Number:
-                    coeff *= Pow(base, term)
+                    coeff *= base**term
                 else:
                     tail += term
 
-            return coeff * Pow(base, tail)
+            return coeff * base**tail
         else:
             return result
 
