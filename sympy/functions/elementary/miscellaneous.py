@@ -101,8 +101,7 @@ def sqrt(arg):
     * http://en.wikipedia.org/wiki/Principal_value
 
     """
-    # arg = sympify(arg) is handled by Pow
-    return C.Pow(arg, S.Half)
+    return arg**S.Half
 
 
 def root(arg, n):
@@ -180,8 +179,7 @@ def root(arg, n):
     * http://mathworld.wolfram.com/CubeRoot.html
 
     """
-    n = sympify(n)
-    return C.Pow(arg, 1/n)
+    return arg**(S.One/n)
 
 def real_root(arg, n=None):
     """Return the real nth-root of arg if possible. If n is omitted then
@@ -209,7 +207,7 @@ def real_root(arg, n=None):
     """
     if n is not None:
         n = int_tested(n)
-        rv = C.Pow(arg, Rational(1, n))
+        rv = arg**Rational(1, n)
         if n % 2 == 0:
             return rv
     else:

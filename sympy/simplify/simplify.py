@@ -88,7 +88,7 @@ def fraction(expr, exact=False):
                 if ex is S.NegativeOne:
                     denom.append(b)
                 else:
-                    denom.append(Pow(b, -ex))
+                    denom.append(b**(-ex))
             elif ex.is_positive:
                 numer.append(term)
             elif not exact and ex.is_Mul:
@@ -324,17 +324,13 @@ def collect(expr, syms, func=None, evaluate=True, exact=False, distribute_order_
         for term, rat, sym, deriv in terms:
             if deriv is not None:
                 var, order = deriv
-
                 while order > 0:
                     term, order = Derivative(term, var), order-1
 
             if sym is None:
-                if rat is S.One:
-                    product.append(term)
-                else:
-                    product.append(Pow(term, rat))
+                product.append(term**rat)
             else:
-                product.append(Pow(term, rat*sym))
+                product.append(term**(rat*sym))
 
         return Mul(*product)
 
@@ -482,7 +478,7 @@ def collect(expr, syms, func=None, evaluate=True, exact=False, distribute_order_
             return Mul(*[ collect(term, syms, func, True, exact, distribute_order_term) for term in expr.args ])
         elif expr.is_Pow:
             b = collect(expr.base, syms, func, True, exact, distribute_order_term)
-            return Pow(b, expr.exp)
+            return b**(expr.exp)
 
     if iterable(syms):
         syms = map(separate, syms)
@@ -527,7 +523,7 @@ def collect(expr, syms, func=None, evaluate=True, exact=False, distribute_order_
                         e = elem[1]
                         if elem[2] is not None:
                             e *= elem[2]
-                        index *= Pow(elem[0], e)
+                        index *= elem[0]**e
                 else:
                     index = make_expression(elems)
                 terms = separate(make_expression(terms))
@@ -666,7 +662,7 @@ def _separatevars(expr, force):
 
     # get a Pow ready for expansion
     if expr.is_Pow:
-        expr = Pow(separatevars(expr.base, force=force), expr.exp)
+        expr = separatevars(expr.base, force=force)**expr.exp
 
     # First try other expansion methods
     expr = expr.expand(mul=False, multinomial=False, force=force)
@@ -1650,7 +1646,7 @@ def _denest_pow(eq):
             else:
                 other.append(ei)
         logs = logcombine(Mul(*logs))
-        return Pow(exp(logs), Mul(*other))
+        return exp(logs)**Mul(*other)
 
     _, be = b.as_base_exp()
     if be is S.One and not (b.is_Mul or
@@ -1668,7 +1664,7 @@ def _denest_pow(eq):
         else:
             nonpolars.append(bb)
     if len(polars) == 1 and not polars[0][0].is_Mul:
-        return Pow(polars[0][0], polars[0][1]*e)*powdenest(Mul(*nonpolars)**e)
+        return polars[0][0]**(polars[0][1]*e) * powdenest(Mul(*nonpolars)**e)
     elif polars:
         return Mul(*[powdenest(bb**(ee*e)) for (bb, ee) in polars]) \
                *powdenest(Mul(*nonpolars)**e)
@@ -1691,7 +1687,7 @@ def _denest_pow(eq):
                     c, logk = logkernel.args
                     e *= c
                     kernel = logk.args[0]
-            return Pow(kernel, e)
+            return kernel**e
 
     # if any factor is an atom then there is nothing to be done
     # but the kernel check may have created a new exponent
@@ -1726,7 +1722,7 @@ def _denest_pow(eq):
         if glogb.args[0].is_Pow or glogb.args[0].func is exp:
             glogb = _denest_pow(glogb.args[0])
             if (abs(glogb.exp) < 1) is True:
-                return Pow(glogb.base, glogb.exp*e)
+                return glogb.base**glogb.exp*e
         return eq
 
     # the log(b) was a Mul so join any adds with logcombine
@@ -1737,7 +1733,7 @@ def _denest_pow(eq):
             add.append(a)
         else:
             other.append(a)
-    return Pow(exp(logcombine(Mul(*add))), e*Mul(*other))
+    return exp(logcombine(Mul(*add)))**(e*Mul(*other))
 
 def powdenest(eq, force=False, polar=False):
     r"""
@@ -1971,7 +1967,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
                     b2, e2 = term.as_base_exp()
                     if (b1 == b2 and
                         e1.is_commutative and e2.is_commutative):
-                        nc_part[-1] = Pow(b1, Add(e1, e2))
+                        nc_part[-1] = b1**(e1 + e2)
                         continue
                 nc_part.append(term)
 
@@ -2142,7 +2138,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
         # ==============================================================
 
         # rebuild the expression
-        newexpr = Mul(*(newexpr + [Pow(b, e) for b, e in c_powers.iteritems()]))
+        newexpr = Mul(*(newexpr + [b**e for b, e in c_powers.iteritems()]))
         if combine == 'exp':
             return Mul(newexpr, Mul(*nc_part))
         else:
@@ -2166,7 +2162,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
                     b1, e1 = nc_part[-1].as_base_exp()
                     b2, e2 = term.as_base_exp()
                     if (e1 == e2 and e2.is_commutative):
-                        nc_part[-1] = Pow(Mul(b1, b2), e1)
+                        nc_part[-1] = (b1 * b2)**e1
                         continue
                 nc_part.append(term)
 
@@ -2178,7 +2174,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
                 continue
             exp_c, exp_t = e.as_coeff_Mul(rational=True)
             if exp_c is not S.One and exp_t is not S.One:
-                c_powers[i] = [Pow(b, exp_c), exp_t]
+                c_powers[i] = [b**exp_c, exp_t]
 
 
         # Combine bases whenever they have the same exponent and
@@ -2248,7 +2244,7 @@ def powsimp(expr, deep=False, combine='all', force=False, measure=count_ops):
             c_powers[new_base].append(e)
 
         # break out the powers from c_powers now
-        c_part = [Pow(b, ei) for b, e in c_powers.iteritems() for ei in e]
+        c_part = [b**ei for b, e in c_powers.iteritems() for ei in e]
 
         # we're done
         return Mul(*(c_part + nc_part))
@@ -2627,7 +2623,6 @@ def combsimp(expr):
         # or S1 == S2 == emptyset)
         inv = {}
         def compute_ST(expr):
-            from sympy import Function, Pow
             if expr in inv:
                 return inv[expr]
             return (expr.free_symbols, expr.atoms(Function).union(
@@ -3001,7 +2996,7 @@ def _real_to_rational(expr):
                 newr *= s
             else:
                 s = 1
-            d = Pow(10, int((mpmath.log(newr)/mpmath.log(10))))
+            d = 10**int((mpmath.log(newr)/mpmath.log(10)))
             newr = s*Rational(str(newr/d))*d
         reps[r] = newr
     return p.subs(reps, simultaneous=True)

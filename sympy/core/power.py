@@ -696,7 +696,7 @@ class Pow(Expr):
         if neg_exp:
             n, d = d, n
             exp = -exp
-        return Pow(n, exp), Pow(d, exp)
+        return n**exp, d**exp
 
     def matches(self, expr, repl_dict={}):
         expr = _sympify(expr)
