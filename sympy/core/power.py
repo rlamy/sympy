@@ -78,16 +78,9 @@ class Pow(Expr):
         b = _sympify(b)
         e = _sympify(e)
         if evaluate:
-            if e is S.One:
-                return b
-            elif S.NaN in (e, b):
-                if b is S.One or e is S.Zero:
-                    return S.One
-                return S.NaN
-            else:
-                obj = b._eval_power(e)
-                if obj is not None:
-                    return obj
+            obj = b._eval_power(e)
+            if obj is not None:
+                return obj
         obj = Expr.__new__(cls, b, e)
         obj.is_commutative = (b.is_commutative and e.is_commutative)
         return obj

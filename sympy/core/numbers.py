@@ -1846,9 +1846,6 @@ class One(IntegerConstant):
     def __neg__():
         return S.NegativeOne
 
-    def _eval_power(self, expt):
-        return self
-
     def _eval_order(self, *symbols):
         return
 
@@ -2331,6 +2328,11 @@ class NaN(Number):
 
 nan = S.NaN
 
+@power.define(NaN, Expr)
+@power.define(Expr, NaN)
+def _pow_nan(x, y):
+    return nan
+
 class ComplexInfinity(AtomicExpr):
     __metaclass__ = Singleton
 
@@ -2366,6 +2368,19 @@ class ComplexInfinity(AtomicExpr):
                     return S.Zero
 
 zoo = S.ComplexInfinity
+
+
+@power.define(Expr, One)
+def _pow_Expr_One(x, one):
+    return x
+
+@power.define(One, Expr)
+@power.define(One, NaN)
+@power.define(One, One)
+@power.define(One, Zero)
+def _pow_One_Expr(one, x):
+    return one
+
 
 class NumberSymbol(AtomicExpr):
     __metaclass__ = Singleton
