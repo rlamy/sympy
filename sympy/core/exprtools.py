@@ -48,7 +48,7 @@ def decompose_power(expr):
     if exp.is_Number:
         if exp.is_Rational:
             if not exp.is_Integer:
-                base = Pow(base, Rational(1, exp.q))
+                base = base**Rational(1, exp.q)
 
             exp = exp.p
         else:
@@ -57,10 +57,10 @@ def decompose_power(expr):
         exp, tail = exp.as_coeff_Mul(rational=True)
 
         if exp is S.NegativeOne:
-            base, exp = Pow(base, tail), -1
+            base, exp = base**tail, -1
         elif exp is not S.One:
             tail = _keep_coeff(Rational(1, exp.q), tail)
-            base, exp = Pow(base, tail), exp.p
+            base, exp = base**tail, exp.p
         else:
             base, exp = expr, 1
 

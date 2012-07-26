@@ -108,7 +108,7 @@ class Dagger(Expr):
                 if arg.is_Mul:
                     return Mul(*[Dagger(i) for i in reversed(arg.args)])
                 if arg.is_Pow:
-                    return Pow(Dagger(arg.args[0]),arg.args[1])
+                    return Dagger(arg.args[0])**arg.args[1]
                 else:
                     if arg.is_Number \
                                      or arg.is_Function or arg.is_Derivative\

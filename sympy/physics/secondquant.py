@@ -128,7 +128,7 @@ class Dagger(Expr):
                 if arg.is_Number:
                     return arg
                 if arg.is_Pow:
-                    return Pow(Dagger(arg.args[0]),arg.args[1])
+                    return Dagger(arg.args[0])**arg.args[1]
                 if arg == I:
                     return -arg
             else:

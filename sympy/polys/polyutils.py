@@ -157,7 +157,7 @@ def _parallel_dict_from_expr_if_gens(exprs, opt):
                         base, exp = decompose_power(factor)
 
                         if exp < 0:
-                            exp, base = -exp, Pow(base, -S.One)
+                            exp, base = -exp, base**S.NegativeOne
 
                         monom[indices[base]] = exp
                     except KeyError:
@@ -210,7 +210,7 @@ def _parallel_dict_from_expr_no_gens(exprs, opt):
                     base, exp = decompose_power(factor)
 
                     if exp < 0:
-                        exp, base = -exp, Pow(base, -S.One)
+                        exp, base = -exp, base**S.NegativeOne
 
                     elements[base] = exp
                     gens.add(base)

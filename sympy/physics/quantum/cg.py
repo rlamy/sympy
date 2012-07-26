@@ -437,7 +437,7 @@ def cg_simp(e):
     elif isinstance(e, Mul):
         return Mul(*[cg_simp(arg) for arg in e.args])
     elif isinstance(e, Pow):
-        return Pow(cg_simp(e.base), e.exp)
+        return cg_simp(e.base)**e.exp
     else:
         return e
 

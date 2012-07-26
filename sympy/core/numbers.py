@@ -916,8 +916,8 @@ class Rational(Number):
                     p = [1, -1][neg_pow]*int("".join(str(x) for x in digits))
                     if expt > 0:
                         # TODO: this branch needs a test
-                        return Rational(p*Pow(10, expt), 1)
-                    return Rational(p, Pow(10, -expt))
+                        return Rational(p*(10**expt), 1)
+                    return Rational(p, 10**-expt)
                 except decimal.InvalidOperation:
                     f = regex.match('^([-+]?[0-9]+)/([0-9]+)$', p)
                     if f:
@@ -1624,16 +1624,16 @@ class Integer(Rational):
             return
         if expt is S.Half and self < 0:
             # we extract I for this special case since everyone is doing so
-            return S.ImaginaryUnit*Pow(-self, expt)
+            return S.ImaginaryUnit * (-self)**expt
         if expt < 0:
             # invert base and change sign on exponent
             ne = -expt
             if self < 0:
                 if expt.q != 1:
-                    return -(S.NegativeOne)**((expt.p % expt.q) / \
-                            S(expt.q))*Rational(1, -self)**ne
+                    return (-(S.NegativeOne)**((expt.p % expt.q) / S(expt.q)) *
+                            Rational(1, -self)**ne)
                 else:
-                    return (S.NegativeOne)**ne*Rational(1, -self)**ne
+                    return S.NegativeOne**ne * Rational(1, -self)**ne
             else:
                 return Rational(1, self.p)**ne
         # see if base is a perfect root, sqrt(4) --> 2
@@ -1675,7 +1675,7 @@ class Integer(Rational):
                 # (2**2)**(1/10) -> 2**(1/5)
                 g = igcd(div_m, expt.q)
                 if g != 1:
-                    out_rad *= Pow(prime, Rational(div_m//g, expt.q//g))
+                    out_rad *= prime**Rational(div_m//g, expt.q//g)
                 else:
                     sqr_dict[prime] = div_m
         # identify gcd of remaining powers
@@ -1691,7 +1691,7 @@ class Integer(Rational):
         if sqr_int == self and out_int == 1 and out_rad == 1:
             result = None
         else:
-            result = out_int*out_rad*Pow(sqr_int, Rational(sqr_gcd, expt.q))
+            result = out_int*out_rad * sqr_int**Rational(sqr_gcd, expt.q)
         return result
 
     def _eval_is_prime(self):
