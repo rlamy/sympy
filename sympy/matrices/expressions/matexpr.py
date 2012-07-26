@@ -3,7 +3,7 @@ from sympy.core.basic import Basic
 from sympy.core.singleton import S
 from sympy.core.decorators import _sympifyit, call_highest_priority
 from sympy.core.binop import power
-from sympy.core.numbers import NegativeOne
+from sympy.core.numbers import NegativeOne, Zero, One
 from sympy.matrices import ShapeError, Matrix
 
 class MatrixExpr(Expr):
@@ -190,8 +190,11 @@ class MatrixExpr(Expr):
         return self.as_explicit().equals(other)
 
 @power.define(MatrixExpr, Expr)
+@power.define(MatrixExpr, Zero)
 def _pow_MatrixExpr(mat, n):
     return MatPow(mat, n)
+
+power[MatrixExpr, One] = power[Expr, One]
 
 @power.define(MatrixExpr, NegativeOne)
 def _inverse_MatrixExpr(mat, n):
