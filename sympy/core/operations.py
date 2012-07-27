@@ -198,7 +198,7 @@ class AssocOp(Expr):
         for last_op in reversed(expr_list):
             for w in reversed(wild_part):
                 d1 = w.matches(last_op, repl_dict)
-                if d1 is not None:
+                if d1 is not None and d1 != repl_dict:
                     d2 = self.xreplace(d1).matches(expr, d1)
                     if d2 is not None:
                         return d2
