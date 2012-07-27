@@ -44,6 +44,9 @@ def test_trigonometric():
 
 def test_powers():
     x, y = symbols('x,y')
+    assert (x**y).subs(y, 0) == 1
+    assert (x**y).subs(y, 1) == x
+    assert (x**y).subs(y, 2) == x**2
     assert sqrt(1 - sqrt(x)).subs(x, 4) == I
     assert (sqrt(1 - x**2)**3).subs(x, 2) == - 3*I*sqrt(3)
     assert (x**Rational(1, 3)).subs(x, 27) == 3

@@ -245,6 +245,10 @@ class Pow(Expr):
                 pow = coeff1/coeff2
                 if pow == int(pow) or self.base.is_positive:
                     return new**pow # (2**x).subs(exp(x*log(2)), z) -> z
+        base = self.base._subs(old, new)
+        exp = self.exp._subs(old, new)
+        if base is not self.base or exp is not self.exp:
+            return base**exp
 
     def as_base_exp(self):
         """Return base and exp of self unless base is 1/Integer, then return Integer, -exp.
