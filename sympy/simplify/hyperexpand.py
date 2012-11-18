@@ -892,6 +892,31 @@ class MeijerFormulaCollection(object):
             if res is not None:
                 return res
 
+class FunctionalOperator(Expr):
+    """ Base class for linear functional operators. """
+
+class OperatorPolynomial(FunctionalOperator):
+    """ A polynomial applied to an operator """
+
+    def __new__(cls, poly, gen):
+        obj = super(FunctionalOperator, cls).__new__(cls)
+        obj.poly = poly
+        obj.gen = gen
+        return obj
+
+    def apply(self, obj):
+        """
+        Apply ``self`` to the expression ``obj``.
+        """
+        op = self.gen
+        coeffs = self.poly.all_coeffs()
+        coeffs.reverse()
+        r = coeffs[0] * obj
+        for c in coeffs[1:]:
+            obj = op(obj)
+            r += c*obj
+        return r
+
 
 class Operator(object):
     """

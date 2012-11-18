@@ -1,8 +1,9 @@
 """ Unit tests for Hyper_Function"""
 from sympy.core import symbols, Dummy, Tuple, S
 from sympy.functions import hyper
+from sympy.polys import Poly
 
-from sympy.simplify.hyperexpand import Hyper_Function
+from sympy.simplify.hyperexpand import Hyper_Function, OperatorPolynomial
 
 def test_attrs():
     a, b = symbols('a, b', cls=Dummy)
@@ -52,3 +53,9 @@ def test_suitable_origin():
             (2, -S(2)/3))._is_suitable_origin() is True
     assert Hyper_Function((S(1)/2, 1),
             (2, -S(2)/3, S(3)/2))._is_suitable_origin() is True
+
+def test_call_operatorpoly():
+    x = Dummy()
+    poly = Poly(x**2 + 2*x + 1, x)
+    op = OperatorPolynomial(poly, lambda f: f.diff(x))
+    assert op.apply(x**7) == x**7 + 14*x**6 + 42*x**5
