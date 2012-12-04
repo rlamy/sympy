@@ -4,7 +4,6 @@ This file assumes knowledge of Basic and little else.
 """
 from sympy import Basic
 from sympy.utilities.iterables import sift
-from util import new
 
 # Functions that create rules
 
@@ -30,10 +29,10 @@ def rm_id(isid):
         if sum(ids) == 0:           # No identities. Common case
             return expr
         elif sum(ids) != len(ids):  # there is at least one non-identity
-            return new(expr.__class__,
+            return expr.__class__(
                        *[arg for arg, x in zip(expr.args, ids) if not x])
         else:
-            return new(expr.__class__, expr.args[0])
+            return expr.__class__(expr.args[0])
 
     return ident_remove
 
@@ -66,7 +65,7 @@ def glom(key, count, combine):
         counts = dict((k, sum(map(count, args))) for k, args in groups.items())
         newargs = [combine(cnt, mat) for mat, cnt in counts.items()]
         if set(newargs) != set(expr.args):
-            return new(type(expr), *newargs)
+            return type(expr)(*newargs)
         else:
             return expr
 
@@ -83,7 +82,7 @@ def sort(key):
     """
 
     def sort_rl(expr):
-        return new(expr.__class__, *sorted(expr.args, key=key))
+        return expr.__class__(*sorted(expr.args, key=key))
     return sort_rl
 
 def distribute(A, B):
@@ -143,4 +142,4 @@ def flatten(expr):
             args.extend(arg.args)
         else:
             args.append(arg)
-    return new(expr.__class__, *args)
+    return expr.__class__(*args)

@@ -1,6 +1,6 @@
 """ Branching Strategies to Traverse a Tree """
 
-from sympy.rules.util import new, is_leaf
+from sympy.rules.util import is_leaf
 from strat_pure import notempty
 from sympy.core.compatibility import product
 
@@ -13,5 +13,5 @@ def top_down(brule):
                 yield newexpr
             else:
                 for args in product(*map(top_down_rl, newexpr.args)):
-                    yield new(type(newexpr), *args)
+                    yield type(newexpr)(*args)
     return top_down_rl

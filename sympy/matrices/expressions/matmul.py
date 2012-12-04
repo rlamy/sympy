@@ -1,7 +1,7 @@
 from sympy.core import Mul, Add, Basic, sympify
 from sympy.functions import transpose, adjoint
 from sympy.rules import (rm_id, unpack, condition, debug, flatten, exhaust,
-        do_one, new)
+        do_one)
 from sympy.matrices.expressions.matexpr import (MatrixExpr, ShapeError,
         Identity, ZeroMatrix)
 
@@ -108,7 +108,7 @@ def validate(*matrices):
 def newmul(*args):
     if args[0] == 1:
         args = args[1:]
-    return new(MatMul, *args)
+    return MatMul(*args)
 
 def any_zeros(mul):
     if any([arg.is_zero or (arg.is_Matrix and arg.is_ZeroMatrix)
