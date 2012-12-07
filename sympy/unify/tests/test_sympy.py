@@ -1,8 +1,8 @@
-from sympy import Add, Basic, symbols, Mul, And
-from sympy import Wild as ExprWild
+from sympy.core import Add, Basic, symbols, Mul, Wild, FiniteSet
+from sympy.logic import And
 from sympy.unify.core import Compound, Variable
 from sympy.unify.usympy import (deconstruct, construct, unify, is_associative,
-        is_commutative, patternify)
+        is_commutative)
 from sympy.abc import w, x, y, z, n, m, k
 from sympy.utilities.pytest import XFAIL
 
@@ -24,14 +24,14 @@ def test_nested():
 
 def test_unify():
     expr = Basic(1, 2, 3)
-    a, b, c = map(ExprWild, 'abc')
+    a, b, c = map(Wild, 'abc')
     pattern = Basic(a, b, c)
     assert list(unify(expr, pattern, {})) == [{a: 1, b: 2, c: 3}]
     assert list(unify(expr, pattern))     == [{a: 1, b: 2, c: 3}]
 
 def test_s_input():
     expr = Basic(1, 2)
-    a, b = map(ExprWild, 'ab')
+    a, b = map(Wild, 'ab')
     pattern = Basic(a, b)
     assert list(unify(expr, pattern, {})) == [{a: 1, b: 2}]
     assert list(unify(expr, pattern, {a: 5})) == []
@@ -43,7 +43,7 @@ def iterdicteq(a, b):
 
 def test_unify_commutative():
     expr = Add(1, 2, 3, evaluate=False)
-    a, b, c = map(ExprWild, 'abc')
+    a, b, c = map(Wild, 'abc')
     pattern = Add(a, b, c, evaluate=False)
 
     result  = tuple(unify(expr, pattern, {}))
@@ -58,7 +58,7 @@ def test_unify_commutative():
 
 def test_unify_iter():
     expr = Add(1, 2, 3, evaluate=False)
-    a, b, c = map(ExprWild, 'abc')
+    a, b, c = map(Wild, 'abc')
     pattern = Add(a, c, evaluate=False)
     assert is_associative(deconstruct(pattern))
     assert is_commutative(deconstruct(pattern))
@@ -82,22 +82,17 @@ def test_unify_iter():
 def test_hard_match():
     from sympy import sin, cos
     expr = sin(x) + cos(x)**2
-    p, q = map(ExprWild, 'pq')
+    p, q = map(Wild, 'pq')
     pattern = sin(p) + cos(p)**2
     assert list(unify(expr, pattern, {})) == [{p: x}]
 
-def test_patternify():
-    assert deconstruct(patternify(x + y, x)) in (
-            Compound(Add, (Variable(x), y)), Compound(Add, (y, Variable(x))))
-    pattern = patternify(x**2 + y**2, x)
-    assert list(unify(pattern, w**2 + y**2, {})) == [{x: w}]
 
 def test_matrix():
     from sympy import MatrixSymbol
-    X = MatrixSymbol('X', n, n)
     Y = MatrixSymbol('Y', 2, 2)
     Z = MatrixSymbol('Z', 2, 3)
-    p = patternify(X, 'X', n)
+    n = Wild('n')
+    p = MatrixSymbol('X', n, n)
     assert list(unify(p, Y, {})) == [{'X': 'Y', n: 2}]
     assert list(unify(p, Z, {})) == []
 
@@ -119,29 +114,29 @@ def test_non_frankenAdds():
     rebuilt.is_commutative
 
 def test_FiniteSet_commutivity():
-    from sympy import FiniteSet
-    a, b, c, x, y = symbols('a,b,c,x,y')
+    a, b, c = symbols('a, b, c')
+    x, y = map(Wild, 'xy')
     s = FiniteSet(a, b, c)
     t = FiniteSet(x, y)
-    pattern = patternify(t, x, y)
-    assert {x: FiniteSet(a, c), y: b} in tuple(unify(s, pattern))
+    assert {x: FiniteSet(a, c), y: b} in tuple(unify(s, t))
 
 def test_FiniteSet_complex():
-    from sympy import FiniteSet
-    a, b, c, x, y, z = symbols('a,b,c,x,y,z')
+    c, x, y, z = symbols('c, x, y, z')
+    a, b = symbols('a, b', cls=Wild)
     expr = FiniteSet(Basic(1, x), y, Basic(x, z))
     expected = tuple([{b: 1, a: FiniteSet(y, Basic(x, z))},
                       {b: z, a: FiniteSet(y, Basic(1, x))}])
-    pattern = patternify(FiniteSet(a, Basic(x, b)), a, b)
+    pattern = FiniteSet(a, Basic(x, b))
     assert iterdicteq(unify(expr, pattern), expected)
 
-def test_patternify_with_types():
-    a, b, c, x, y = symbols('a,b,c,x,y')
-    pattern = patternify(x + y, x, y, types={x: Mul})
+def test_with_types():
+    a, b, c = symbols('a, b, c')
+    x = Wild('x', properties=[lambda x: isinstance(x, Mul)])
+    y = Wild('y')
     expr = a*b + c
-    assert list(unify(expr, pattern)) == [{x: a*b, y: c}]
+    assert list(unify(expr, x+y)) == [{x: a*b, y: c}]
 
 @XFAIL
 def test_and():
-    pattern = patternify(And(x, y), x, y)
-    str(list(unify((x>0) & (z<3), pattern)))
+    a, b = symbols('a, b', Wild)
+    str(list(unify((x>0) & (z<3), And(a, b))))
