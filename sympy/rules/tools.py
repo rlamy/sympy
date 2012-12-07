@@ -15,4 +15,4 @@ def subs(d):
     >>> subs(mapping)(expr)
     Basic(4, Basic(2, 3), Basic(1, Basic(6, 7)))
     """
-    return top_down(do_one(*map(rl.subs, *zip(*d.items()))))
+    return lambda expr: expr.xreplace(d)
