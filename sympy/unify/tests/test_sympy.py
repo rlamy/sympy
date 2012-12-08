@@ -94,7 +94,7 @@ def test_matrix():
     Y = MatrixSymbol('Y', 2, 2)
     Z = MatrixSymbol('Z', 2, 3)
     n = Wild('n')
-    p = MatrixSymbol('X', n, n)
+    p = MatrixSymbol(Variable('X'), n, n)
     assert list(unify(p, Y, {})) == [{'X': 'Y', n: 2}]
     assert list(unify(p, Z, {})) == []
 
