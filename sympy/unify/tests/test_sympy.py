@@ -7,9 +7,11 @@ from sympy.abc import w, x, y, z, n, m, k
 from sympy.utilities.pytest import XFAIL
 
 def test_deconstruct():
-    expr     = Basic(1, 2, 3)
+    expr = Basic(1, 2, 3)
     expected = Compound(Basic, (1, 2, 3))
     assert deconstruct(expr) == expected
+    a = Wild('a', properties=[lambda x: x.is_positive])
+    assert deconstruct(a) == deconstruct(a)
 
 def test_construct():
     expr     = Compound(Basic, (1, 2, 3))

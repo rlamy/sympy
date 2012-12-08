@@ -4,8 +4,9 @@ See sympy.unify for module level docstring
 See sympy.unify.core for algorithmic docstring """
 
 
-from sympy.core import Basic, Expr, Tuple, Add, Mul, Pow, FiniteSet
-from sympy.core import Wild as ExprWild
+from sympy.core import (Basic, Expr, Tuple, Add, Mul, Pow, FiniteSet,
+        Wild, sympify)
+from sympy.core.sympify import SympifyError
 from sympy.matrices import MatAdd, MatMul, MatrixExpr
 from sympy.core.sets import Union, Intersection, FiniteSet
 from sympy.core.operations import AssocOp, LatticeOp
@@ -36,10 +37,32 @@ def is_commutative(x):
         return _build(x).is_commutative
 
 
+class WildVariable(CondVariable):
+    """
+    Wrapper for a Wild object.
+    """
+    def __init__(self, arg):
+        self.arg = arg
+
+    def valid(self, var):
+        try:
+            reconstructed = sympify(construct(var))
+        except SympifyError:
+            return False
+        return self.arg.matches(reconstructed)
+
+    def __eq__(self, other):
+        return (type(self) == type(other) and
+                self.arg == other.arg)
+
+    def __hash__(self):
+        return hash((type(self), self.arg))
+
+
 def deconstruct(s):
     """ Turn a SymPy object into a Compound """
-    if isinstance(s, ExprWild):
-        return Variable(s)
+    if isinstance(s, Wild):
+        return WildVariable(s)
     if isinstance(s, (Variable, CondVariable)):
         return s
     if not isinstance(s, Basic) or s.is_Atom:
