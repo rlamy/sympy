@@ -1,12 +1,11 @@
 from sympy.simplify.hyperexpand import (ShiftA, ShiftB, UnShiftA, UnShiftB,
-                       MeijerShiftA, MeijerShiftB, MeijerShiftC, MeijerShiftD,
-                       MeijerUnShiftA, MeijerUnShiftB, MeijerUnShiftC,
-                       MeijerUnShiftD,
-                       ReduceOrder, reduce_order, apply_operators,
-                       devise_plan, make_derivative_operator, Formula,
-                       hyperexpand, Hyper_Function, G_Function,
-                       reduce_order_meijer,
-                       build_hypergeometric_formula)
+    MeijerShiftA, MeijerShiftB, MeijerShiftC, MeijerShiftD, MeijerUnShiftA,
+    MeijerUnShiftB, MeijerUnShiftC, MeijerUnShiftD,
+    _make_reduce_meijer_plus, _make_reduce_meijer_minus, _make_reduceorder,
+    reduce_order,
+    apply_operators, devise_plan, make_derivative_operator, Formula,
+    hyperexpand, Hyper_Function, G_Function, reduce_order_meijer,
+    build_hypergeometric_formula)
 from sympy import hyper, I, S, meijerg, Piecewise, exp_polar
 from sympy.utilities.pytest import raises
 from sympy.abc import z, a, b, c
@@ -250,18 +249,18 @@ def test_reduction_operators():
     a1, a2, b1 = map(lambda n: randcplx(n), range(3))
     h = hyper([a1], [b1], z)
 
-    assert ReduceOrder(2, 0) is None
-    assert ReduceOrder(2, -1) is None
-    assert ReduceOrder(1, S('1/2')) is None
+    assert _make_reduceorder(2, 0) is None
+    assert _make_reduceorder(2, -1) is None
+    assert _make_reduceorder(1, S('1/2')) is None
 
     h2 = hyper((a1, a2), (b1, a2), z)
-    assert tn(ReduceOrder(a2, a2).apply(h, op), h2, z)
+    assert tn(_make_reduceorder(a2, a2).apply(h, op), h2, z)
 
     h2 = hyper((a1, a2 + 1), (b1, a2), z)
-    assert tn(ReduceOrder(a2 + 1, a2).apply(h, op), h2, z)
+    assert tn(_make_reduceorder(a2 + 1, a2).apply(h, op), h2, z)
 
     h2 = hyper((a2 + 4, a1), (b1, a2), z)
-    assert tn(ReduceOrder(a2 + 4, a2).apply(h, op), h2, z)
+    assert tn(_make_reduceorder(a2 + 4, a2).apply(h, op), h2, z)
 
     # test several step order reduction
     ap = (a2 + 4, a1, b1 + 1)
@@ -440,20 +439,20 @@ def test_meijerg():
     b3, b4, b5, a3, a4, a5 = map(lambda n: randcplx(), range(6))
     g = meijerg([a1], [a3, a4], [b1], [b3, b4], z)
 
-    assert ReduceOrder.meijer_minus(3, 4) is None
-    assert ReduceOrder.meijer_plus(4, 3) is None
+    assert _make_reduce_meijer_minus(3, 4) is None
+    assert _make_reduce_meijer_plus(4, 3) is None
 
     g2 = meijerg([a1, a2], [a3, a4], [b1], [b3, b4, a2], z)
-    assert tn(ReduceOrder.meijer_plus(a2, a2).apply(g, op), g2, z)
+    assert tn(_make_reduce_meijer_plus(a2, a2).apply(g, op), g2, z)
 
     g2 = meijerg([a1, a2], [a3, a4], [b1], [b3, b4, a2 + 1], z)
-    assert tn(ReduceOrder.meijer_plus(a2, a2 + 1).apply(g, op), g2, z)
+    assert tn(_make_reduce_meijer_plus(a2, a2 + 1).apply(g, op), g2, z)
 
     g2 = meijerg([a1, a2 - 1], [a3, a4], [b1], [b3, b4, a2 + 2], z)
-    assert tn(ReduceOrder.meijer_plus(a2 - 1, a2 + 2).apply(g, op), g2, z)
+    assert tn(_make_reduce_meijer_plus(a2 - 1, a2 + 2).apply(g, op), g2, z)
 
     g2 = meijerg([a1], [a3, a4, b2 - 1], [b1, b2 + 2], [b3, b4], z)
-    assert tn(ReduceOrder.meijer_minus(
+    assert tn(_make_reduce_meijer_minus(
         b2 + 2, b2 - 1).apply(g, op), g2, z, tol=1e-6)
 
     # test several-step reduction

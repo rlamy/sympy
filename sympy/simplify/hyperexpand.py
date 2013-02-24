@@ -1324,61 +1324,10 @@ class MeijerUnShiftD(Operator):
 class ReduceOrder(Operator):
     """ Reduce Order by cancelling an upper and a lower index. """
 
-    def __new__(cls, ai, bj):
-        """ For convenience if reduction is not possible, return None. """
-        ai = sympify(ai)
-        bj = sympify(bj)
-        n = ai - bj
-        if not n.is_Integer or n < 0:
-            return None
-        if bj.is_integer and bj <= 0 and bj + n - 1 >= 0:
-            return None
-
-        self = Operator.__new__(cls)
-
-        p = S(1)
-        for k in xrange(n):
-            p *= (_x + bj + k)/(bj + k)
-
-        self._poly = Poly(p, _x)
-        self._a = ai
-        self._b = bj
-
-        return self
-
-    @classmethod
-    def _meijer(cls, b, a, sign):
-        """ Cancel b + sign*s and a + sign*s
-            This is for meijer G functions. """
-        b = sympify(b)
-        a = sympify(a)
-        n = b - a
-        if n < 0 or not n.is_Integer:
-            return None
-
-        self = Operator.__new__(cls)
-
-        p = S(1)
-        for k in xrange(n):
-            p *= (sign*_x + a + k)
-
-        self._poly = Poly(p, _x)
-        if sign == -1:
-            self._a = b
-            self._b = a
-        else:
-            self._b = Add(1, a - 1, evaluate=False)
-            self._a = Add(1, b - 1, evaluate=False)
-
-        return self
-
-    @classmethod
-    def meijer_minus(cls, b, a):
-        return cls._meijer(b, a, -1)
-
-    @classmethod
-    def meijer_plus(cls, a, b):
-        return cls._meijer(1 - a, 1 - b, 1)
+    def __init__(self, poly, a, b):
+        self._poly = poly
+        self._a = a
+        self._b = b
 
     def __str__(self):
         return '<Reduce order by cancelling upper %s with lower %s.>' % \
@@ -1411,6 +1360,49 @@ def _reduce_order(ap, bq, gen, key):
     return nap, bq, operators
 
 
+def _make_reduceorder(ai, bj):
+    """ For convenience if reduction is not possible, return None. """
+    ai = sympify(ai)
+    bj = sympify(bj)
+    n = ai - bj
+    if not n.is_Integer or n < 0:
+        return None
+    if bj.is_integer and bj <= 0 and bj + n - 1 >= 0:
+        return None
+    p = S(1)
+    for k in xrange(n):
+        p *= (_x + bj + k)/(bj + k)
+
+    return ReduceOrder(Poly(p, _x), ai, bj)
+
+def _make_reduce_meijer(b, a, sign):
+    """ Cancel b + sign*s and a + sign*s
+        This is for meijer G functions. """
+    b = sympify(b)
+    a = sympify(a)
+    n = b - a
+    if not n.is_Integer or n < 0:
+        return None
+    p = S(1)
+    for k in xrange(n):
+        p *= (sign*_x + a + k)
+
+    if sign == -1:
+        _a = b
+        _b = a
+    else:
+        _b = Add(1, a - 1, evaluate=False)
+        _a = Add(1, b - 1, evaluate=False)
+
+    return ReduceOrder(Poly(p, _x), _a, _b)
+
+def _make_reduce_meijer_minus(b, a):
+    return _make_reduce_meijer(b, a, -1)
+
+def _make_reduce_meijer_plus(a, b):
+    return _make_reduce_meijer(1 - a, 1 - b, 1)
+
+
 def reduce_order(func):
     """
     Given the hypergeometric function ``func``, find a sequence of operators to
@@ -1431,8 +1423,8 @@ def reduce_order(func):
     (Hyper_Function((2,), (3,)), [<Reduce order by cancelling
     upper 4 with lower 3.>])
     """
-    nap, nbq, operators = _reduce_order(func.ap, func.bq, ReduceOrder, lambda x: x)
-
+    nap, nbq, operators = _reduce_order(func.ap, func.bq, _make_reduceorder,
+            lambda x: x)
     return Hyper_Function(Tuple(*nap), Tuple(*nbq)), operators
 
 
@@ -1458,9 +1450,9 @@ def reduce_order_meijer(func):
     G_Function((), (), (), ())
     """
 
-    nan, nbq, ops1 = _reduce_order(func.an, func.bq, ReduceOrder.meijer_plus,
+    nan, nbq, ops1 = _reduce_order(func.an, func.bq, _make_reduce_meijer_plus,
                                    lambda x: -x)
-    nbm, nap, ops2 = _reduce_order(func.bm, func.ap, ReduceOrder.meijer_minus,
+    nbm, nap, ops2 = _reduce_order(func.bm, func.ap, _make_reduce_meijer_minus,
                                    lambda x: x)
 
     return G_Function(nan, nap, nbm, nbq), ops1 + ops2
