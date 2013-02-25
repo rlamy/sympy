@@ -1335,7 +1335,7 @@ class ReduceOrder(Operator):
 
 
 def _reduce_order(ap, bq, gen, key):
-    """ Order reduction algorithm used in Hypergeometric and Meijer G """
+    """ Order reduction algorithm used in Meijer G """
     ap = list(ap)
     bq = list(bq)
 
@@ -1359,16 +1359,6 @@ def _reduce_order(ap, bq, gen, key):
 
     return nap, bq, operators
 
-
-def _make_reduceorder(ai, bj):
-    """ For convenience if reduction is not possible, return None. """
-    n = ai - bj
-    if not n.is_Integer or n < 0:
-        return None
-    if bj.is_integer and bj <= 0 and bj + n - 1 >= 0:
-        return None
-    p = Mul(*[(_x + bj + k)/(bj + k) for k in xrange(n)])
-    return ReduceOrder(Poly(p, _x), ai, bj)
 
 def _make_reduce_meijer_minus(b, a):
     """ Cancel b - s and a - s
@@ -1411,9 +1401,28 @@ def reduce_order(func):
     (Hyper_Function((2,), (3,)), [<Reduce order by cancelling
     upper 4 with lower 3.>])
     """
-    nap, nbq, operators = _reduce_order(func.ap, func.bq, _make_reduceorder,
-            lambda x: x)
-    return Hyper_Function(Tuple(*nap), Tuple(*nbq)), operators
+    ap = sorted(func.ap)
+    bq = sorted(func.bq)
+    nap = []
+    # we will edit bq in place
+    operators = []
+    for a in ap:
+        op = None
+        for i in xrange(len(bq)):
+            b = bq[i]
+            n = a - b
+            if not n.is_Integer or n < 0:
+                continue
+            if b.is_integer and b <= 0 and a > 0:
+                continue
+            p = Mul(*[(_x + b + k)/(b + k) for k in xrange(n)])
+            op = ReduceOrder(Poly(p, _x), a, b)
+            bq.pop(i)
+            operators.append(op)
+            break
+        else:
+            nap.append(a)
+    return Hyper_Function(nap, bq), operators
 
 
 def reduce_order_meijer(func):

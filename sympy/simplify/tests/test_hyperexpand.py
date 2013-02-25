@@ -1,8 +1,7 @@
 from sympy.simplify.hyperexpand import (ShiftA, ShiftB, UnShiftA, UnShiftB,
     MeijerShiftA, MeijerShiftB, MeijerShiftC, MeijerShiftD, MeijerUnShiftA,
     MeijerUnShiftB, MeijerUnShiftC, MeijerUnShiftD,
-    _make_reduce_meijer_plus, _make_reduce_meijer_minus, _make_reduceorder,
-    reduce_order,
+    _make_reduce_meijer_plus, _make_reduce_meijer_minus, reduce_order,
     apply_operators, devise_plan, make_derivative_operator, Formula,
     hyperexpand, Hyper_Function, G_Function, reduce_order_meijer,
     build_hypergeometric_formula)
@@ -249,18 +248,21 @@ def test_reduction_operators():
     a1, a2, b1 = map(lambda n: randcplx(n), range(3))
     h = hyper([a1], [b1], z)
 
-    assert _make_reduceorder(S(2), S(0)) is None
-    assert _make_reduceorder(S(2), S(-1)) is None
-    assert _make_reduceorder(S(1), S(1)/2) is None
+    assert not reduce_order(Hyper_Function([2], [0]))[1]
+    assert not reduce_order(Hyper_Function([2], [-1]))[1]
+    assert not reduce_order(Hyper_Function([1], [S(1)/2]))[1]
 
     h2 = hyper((a1, a2), (b1, a2), z)
-    assert tn(_make_reduceorder(a2, a2).apply(h, op), h2, z)
+    func, ops = reduce_order(h2)
+    assert tn(apply_operators(h, ops, op), h2, z)
 
     h2 = hyper((a1, a2 + 1), (b1, a2), z)
-    assert tn(_make_reduceorder(a2 + 1, a2).apply(h, op), h2, z)
+    func, ops = reduce_order(h2)
+    assert tn(apply_operators(h, ops, op), h2, z)
 
     h2 = hyper((a2 + 4, a1), (b1, a2), z)
-    assert tn(_make_reduceorder(a2 + 4, a2).apply(h, op), h2, z)
+    func, ops = reduce_order(h2)
+    assert tn(apply_operators(h, ops, op), h2, z)
 
     # test several step order reduction
     ap = (a2 + 4, a1, b1 + 1)
