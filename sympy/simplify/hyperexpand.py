@@ -1362,8 +1362,6 @@ def _reduce_order(ap, bq, gen, key):
 
 def _make_reduceorder(ai, bj):
     """ For convenience if reduction is not possible, return None. """
-    ai = sympify(ai)
-    bj = sympify(bj)
     n = ai - bj
     if not n.is_Integer or n < 0:
         return None
@@ -1378,8 +1376,6 @@ def _make_reduceorder(ai, bj):
 def _make_reduce_meijer(b, a, sign):
     """ Cancel b + sign*s and a + sign*s
         This is for meijer G functions. """
-    b = sympify(b)
-    a = sympify(a)
     n = b - a
     if not n.is_Integer or n < 0:
         return None

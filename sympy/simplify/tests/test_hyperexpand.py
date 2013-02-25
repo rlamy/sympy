@@ -249,9 +249,9 @@ def test_reduction_operators():
     a1, a2, b1 = map(lambda n: randcplx(n), range(3))
     h = hyper([a1], [b1], z)
 
-    assert _make_reduceorder(2, 0) is None
-    assert _make_reduceorder(2, -1) is None
-    assert _make_reduceorder(1, S('1/2')) is None
+    assert _make_reduceorder(S(2), S(0)) is None
+    assert _make_reduceorder(S(2), S(-1)) is None
+    assert _make_reduceorder(S(1), S(1)/2) is None
 
     h2 = hyper((a1, a2), (b1, a2), z)
     assert tn(_make_reduceorder(a2, a2).apply(h, op), h2, z)
@@ -439,8 +439,8 @@ def test_meijerg():
     b3, b4, b5, a3, a4, a5 = map(lambda n: randcplx(), range(6))
     g = meijerg([a1], [a3, a4], [b1], [b3, b4], z)
 
-    assert _make_reduce_meijer_minus(3, 4) is None
-    assert _make_reduce_meijer_plus(4, 3) is None
+    assert _make_reduce_meijer_minus(S(3), S(4)) is None
+    assert _make_reduce_meijer_plus(S(4), S(3)) is None
 
     g2 = meijerg([a1, a2], [a3, a4], [b1], [b3, b4, a2], z)
     assert tn(_make_reduce_meijer_plus(a2, a2).apply(g, op), g2, z)
