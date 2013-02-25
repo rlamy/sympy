@@ -1367,36 +1367,28 @@ def _make_reduceorder(ai, bj):
         return None
     if bj.is_integer and bj <= 0 and bj + n - 1 >= 0:
         return None
-    p = S(1)
-    for k in xrange(n):
-        p *= (_x + bj + k)/(bj + k)
-
+    p = Mul(*[(_x + bj + k)/(bj + k) for k in xrange(n)])
     return ReduceOrder(Poly(p, _x), ai, bj)
 
-def _make_reduce_meijer(b, a, sign):
-    """ Cancel b + sign*s and a + sign*s
+def _make_reduce_meijer_minus(b, a):
+    """ Cancel b - s and a - s
         This is for meijer G functions. """
     n = b - a
     if not n.is_Integer or n < 0:
         return None
-    p = S(1)
-    for k in xrange(n):
-        p *= (sign*_x + a + k)
-
-    if sign == -1:
-        _a = b
-        _b = a
-    else:
-        _b = Add(1, a - 1, evaluate=False)
-        _a = Add(1, b - 1, evaluate=False)
-
-    return ReduceOrder(Poly(p, _x), _a, _b)
-
-def _make_reduce_meijer_minus(b, a):
-    return _make_reduce_meijer(b, a, -1)
+    p = Mul(*[-_x + a + k for k in xrange(n)])
+    return ReduceOrder(Poly(p, _x), b, a)
 
 def _make_reduce_meijer_plus(a, b):
-    return _make_reduce_meijer(1 - a, 1 - b, 1)
+    """ Cancel b + s and a + s
+        This is for meijer G functions. """
+    n = b - a
+    if not n.is_Integer or n < 0:
+        return None
+    p = Mul(*[_x + 1 - b + k for k in xrange(n)])
+    _a = Add(1, -a, evaluate=False)
+    _b = Add(1, -b, evaluate=False)
+    return ReduceOrder(Poly(p, _x), _a, _b)
 
 
 def reduce_order(func):
