@@ -1474,10 +1474,7 @@ class Vector(object):
         10*b*N.x
 
         """
-
-        newlist = [v for v in self.args]
-        for i, v in enumerate(newlist):
-            newlist[i] = (sympify(other) * newlist[i][0], newlist[i][1])
+        newlist = [(sympify(other) * mat, frame) for mat, frame in self.args]
         return Vector(newlist)
 
     def __ne__(self, other):
@@ -1506,14 +1503,10 @@ class Vector(object):
         (N.x|N.x)
 
         """
-
         other = _check_vector(other)
         ol = Dyadic(0)
-        for i, v in enumerate(self.args):
-            for i2, v2 in enumerate(other.args):
-                # it looks this way because if we are in the same frame and
-                # use the enumerate function on the same frame in a nested
-                # fashion, then bad things happen
+        for v in self.args:
+            for v2 in other.args:
                 ol += Dyadic([(v[0][0] * v2[0][0], v[1].x, v2[1].x)])
                 ol += Dyadic([(v[0][0] * v2[0][1], v[1].x, v2[1].y)])
                 ol += Dyadic([(v[0][0] * v2[0][2], v[1].x, v2[1].z)])
@@ -1524,83 +1517,6 @@ class Vector(object):
                 ol += Dyadic([(v[0][2] * v2[0][1], v[1].z, v2[1].y)])
                 ol += Dyadic([(v[0][2] * v2[0][2], v[1].z, v2[1].z)])
         return ol
-
-    def _latex(self, printer=None):
-        """Latex Printing method. """
-        ar = self.args  # just to shorten things
-        if len(ar) == 0:
-            return str(0)
-        ol = []  # output list, to be concatenated to a string
-        for i, v in enumerate(ar):
-            for j in 0, 1, 2:
-                # if the coef of the basis vector is 1, we skip the 1
-                if ar[i][0][j] == 1:
-                    ol.append(' + ' + ar[i][1].latex_vecs[j])
-                # if the coef of the basis vector is -1, we skip the 1
-                elif ar[i][0][j] == -1:
-                    ol.append(' - ' + ar[i][1].latex_vecs[j])
-                elif ar[i][0][j] != 0:
-                    # If the coefficient of the basis vector is not 1 or -1;
-                    # also, we might wrap it in parentheses, for readability.
-                    arg_str = MechanicsStrPrinter().doprint(ar[i][0][j])
-                    if isinstance(ar[i][0][j], Add):
-                        arg_str = "(%s)" % arg_str
-                    if arg_str[0] == '-':
-                        arg_str = arg_str[1:]
-                        str_start = ' - '
-                    else:
-                        str_start = ' + '
-                    ol.append(str_start + arg_str + '*' +
-                              ar[i][1].latex_vecs[j])
-        outstr = ''.join(ol)
-        if outstr.startswith(' + '):
-            outstr = outstr[3:]
-        elif outstr.startswith(' '):
-            outstr = outstr[1:]
-        return outstr
-
-    def _pretty(self, printer=None):
-        """Pretty Printing method. """
-        e = self
-
-        class Fake(object):
-            baseline = 0
-
-            def render(self, *args, **kwargs):
-                self = e
-                ar = self.args  # just to shorten things
-                if len(ar) == 0:
-                    return unicode(0)
-                ol = []  # output list, to be concatenated to a string
-                for i, v in enumerate(ar):
-                    for j in 0, 1, 2:
-                        # if the coef of the basis vector is 1, we skip the 1
-                        if ar[i][0][j] == 1:
-                            ol.append(u(" + ") + ar[i][1].pretty_vecs[j])
-                        # if the coef of the basis vector is -1, we skip the 1
-                        elif ar[i][0][j] == -1:
-                            ol.append(u(" - ") + ar[i][1].pretty_vecs[j])
-                        elif ar[i][0][j] != 0:
-                            # If the basis vector coeff is not 1 or -1,
-                            # we might wrap it in parentheses, for readability.
-                            arg_str = (MechanicsPrettyPrinter().doprint(
-                                ar[i][0][j]))
-                            if isinstance(ar[i][0][j], Add):
-                                arg_str = u("(%s)") % arg_str
-                            if arg_str[0] == u("-"):
-                                arg_str = arg_str[1:]
-                                str_start = u(" - ")
-                            else:
-                                str_start = u(" + ")
-                            ol.append(str_start + arg_str + '*' +
-                                      ar[i][1].pretty_vecs[j])
-                outstr = u("").join(ol)
-                if outstr.startswith(u(" + ")):
-                    outstr = outstr[3:]
-                elif outstr.startswith(" "):
-                    outstr = outstr[1:]
-                return outstr
-        return Fake()
 
     def __ror__(self, other):
         """Outer product between two Vectors.
@@ -1625,11 +1541,8 @@ class Vector(object):
 
         other = _check_vector(other)
         ol = Dyadic(0)
-        for i, v in enumerate(other.args):
-            for i2, v2 in enumerate(self.args):
-                # it looks this way because if we are in the same frame and
-                # use the enumerate function on the same frame in a nested
-                # fashion, then bad things happen
+        for v in other.args:
+            for v2 in self.args:
                 ol += Dyadic([(v[0][0] * v2[0][0], v[1].x, v2[1].x)])
                 ol += Dyadic([(v[0][0] * v2[0][1], v[1].x, v2[1].y)])
                 ol += Dyadic([(v[0][0] * v2[0][2], v[1].x, v2[1].z)])
@@ -1641,8 +1554,81 @@ class Vector(object):
                 ol += Dyadic([(v[0][2] * v2[0][2], v[1].z, v2[1].z)])
         return ol
 
-    def __rsub__(self, other):
-        return (-1 * self) + other
+
+    def _latex(self, printer=None):
+        """Latex Printing method. """
+        ar = self.args  # just to shorten things
+        if not self.args:
+            return str(0)
+        ol = []  # output list, to be concatenated to a string
+        for v in self.args:
+            for j in 0, 1, 2:
+                # if the coef of the basis vector is 1, we skip the 1
+                if v[0][j] == 1:
+                    ol.append(' + ' + v[1].latex_vecs[j])
+                # if the coef of the basis vector is -1, we skip the 1
+                elif v[0][j] == -1:
+                    ol.append(' - ' + v[1].latex_vecs[j])
+                elif v[0][j] != 0:
+                    # If the coefficient of the basis vector is not 1 or -1;
+                    # also, we might wrap it in parentheses, for readability.
+                    arg_str = MechanicsStrPrinter().doprint(v[0][j])
+                    if isinstance(v[0][j], Add):
+                        arg_str = "(%s)" % arg_str
+                    if arg_str[0] == '-':
+                        arg_str = arg_str[1:]
+                        str_start = ' - '
+                    else:
+                        str_start = ' + '
+                    ol.append(str_start + arg_str + '*' + v[1].latex_vecs[j])
+        outstr = ''.join(ol)
+        if outstr.startswith(' + '):
+            outstr = outstr[3:]
+        elif outstr.startswith(' '):
+            outstr = outstr[1:]
+        return outstr
+
+    def _pretty(self, printer=None):
+        """Pretty Printing method. """
+        e = self
+
+        class Fake(object):
+            baseline = 0
+
+            def render(self, *args, **kwargs):
+                self = e
+                if not self.args:
+                    return unicode(0)
+                ol = []  # output list, to be concatenated to a string
+                for v in self.args:
+                    for j in 0, 1, 2:
+                        # if the coef of the basis vector is 1, we skip the 1
+                        if v[0][j] == 1:
+                            ol.append(u(" + ") + v[1].pretty_vecs[j])
+                        # if the coef of the basis vector is -1, we skip the 1
+                        elif v[0][j] == -1:
+                            ol.append(u(" - ") + v[1].pretty_vecs[j])
+                        elif v[0][j] != 0:
+                            # If the basis vector coeff is not 1 or -1,
+                            # we might wrap it in parentheses, for readability.
+                            arg_str = (MechanicsPrettyPrinter().doprint(
+                                v[0][j]))
+                            if isinstance(v[0][j], Add):
+                                arg_str = u("(%s)") % arg_str
+                            if arg_str[0] == u("-"):
+                                arg_str = arg_str[1:]
+                                str_start = u(" - ")
+                            else:
+                                str_start = u(" + ")
+                            ol.append(str_start + arg_str + '*' +
+                                      v[1].pretty_vecs[j])
+                outstr = u("").join(ol)
+                if outstr.startswith(u(" + ")):
+                    outstr = outstr[3:]
+                elif outstr.startswith(" "):
+                    outstr = outstr[1:]
+                return outstr
+        return Fake()
 
     def __str__(self, printer=None):
         """Printing method. """
@@ -1650,26 +1636,26 @@ class Vector(object):
         if len(ar) == 0:
             return str(0)
         ol = []  # output list, to be concatenated to a string
-        for i, v in enumerate(ar):
+        for v in self.args:
             for j in 0, 1, 2:
                 # if the coef of the basis vector is 1, we skip the 1
-                if ar[i][0][j] == 1:
-                    ol.append(' + ' + ar[i][1].str_vecs[j])
+                if v[0][j] == 1:
+                    ol.append(' + ' + v[1].str_vecs[j])
                 # if the coef of the basis vector is -1, we skip the 1
-                elif ar[i][0][j] == -1:
-                    ol.append(' - ' + ar[i][1].str_vecs[j])
-                elif ar[i][0][j] != 0:
+                elif v[0][j] == -1:
+                    ol.append(' - ' + v[1].str_vecs[j])
+                elif v[0][j] != 0:
                     # If the coefficient of the basis vector is not 1 or -1;
                     # also, we might wrap it in parentheses, for readability.
-                    arg_str = MechanicsStrPrinter().doprint(ar[i][0][j])
-                    if isinstance(ar[i][0][j], Add):
+                    arg_str = MechanicsStrPrinter().doprint(v[0][j])
+                    if isinstance(v[0][j], Add):
                         arg_str = "(%s)" % arg_str
                     if arg_str[0] == '-':
                         arg_str = arg_str[1:]
                         str_start = ' - '
                     else:
                         str_start = ' + '
-                    ol.append(str_start + arg_str + '*' + ar[i][1].str_vecs[j])
+                    ol.append(str_start + arg_str + '*' + v[1].str_vecs[j])
         outstr = ''.join(ol)
         if outstr.startswith(' + '):
             outstr = outstr[3:]
@@ -1680,6 +1666,9 @@ class Vector(object):
     def __sub__(self, other):
         """The subraction operator. """
         return self.__add__(other * -1)
+
+    def __rsub__(self, other):
+        return (-1 * self) + other
 
     def __xor__(self, other):
         """The cross product operator for two Vectors.
@@ -1712,7 +1701,7 @@ class Vector(object):
         if isinstance(other, Dyadic):
             return NotImplemented
         other = _check_vector(other)
-        if other.args == []:
+        if not other.args:
             return Vector(0)
 
         def _det(mat):
@@ -1729,14 +1718,13 @@ class Vector(object):
                     mat[1][1] * mat[2][0]))
 
         outvec = Vector(0)
-        ar = other.args  # For brevity
-        for i, v in enumerate(ar):
+        for v in other.args:
             tempx = v[1].x
             tempy = v[1].y
             tempz = v[1].z
             tempm = ([[tempx, tempy, tempz], [self & tempx, self & tempy,
-                self & tempz], [Vector([ar[i]]) & tempx,
-                Vector([ar[i]]) & tempy, Vector([ar[i]]) & tempz]])
+                self & tempz], [Vector([v]) & tempx,
+                Vector([v]) & tempy, Vector([v]) & tempz]])
             outvec += _det(tempm)
         return outvec
 
@@ -1790,16 +1778,16 @@ class Vector(object):
         wrt = sympify(wrt)
         _check_frame(otherframe)
         outvec = Vector(0)
-        for i, v in enumerate(self.args):
-            if v[1] == otherframe:
-                outvec += Vector([(v[0].diff(wrt), otherframe)])
+        for vec, frame in self.args:
+            if frame == otherframe:
+                outvec += Vector([(vec.diff(wrt), otherframe)])
             else:
-                if otherframe.dcm(v[1]).diff(wrt) == zeros(3, 3):
-                    d = v[0].diff(wrt)
-                    outvec += Vector([(d, v[1])])
+                if otherframe.dcm(frame).diff(wrt) == zeros(3, 3):
+                    d = vec.diff(wrt)
+                    outvec += Vector([(d, frame)])
                 else:
-                    d = (Vector([v]).express(otherframe)).args[0][0].diff(wrt)
-                    outvec += Vector([(d, otherframe)]).express(v[1])
+                    d = (Vector([(vec, frame)]).express(otherframe)).args[0][0].diff(wrt)
+                    outvec += Vector([(d, otherframe)]).express(frame)
         return outvec
 
     def express(self, otherframe, variables=False):
@@ -1813,8 +1801,8 @@ class Vector(object):
     def doit(self, **hints):
         """Calls .doit() on each term in the Vector"""
         ov = Vector(0)
-        for i, v in enumerate(self.args):
-            ov += Vector([(v[0].applyfunc(lambda x: x.doit(**hints)), v[1])])
+        for vec, frame in self.args:
+            ov += Vector([(vec.applyfunc(lambda x: x.doit(**hints)), frame)])
         return ov
 
     def dt(self, otherframe):
@@ -1827,12 +1815,12 @@ class Vector(object):
 
         outvec = Vector(0)
         _check_frame(otherframe)
-        for i, v in enumerate(self.args):
-            if v[1] == otherframe:
-                outvec += Vector([(v[0].diff(dynamicsymbols._t), otherframe)])
+        for vec, frame in self.args:
+            if frame == otherframe:
+                outvec += Vector([(vec.diff(dynamicsymbols._t), otherframe)])
             else:
-                outvec += (Vector([v]).dt(v[1]) +
-                    (v[1].ang_vel_in(otherframe) ^ Vector([v])))
+                outvec += (Vector([(vec, frame)]).dt(frame) +
+                    (frame.ang_vel_in(otherframe) ^ Vector([(vec, frame)])))
         return outvec
 
     def express(self, otherframe):
@@ -1861,25 +1849,25 @@ class Vector(object):
 
         _check_frame(otherframe)
         outvec = Vector(0)
-        for i, v in enumerate(self.args):
-            if v[1] != otherframe:
-                temp = otherframe.dcm(v[1]) * v[0]
+        for vec, frame in self.args:
+            if frame != otherframe:
+                temp = otherframe.dcm(frame) * vec
                 if Vector.simp is True:
                     temp = temp.applyfunc(lambda x: trigsimp(x, method='fu'))
                 outvec += Vector([(temp, otherframe)])
             else:
-                outvec += Vector([v])
+                outvec += Vector([(vec, frame)])
         return outvec
 
     def simplify(self):
         """Returns a simplified Vector."""
         outvec = Vector(0)
-        for i in self.args:
-            outvec += Vector([(i[0].simplify(), i[1])])
+        for vec, frame in self.args:
+            outvec += Vector([(vec.simplify(), frame)])
         return outvec
 
     def subs(self, *args, **kwargs):
-        """Substituion on the Vector.
+        """Substitution on the Vector.
 
         Examples
         ========
@@ -1895,8 +1883,8 @@ class Vector(object):
         """
 
         ov = Vector(0)
-        for i, v in enumerate(self.args):
-            ov += Vector([(v[0].subs(*args, **kwargs), v[1])])
+        for vec, frame in self.args:
+            ov += Vector([(vec.subs(*args, **kwargs), frame)])
         return ov
 
     def magnitude(self):
