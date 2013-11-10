@@ -366,6 +366,7 @@ class KanesMethod(object):
         self._k_ku = self._mat_inv_mul(k_kqdot, k_ku).subs(uaz)
         self._f_k = self._mat_inv_mul(k_kqdot, f_k).subs(uaz)
 
+    @profile
     def _form_fr(self, fl):
         """Form the generalized active force.
 
@@ -403,12 +404,12 @@ class KanesMethod(object):
             else:
                 raise TypeError('First entry in pair must be point or frame.')
             f_list += [i[1]]
-        partials = self._partial_velocity(vel_list, u, N)
 
         # Fill Fr with dot product of partial velocities and forces
         for i in range(o):
             for j in range(b):
-                FR[i] += partials[j][i] & f_list[j]
+                partial = vel_list[j].partial_velocity(u[i])
+                FR[i] += partial & f_list[j]
 
         # In case there are dependent speeds
         m = len(self._udep)  # number of dependent speeds
@@ -422,6 +423,7 @@ class KanesMethod(object):
         self._fr = FR
         return FR
 
+    @profile
     def _form_frstar(self, bl):
         """Form the generalized inertia force.
 

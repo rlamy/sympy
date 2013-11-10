@@ -1747,6 +1747,7 @@ class Vector(object):
         return self | other
     outer.__doc__ = __or__.__doc__
 
+    @profile
     def diff(self, wrt, otherframe):
         """Takes the partial derivative, with respect to a value, in a frame.
 
@@ -1782,13 +1783,33 @@ class Vector(object):
             if frame == otherframe:
                 outvec += Vector([(vec.diff(wrt), otherframe)])
             else:
-                if otherframe.dcm(frame).diff(wrt) == zeros(3, 3):
+                dcm = otherframe.dcm(frame)
+                if dcm.diff(wrt) == zeros(3, 3):
                     d = vec.diff(wrt)
                     outvec += Vector([(d, frame)])
                 else:
-                    d = (Vector([(vec, frame)]).express(otherframe)).args[0][0].diff(wrt)
-                    outvec += Vector([(d, otherframe)]).express(frame)
+                    vec_other = dcm * vec
+                    if Vector.simp is True:
+                        vec_other = vec_other.applyfunc(lambda x: trigsimp(x, method='fu'))
+                    d = vec_other.diff(wrt)
+                    inv_dcm = frame.dcm(otherframe)
+                    outvec += Vector([(inv_dcm*d, frame)])
         return outvec
+
+    def partial_velocity(self, u):
+        """Takes the partial derivative, with respect to a value, in a frame.
+
+        Returns a Vector.
+
+        Parameters
+        ==========
+
+        u : Symbol
+            What the partial derivative is taken with respect to.
+
+        """
+        u = sympify(u)
+        return Vector([(vec.diff(u), frame) for vec, frame in self.args])
 
     def express(self, otherframe, variables=False):
         """
